@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:waxhub_v3/pages/nuevo_disco_page.dart';
 
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
@@ -9,6 +10,7 @@ import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
+
 // import 'screens/new_disc_screen.dart';
 // import 'screens/collection_screen.dart';
 // import 'screens/map_screen.dart';
@@ -100,9 +102,9 @@ class MyApp extends StatelessWidget {
             case '/home':
               page = const HomeScreen();
               break;
-            // case '/nuevo_disco':
-            //   page = const NewDiscScreen();
-            //   break;
+            case '/nuevo_disco':
+              page = NuevoDiscoPage();
+              break;
             // case '/coleccion':
             //   page = const CollectionScreen();
             //   break;

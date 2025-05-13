@@ -20,6 +20,10 @@ dependencies:
   firebase_auth: ^5.5.3
   cloud_firestore: ^5.6.7
   firebase_storage: ^12.4.5
+  flutter_typeahead: ^4.3.0
+  http: ^1.4.0
+  image_picker: ^1.1.2
+  uuid: ^4.5.1
 
   # Google Sign-In
   google_sign_in: ^6.0.0
