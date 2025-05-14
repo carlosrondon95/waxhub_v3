@@ -12,7 +12,7 @@ class DiscogsService {
   static const _secret = 'mobvMiiVhTlRnxHvGEtsQccHnyihqtOV';
   static const _agent = 'WaxHub/1.0 (info@tucorreo.com)';
 
-  Map<String, String> _headers = {
+  final Map<String, String> _headers = {
     'Accept': 'application/json',
     'User-Agent': _agent,
   };
@@ -36,7 +36,7 @@ class DiscogsService {
         .toList();
   }
 
-  /* ---------- VINILOS ---------- */
+  /* ---------- VINILOS (una sola referencia) ---------- */
   Future<List<ReleaseResult>> searchVinylsOfArtist(
     int artistId,
     String title,
@@ -47,14 +47,25 @@ class DiscogsService {
         'release_title': title,
         'format': 'Vinyl',
         'type': 'release',
+        'per_page': '100',
       }),
     );
     final res = await http.get(uri, headers: _headers);
     _throwIfError(res);
-    final json = jsonDecode(res.body);
-    return (json['results'] as List)
-        .map((e) => ReleaseResult.fromJson(e))
-        .toList();
+
+    final seen = <String>{};
+    final out = <ReleaseResult>[];
+
+    for (final e in jsonDecode(res.body)['results']) {
+      final r = ReleaseResult.fromJson(e);
+      final key =
+          r.title
+              .toLowerCase()
+              .replaceAll(RegExp(r'\s+\(.*?\)'), '') // quita paréntesis
+              .trim();
+      if (seen.add(key)) out.add(r); // sólo la primera
+    }
+    return out;
   }
 
   /* ---------- DETALLE RELEASE ---------- */

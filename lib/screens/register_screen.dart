@@ -81,25 +81,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     try {
+      // 1️⃣ Crear usuario en Firebase Auth
       final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
+      // 2️⃣ Enviar correo de verificación
       await cred.user?.sendEmailVerification();
 
-      await _firestore.collection('usuarios').doc(cred.user!.uid).set({
+      // 3️⃣ Guardar datos en Firestore
+      final uid = cred.user!.uid;
+      await _firestore.collection('usuarios').doc(uid).set({
         'nombre': nombre,
         'email': email,
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
       _showSuccess(
         'Registro exitoso. Revisa tu correo para verificar tu cuenta.',
       );
-
       Navigator.pushReplacementNamed(context, '/login');
     } on FirebaseAuthException catch (e) {
-      _showError(e.message ?? 'Error desconocido');
+      _showError(e.message ?? 'Error de autenticación');
+    } catch (e) {
+      _showError('Error guardando datos: $e');
     }
   }
 

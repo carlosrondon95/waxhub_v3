@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import '../services/discogs_service.dart';
 
-/* ─── Artista ───────────────────────────────────────────── */
+/* ─── ARTISTA ──────────────────────────────────────────── */
 class ArtistAutocomplete extends StatelessWidget {
   final TextEditingController controller;
   final void Function(ArtistResult) onArtistSelected;
@@ -14,27 +14,31 @@ class ArtistAutocomplete extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TypeAheadFormField<ArtistResult>(
-      textFieldConfiguration: TextFieldConfiguration(
-        controller: controller,
-        decoration: const InputDecoration(labelText: 'Artista'),
-      ),
+    return TypeAheadField<ArtistResult>(
       suggestionsCallback:
-          (pattern) =>
-              pattern.length < 2 ? [] : DiscogsService().searchArtists(pattern),
+          (q) => q.length < 2 ? [] : DiscogsService().searchArtists(q),
       itemBuilder: (_, a) => ListTile(title: Text(a.name)),
-      onSuggestionSelected: onArtistSelected,
-      noItemsFoundBuilder:
+      onSelected: (a) {
+        controller.text = a.name; // texto con mayúsculas y “&”
+        onArtistSelected(a);
+      },
+      emptyBuilder:
           (_) => const Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8),
             child: Text('Sin coincidencias'),
           ),
-      validator: (v) => v == null || v.isEmpty ? 'Introduce un artista' : null,
+      builder:
+          (context, textCtrl, focus) => TextField(
+            controller: textCtrl, // ← ¡usar el que da TypeAhead!
+            focusNode: focus,
+            decoration: const InputDecoration(labelText: 'Artista'),
+            textInputAction: TextInputAction.next,
+          ),
     );
   }
 }
 
-/* ─── Título ────────────────────────────────────────────── */
+/* ─── TÍTULO ───────────────────────────────────────────── */
 class TitleAutocomplete extends StatelessWidget {
   final bool enabled;
   final int artistId;
@@ -57,42 +61,49 @@ class TitleAutocomplete extends StatelessWidget {
         enabled: false,
       );
     }
-    return TypeAheadFormField<ReleaseResult>(
-      textFieldConfiguration: TextFieldConfiguration(
-        controller: controller,
-        decoration: const InputDecoration(labelText: 'Título'),
-      ),
+    return TypeAheadField<ReleaseResult>(
       suggestionsCallback:
-          (pattern) =>
-              pattern.length < 1
+          (q) =>
+              q.isEmpty
                   ? []
-                  : DiscogsService().searchVinylsOfArtist(artistId, pattern),
+                  : DiscogsService().searchVinylsOfArtist(artistId, q),
       itemBuilder:
           (_, r) => ListTile(
             leading:
                 r.thumb.isNotEmpty ? Image.network(r.thumb, width: 40) : null,
             title: Text(r.title),
           ),
-      onSuggestionSelected: onTitleSelected,
-      noItemsFoundBuilder:
+      onSelected: (r) {
+        controller.text = r.title; // texto exacto
+        onTitleSelected(r);
+      },
+      emptyBuilder:
           (_) => const Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8),
             child: Text('Sin coincidencias'),
           ),
-      validator: (v) => v == null || v.isEmpty ? 'Selecciona un título' : null,
+      builder:
+          (context, textCtrl, focus) => TextField(
+            controller: textCtrl, // ← importante
+            focusNode: focus,
+            decoration: const InputDecoration(labelText: 'Título'),
+            textInputAction: TextInputAction.next,
+          ),
     );
   }
 }
 
-/* ─── TextFormField genérico ───────────────────────────── */
+/* ─── INPUT GENÉRICO ───────────────────────────────────── */
 class DiscoFormInput extends StatelessWidget {
   final TextEditingController controller;
   final String label;
+  final bool obligatorio;
   final TextInputType keyboardType;
   const DiscoFormInput({
     super.key,
     required this.controller,
     required this.label,
+    this.obligatorio = true,
     this.keyboardType = TextInputType.text,
   });
 
@@ -101,13 +112,14 @@ class DiscoFormInput extends StatelessWidget {
     controller: controller,
     decoration: InputDecoration(labelText: label),
     keyboardType: keyboardType,
-    validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
+    validator:
+        obligatorio
+            ? (v) => v == null || v.isEmpty ? 'Campo requerido' : null
+            : null,
   );
 }
 
-/* ─── Portada ───────────────────────────────────────────── */
-/* …imports y demás widgets… */
-
+/* ─── PORTADA (sin cambios) ───────────────────────────── */
 class CoverSelector extends StatelessWidget {
   final String? coverUrl;
   final VoidCallback onPickImage;
@@ -138,7 +150,7 @@ class CoverSelector extends StatelessWidget {
         const SizedBox(height: 8),
         ElevatedButton(
           onPressed: onPickImage,
-          child: const Text('Seleccionar portada manual'),
+          child: const Text('Cargar portada'),
         ),
       ],
     );

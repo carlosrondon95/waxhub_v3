@@ -10,6 +10,8 @@ import '../services/discogs_service.dart';
 import '../screens/nuevo_disco_screen.dart';
 
 class NuevoDiscoPage extends StatefulWidget {
+  const NuevoDiscoPage({super.key});
+
   @override
   State<NuevoDiscoPage> createState() => _NuevoDiscoPageState();
 }

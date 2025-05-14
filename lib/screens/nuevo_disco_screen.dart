@@ -64,9 +64,17 @@ class NuevoDiscoScreen extends StatelessWidget {
         const SizedBox(height: 12),
         DiscoFormInput(controller: labelCtr, label: 'Sello'),
         const SizedBox(height: 12),
-        DiscoFormInput(controller: buyCtr, label: 'Lugar de compra'),
+        DiscoFormInput(
+          controller: buyCtr,
+          label: 'Lugar de compra',
+          obligatorio: false,
+        ), // ← opcional
         const SizedBox(height: 12),
-        DiscoFormInput(controller: descCtr, label: 'Descripción'),
+        DiscoFormInput(
+          controller: descCtr,
+          label: 'Descripción',
+          obligatorio: false,
+        ), // ← opcional
         const SizedBox(height: 24),
         CoverSelector(coverUrl: coverUrl, onPickImage: onPickImage),
         const SizedBox(height: 24),
