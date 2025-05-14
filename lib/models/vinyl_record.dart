@@ -1,3 +1,4 @@
+// lib/models/vinyl_record.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class VinylRecord {
@@ -12,6 +13,7 @@ class VinylRecord {
   final String lugarCompra;
   final String descripcion;
   final String portadaUrl;
+  final bool favorito;
 
   VinylRecord({
     required this.id,
@@ -25,6 +27,7 @@ class VinylRecord {
     this.lugarCompra = '',
     this.descripcion = '',
     required this.portadaUrl,
+    this.favorito = false,
   });
 
   Map<String, dynamic> toMap() => {
@@ -38,6 +41,7 @@ class VinylRecord {
     'lugarCompra': lugarCompra,
     'descripcion': descripcion,
     'portadaUrl': portadaUrl,
+    'favorito': favorito,
     'timestamp': FieldValue.serverTimestamp(),
   };
 
@@ -55,6 +59,7 @@ class VinylRecord {
       lugarCompra: data['lugarCompra'] as String? ?? '',
       descripcion: data['descripcion'] as String? ?? '',
       portadaUrl: data['portadaUrl'] as String,
+      favorito: data['favorito'] as bool? ?? false,
     );
   }
 }
