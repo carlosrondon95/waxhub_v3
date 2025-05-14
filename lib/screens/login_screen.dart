@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/password_field.dart';
-import '../routes/fade_route.dart';
-import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,16 +16,22 @@ class _LoginScreenState extends State<LoginScreen> {
   final _recoveryEmailController = TextEditingController();
 
   bool _showRecoveryDialog = false;
-  bool _isLoading = false;
-  bool mostrarReenviar = false; // Simulado por ahora
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _recoveryEmailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
     return Scaffold(
       appBar: AppBar(title: const Text('Iniciar sesión')),
       body: Stack(
         children: [
-          // Contenido principal
           SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -49,23 +53,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 PasswordField(controller: _passwordController),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: _isLoading ? null : _handleSignIn,
+                  onPressed: auth.isLoading ? null : _handleSignIn,
                   child: const Text('Iniciar sesión'),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton(
-                  onPressed: _isLoading ? null : _handleSignInWithGoogle,
+                  onPressed: auth.isLoading ? null : _handleSignInWithGoogle,
                   child: const Text('Iniciar sesión con Google'),
                 ),
                 const SizedBox(height: 8),
-                if (mostrarReenviar)
-                  TextButton(
-                    onPressed: _isLoading ? null : _handleResendVerification,
-                    child: const Text('Reenviar correo de verificación'),
-                  ),
                 TextButton(
                   onPressed:
-                      _isLoading
+                      auth.isLoading
                           ? null
                           : () => setState(() => _showRecoveryDialog = true),
                   child: const Text('He olvidado mi contraseña'),
@@ -73,75 +72,42 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
-
-          // Overlay semitransparente con spinner central
-          if (_isLoading)
+          if (auth.isLoading)
             Container(
               color: Colors.black45,
               child: const Center(child: CircularProgressIndicator()),
             ),
         ],
       ),
-
-      // Diálogo de recuperación de contraseña
       floatingActionButton:
           _showRecoveryDialog ? _buildRecoveryDialog(context) : null,
     );
   }
 
   Future<void> _handleSignIn() async {
-    setState(() => _isLoading = true);
-    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final auth = context.read<AuthProvider>();
     final error = await auth.signIn(
-      _emailController.text,
-      _passwordController.text,
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
     );
-    setState(() => _isLoading = false);
-
     if (error != null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(error)));
     } else {
-      Navigator.of(context).pushAndRemoveUntil(
-        FadePageRoute(page: const HomeScreen()),
-        (route) => false,
-      );
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (r) => false);
     }
   }
 
   Future<void> _handleSignInWithGoogle() async {
-    setState(() => _isLoading = true);
-    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final auth = context.read<AuthProvider>();
     final error = await auth.signInWithGoogle();
-    setState(() => _isLoading = false);
-
     if (error != null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(error)));
     } else {
-      Navigator.of(context).pushAndRemoveUntil(
-        FadePageRoute(page: const HomeScreen()),
-        (route) => false,
-      );
-    }
-  }
-
-  Future<void> _handleResendVerification() async {
-    setState(() => _isLoading = true);
-    final auth = Provider.of<AuthProvider>(context, listen: false);
-    final error = await auth.resendEmailVerification();
-    setState(() => _isLoading = false);
-
-    if (error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Correo reenviado.')));
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (r) => false);
     }
   }
 
@@ -170,38 +136,23 @@ class _LoginScreenState extends State<LoginScreen> {
         ElevatedButton(
           onPressed: () async {
             setState(() => _showRecoveryDialog = false);
-            await _handlePasswordReset();
+            final auth = context.read<AuthProvider>();
+            final error = await auth.sendPasswordReset(
+              _recoveryEmailController.text.trim(),
+            );
+            if (error != null) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(error)));
+            } else {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Enlace enviado.')));
+            }
           },
           child: const Text('Enviar'),
         ),
       ],
     );
-  }
-
-  Future<void> _handlePasswordReset() async {
-    setState(() => _isLoading = true);
-    final auth = Provider.of<AuthProvider>(context, listen: false);
-    final error = await auth.sendPasswordReset(
-      _recoveryEmailController.text.trim(),
-    );
-    setState(() => _isLoading = false);
-
-    if (error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Enlace enviado.')));
-    }
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _recoveryEmailController.dispose();
-    super.dispose();
   }
 }

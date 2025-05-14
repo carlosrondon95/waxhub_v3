@@ -9,7 +9,7 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('WaxHub'),
         centerTitle: true,
-        automaticallyImplyLeading: false, // quita la flecha de “atrás”
+        automaticallyImplyLeading: false,
       ),
       body: SafeArea(
         child: Center(
@@ -70,9 +70,11 @@ class MenuOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: const Color(0xFFB2EBF2), // secundario suave
+      color: colors.secondaryContainer,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
@@ -80,11 +82,7 @@ class MenuOption extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
           child: Row(
             children: [
-              Icon(
-                icon,
-                size: 32,
-                color: const Color(0xFF00BCD4), // primario turquesa
-              ),
+              Icon(icon, size: 32, color: colors.primary),
               const SizedBox(width: 16),
               Text(title, style: Theme.of(context).textTheme.titleLarge),
             ],
