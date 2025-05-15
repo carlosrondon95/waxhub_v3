@@ -4,12 +4,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
 import 'core/theme.dart';
+import 'core/app_scroll_behavior.dart'; // 👈 nuevo import
 import 'firebase_options.dart';
 import 'routes/app_router.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/vinyl_provider.dart';
-import 'providers/collection_provider.dart'; // nuevo proveedor
+import 'providers/collection_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'WaxHub',
         theme: AppTheme,
+        scrollBehavior: AppScrollBehavior(), // 👈 habilita drag mouse/trackpad
         initialRoute: '/',
         onGenerateRoute: AppRouter.generate,
       ),
