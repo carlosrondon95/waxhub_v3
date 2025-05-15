@@ -9,44 +9,41 @@ import 'package:uuid/uuid.dart';
 
 import '../services/discogs_service.dart';
 import '../models/vinyl_record.dart';
+import '../core/image_proxy.dart'; // 👈 helper para CORS
 
 class VinylProvider extends ChangeNotifier {
-  // Form key
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  /* ─── Form & controllers ─── */
+  final formKey = GlobalKey<FormState>();
 
-  // Controllers
-  final TextEditingController artistController = TextEditingController();
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController genreController = TextEditingController();
-  final TextEditingController yearController = TextEditingController();
-  final TextEditingController labelController = TextEditingController();
-  final TextEditingController buyController = TextEditingController();
-  final TextEditingController descController = TextEditingController();
+  final artistController = TextEditingController();
+  final titleController = TextEditingController();
+  final genreController = TextEditingController();
+  final yearController = TextEditingController();
+  final labelController = TextEditingController();
+  final buyController = TextEditingController();
+  final descController = TextEditingController();
 
-  // Services & utilities
-  final DiscogsService _discogs = DiscogsService();
-  final ImagePicker _picker = ImagePicker();
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Uuid _uuid = const Uuid();
+  /* ─── Services ─── */
+  final _discogs = DiscogsService();
+  final _picker = ImagePicker();
+  final _storage = FirebaseStorage.instance;
+  final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
+  final _uuid = const Uuid();
 
-  // State
+  /* ─── State ─── */
   ArtistResult? selectedArtist;
   ReleaseResult? selectedRelease;
   String? coverUrl;
   bool isLoading = false;
 
-  // Search artists on Discogs
-  Future<List<ArtistResult>> searchArtists(String query) async {
-    return query.length < 2 ? [] : await _discogs.searchArtists(query);
-  }
+  /* ───────────── Discogs search ───────────── */
+  Future<List<ArtistResult>> searchArtists(String q) async =>
+      q.length < 2 ? [] : _discogs.searchArtists(q);
 
-  // Select an artist
   void selectArtist(ArtistResult artist) {
     selectedArtist = artist;
     artistController.text = artist.name;
-    // Reset dependent fields
     selectedRelease = null;
     titleController.clear();
     genreController.clear();
@@ -56,15 +53,12 @@ class VinylProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Search releases by selected artist
-  Future<List<ReleaseResult>> searchReleases(String query) async {
-    if (selectedArtist == null) return [];
-    return query.isEmpty
-        ? []
-        : await _discogs.searchVinylsOfArtist(selectedArtist!.id, query);
+  Future<List<ReleaseResult>> searchReleases(String q) async {
+    if (selectedArtist == null || q.isEmpty) return [];
+    return _discogs.searchVinylsOfArtist(selectedArtist!.id, q);
   }
 
-  // Select a release and fetch details
+  /* ───────────── Select release ───────────── */
   Future<void> selectRelease(ReleaseResult release) async {
     isLoading = true;
     notifyListeners();
@@ -76,13 +70,14 @@ class VinylProvider extends ChangeNotifier {
     genreController.text = detail.genre ?? '';
     yearController.text = detail.year ?? '';
     labelController.text = detail.label ?? '';
-    coverUrl = detail.coverUrl;
+
+    coverUrl = proxiedImage(detail.coverUrl); // 👈 usa helper
 
     isLoading = false;
     notifyListeners();
   }
 
-  // Pick and upload cover image
+  /* ───────────── Imagen manual ───────────── */
   Future<void> pickCoverImage() async {
     final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
     if (picked == null) return;
@@ -91,23 +86,19 @@ class VinylProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final file = File(picked.path);
       final ref = _storage.ref('covers/${_uuid.v4()}.jpg');
-      await ref.putFile(file);
+      await ref.putFile(File(picked.path));
       coverUrl = await ref.getDownloadURL();
-    } catch (_) {
-      // Handle error if needed
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
-
-    isLoading = false;
-    notifyListeners();
   }
 
-  // Validate and save record to Firestore
+  /* ───────────── Guardar disco ───────────── */
   Future<bool> saveRecord() async {
-    if (!formKey.currentState!.validate()) return false;
-    if (selectedRelease == null) return false;
-
+    if (!formKey.currentState!.validate() || selectedRelease == null)
+      return false;
     final user = _auth.currentUser;
     if (user == null) return false;
 
@@ -139,6 +130,7 @@ class VinylProvider extends ChangeNotifier {
     }
   }
 
+  /* ───────────── Clean up ───────────── */
   @override
   void dispose() {
     artistController.dispose();

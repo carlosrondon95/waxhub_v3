@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../services/discogs_service.dart';
 import '../providers/vinyl_provider.dart';
+import '../core/image_proxy.dart'; // 👈 helper
 
 class NuevoDiscoForm extends StatelessWidget {
   const NuevoDiscoForm({Key? key}) : super(key: key);
@@ -14,17 +15,16 @@ class NuevoDiscoForm extends StatelessWidget {
 
     return ListView(
       children: [
-        // Autocomplete Artista
+        /* ─── Autocomplete Artista ─── */
         TypeAheadField<ArtistResult>(
-          builder: (context, textCtrl, focusNode) {
-            return TextFormField(
-              controller: textCtrl,
-              focusNode: focusNode,
-              decoration: const InputDecoration(labelText: 'Artista'),
-              validator:
-                  (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
-            );
-          },
+          builder:
+              (context, textCtrl, focusNode) => TextFormField(
+                controller: textCtrl,
+                focusNode: focusNode,
+                decoration: const InputDecoration(labelText: 'Artista'),
+                validator:
+                    (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
+              ),
           suggestionsCallback:
               (q) => q.length < 2 ? [] : vinyl.searchArtists(q),
           itemBuilder: (_, a) => ListTile(title: Text(a.name)),
@@ -37,7 +37,7 @@ class NuevoDiscoForm extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // Autocomplete Título
+        /* ─── Autocomplete Título ─── */
         vinyl.selectedArtist == null
             ? TextFormField(
               controller: vinyl.titleController,
@@ -45,22 +45,26 @@ class NuevoDiscoForm extends StatelessWidget {
               enabled: false,
             )
             : TypeAheadField<ReleaseResult>(
-              builder: (context, textCtrl, focusNode) {
-                return TextFormField(
-                  controller: textCtrl,
-                  focusNode: focusNode,
-                  decoration: const InputDecoration(labelText: 'Título'),
-                  validator:
-                      (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
-                );
-              },
+              builder:
+                  (context, textCtrl, focusNode) => TextFormField(
+                    controller: textCtrl,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(labelText: 'Título'),
+                    validator:
+                        (v) =>
+                            v == null || v.isEmpty ? 'Campo requerido' : null,
+                  ),
               suggestionsCallback:
                   (q) => q.isEmpty ? [] : vinyl.searchReleases(q),
               itemBuilder:
                   (_, r) => ListTile(
                     leading:
                         r.thumb.isNotEmpty
-                            ? Image.network(r.thumb, width: 40)
+                            ? Image.network(
+                              proxiedImage(r.thumb),
+                              width: 40,
+                              fit: BoxFit.cover,
+                            ) // 👈 proxy
                             : null,
                     title: Text(r.title),
                   ),
@@ -73,15 +77,13 @@ class NuevoDiscoForm extends StatelessWidget {
             ),
         const SizedBox(height: 12),
 
-        // Género
+        /* ─── Otros campos ─── */
         TextFormField(
           controller: vinyl.genreController,
           decoration: const InputDecoration(labelText: 'Género'),
           validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
         ),
         const SizedBox(height: 12),
-
-        // Año
         TextFormField(
           controller: vinyl.yearController,
           decoration: const InputDecoration(labelText: 'Año'),
@@ -89,23 +91,17 @@ class NuevoDiscoForm extends StatelessWidget {
           validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
         ),
         const SizedBox(height: 12),
-
-        // Sello
         TextFormField(
           controller: vinyl.labelController,
           decoration: const InputDecoration(labelText: 'Sello'),
           validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
         ),
         const SizedBox(height: 12),
-
-        // Lugar de compra (opcional)
         TextFormField(
           controller: vinyl.buyController,
           decoration: const InputDecoration(labelText: 'Lugar de compra'),
         ),
         const SizedBox(height: 12),
-
-        // Descripción (opcional)
         TextFormField(
           controller: vinyl.descController,
           decoration: const InputDecoration(labelText: 'Descripción'),
@@ -113,12 +109,12 @@ class NuevoDiscoForm extends StatelessWidget {
         ),
         const SizedBox(height: 24),
 
-        // Selector de portada
+        /* ─── Selector de portada ─── */
         Column(
           children: [
             if (vinyl.coverUrl != null && vinyl.coverUrl!.isNotEmpty)
               Image.network(
-                vinyl.coverUrl!,
+                proxiedImage(vinyl.coverUrl), // 👈 proxy
                 height: 150,
                 fit: BoxFit.cover,
                 errorBuilder:
@@ -139,7 +135,7 @@ class NuevoDiscoForm extends StatelessWidget {
         ),
         const SizedBox(height: 24),
 
-        // Botón Guardar
+        /* ─── Botón Guardar ─── */
         ElevatedButton(
           onPressed:
               vinyl.isLoading

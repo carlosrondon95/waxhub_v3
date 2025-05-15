@@ -1,11 +1,10 @@
-// lib/widgets/collection_grid.dart
 import 'package:flutter/material.dart';
 import '../models/vinyl_record.dart';
+import '../core/image_proxy.dart'; // 👈
 
 class CollectionGrid extends StatelessWidget {
   final List<VinylRecord> records;
   final void Function(VinylRecord) onTap;
-
   const CollectionGrid({Key? key, required this.records, required this.onTap})
     : super(key: key);
 
@@ -17,7 +16,7 @@ class CollectionGrid extends StatelessWidget {
         crossAxisCount: 3,
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
-        childAspectRatio: 0.7, // ajusta para dar espacio al texto
+        childAspectRatio: 0.7,
       ),
       itemCount: records.length,
       itemBuilder: (_, idx) {
@@ -26,14 +25,13 @@ class CollectionGrid extends StatelessWidget {
           onTap: () => onTap(disco),
           child: Column(
             children: [
-              // Caja cuadrada con la imagen centrada y sin recortar
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: AspectRatio(
-                  aspectRatio: 1, // siempre cuadrado
+                  aspectRatio: 1,
                   child: Image.network(
-                    disco.portadaUrl,
-                    fit: BoxFit.contain, // se ajusta sin recortar
+                    proxiedImage(disco.portadaUrl), // 👈
+                    fit: BoxFit.contain,
                     errorBuilder:
                         (_, __, ___) =>
                             const Icon(Icons.broken_image, size: 40),
