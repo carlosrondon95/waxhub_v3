@@ -41,7 +41,7 @@ class MapProvider extends ChangeNotifier {
       shops = await _places.buscarTiendas(
         lat: userLocation!.latitude,
         lng: userLocation!.longitude,
-        radius: 50000,
+        radius: 10000,
       );
 
       markers =
