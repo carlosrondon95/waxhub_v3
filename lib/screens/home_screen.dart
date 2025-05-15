@@ -41,6 +41,7 @@ class HomeScreen extends StatelessWidget {
 
               // Primera fila: Añadir Disco y Colección
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start, // ← aquí
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
@@ -65,6 +66,7 @@ class HomeScreen extends StatelessWidget {
 
               // Segunda fila: Mapa de Tiendas y Comunidad
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start, // ← y aquí
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
