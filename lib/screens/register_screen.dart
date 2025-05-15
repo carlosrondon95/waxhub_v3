@@ -59,11 +59,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Nombre completo con validación en tiempo real
+                  // Nombre de usuario con validación en tiempo real
                   TextFormField(
                     controller: _nameController,
                     decoration: InputDecoration(
-                      labelText: 'Nombre completo',
+                      labelText: 'Nombre de usuario',
                       errorText: _nameError,
                     ),
                     validator: (_) => _nameError,
