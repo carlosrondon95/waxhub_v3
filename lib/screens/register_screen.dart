@@ -1,6 +1,7 @@
 // lib/screens/register_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
 import '../widgets/password_field.dart';
@@ -59,7 +60,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Nombre de usuario con validación en tiempo real
                   TextFormField(
                     controller: _nameController,
                     decoration: InputDecoration(
@@ -84,7 +84,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Correo electrónico con validación en tiempo real
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -110,14 +109,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Contraseña
                   PasswordField(
                     controller: _passwordController,
                     validator: _passwordValidator,
                   ),
                   const SizedBox(height: 16),
 
-                  // Confirmar contraseña
                   PasswordField(
                     controller: _confirmPasswordController,
                     label: 'Confirmar contraseña',
@@ -129,7 +126,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Botón de registro
                   ElevatedButton(
                     onPressed:
                         (auth.isLoading ||
@@ -179,7 +175,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pushReplacementNamed(context, '/login');
+      context.goNamed('login');
     }
   }
 }

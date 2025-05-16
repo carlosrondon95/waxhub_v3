@@ -1,11 +1,11 @@
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
-  void _goTo(BuildContext context, String route) =>
-      Navigator.pushNamed(context, route);
+  void _goTo(BuildContext context, String route) => context.push(route);
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,6 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            // ← aquí
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
             child: Column(
               children: [

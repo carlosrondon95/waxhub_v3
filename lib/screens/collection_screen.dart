@@ -1,6 +1,7 @@
 // lib/screens/collection_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../providers/collection_provider.dart';
 import '../widgets/collection_filters.dart';
@@ -47,10 +48,9 @@ class CollectionScreen extends StatelessWidget {
                               return CollectionGrid(
                                 records: items,
                                 onTap:
-                                    (r) => Navigator.pushNamed(
-                                      context,
-                                      '/detalle_disco',
-                                      arguments: r,
+                                    (r) => context.pushNamed(
+                                      'detalle_disco',
+                                      extra: r,
                                     ),
                               );
                             case 'carrusel':
@@ -60,16 +60,14 @@ class CollectionScreen extends StatelessWidget {
                               return CollectionList(
                                 records: items,
                                 onTap:
-                                    (r) => Navigator.pushNamed(
-                                      context,
-                                      '/detalle_disco',
-                                      arguments: r,
+                                    (r) => context.pushNamed(
+                                      'detalle_disco',
+                                      extra: r,
                                     ),
                                 onEdit:
-                                    (r) => Navigator.pushNamed(
-                                      context,
-                                      '/editar_disco',
-                                      arguments: r,
+                                    (r) => context.pushNamed(
+                                      'editar_disco',
+                                      extra: r,
                                     ),
                                 onDelete: collection.deleteRecord,
                                 onFavoriteToggle: collection.toggleFavorite,

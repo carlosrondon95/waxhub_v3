@@ -1,4 +1,6 @@
+// lib/screens/welcome_screen.dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -25,7 +27,7 @@ class WelcomeScreen extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () => Navigator.pushNamed(context, '/login'),
+                    onPressed: () => context.pushNamed('login'),
                     child: const Text('Iniciar Sesión'),
                   ),
                 ),
@@ -33,7 +35,7 @@ class WelcomeScreen extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
-                    onPressed: () => Navigator.pushNamed(context, '/register'),
+                    onPressed: () => context.pushNamed('register'),
                     child: const Text('Crear Cuenta'),
                   ),
                 ),

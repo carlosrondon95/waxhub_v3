@@ -1,6 +1,7 @@
 // lib/screens/detalle_disco_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/vinyl_record.dart';
 import '../providers/collection_provider.dart';
@@ -19,18 +20,13 @@ class DetalleDiscoScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed:
-                () => Navigator.pushNamed(
-                  context,
-                  '/editar_disco',
-                  arguments: record,
-                ),
+            onPressed: () => context.pushNamed('editar_disco', extra: record),
           ),
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () async {
               await collection.deleteRecord(record.id);
-              Navigator.pop(context);
+              context.pop();
             },
           ),
         ],

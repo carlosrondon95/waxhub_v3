@@ -1,5 +1,8 @@
+// lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+
 import '../providers/auth_provider.dart';
 import '../widgets/password_field.dart';
 
@@ -91,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
         context,
       ).showSnackBar(SnackBar(content: Text(error)));
     } else {
-      Navigator.pushNamedAndRemoveUntil(context, '/home', (r) => false);
+      context.goNamed('home');
     }
   }
 
@@ -103,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
         context,
       ).showSnackBar(SnackBar(content: Text(error)));
     } else {
-      Navigator.pushNamedAndRemoveUntil(context, '/home', (r) => false);
+      context.goNamed('home');
     }
   }
 

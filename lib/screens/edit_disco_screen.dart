@@ -1,6 +1,7 @@
 // lib/screens/edit_disco_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/vinyl_record.dart';
 import '../providers/collection_provider.dart';
@@ -66,7 +67,7 @@ class _EditDiscoScreenState extends State<EditDiscoScreen> {
       favorito: widget.record.favorito,
     );
     await provider.updateRecord(updated);
-    Navigator.pop(context);
+    context.pop();
   }
 
   @override

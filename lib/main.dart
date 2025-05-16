@@ -30,24 +30,22 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => VinylProvider()),
         ChangeNotifierProvider(create: (_) => CollectionProvider()),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'WaxHub',
-        theme: AppTheme,
-        initialRoute: '/',
-        onGenerateRoute: AppRouter.generate,
-        scrollBehavior: AppScrollBehavior(),
-
-        // aquí aplicamos responsive_framework para toda la app
+      child: Builder(
         builder:
-            (context, child) => ResponsiveBreakpoints.builder(
-              child: child!,
+            (context) => ResponsiveBreakpoints.builder(
               breakpoints: const [
                 Breakpoint(start: 0, end: 450, name: MOBILE),
                 Breakpoint(start: 451, end: 800, name: TABLET),
                 Breakpoint(start: 801, end: 1200, name: DESKTOP),
                 Breakpoint(start: 1201, end: double.infinity, name: '4K'),
               ],
+              child: MaterialApp.router(
+                debugShowCheckedModeBanner: false,
+                title: 'WaxHub',
+                theme: AppTheme,
+                routerConfig: AppRouter.router,
+                scrollBehavior: AppScrollBehavior(),
+              ),
             ),
       ),
     );

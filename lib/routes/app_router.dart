@@ -1,60 +1,93 @@
 // lib/routes/app_router.dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import '../routes/fade_route.dart';
 import '../screens/welcome_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/register_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/nuevo_disco_screen.dart';
 import '../screens/collection_screen.dart';
+import '../screens/map_screen.dart';
 import '../screens/detalle_disco_screen.dart';
 import '../screens/edit_disco_screen.dart';
-import '../screens/map_screen.dart';
-//import '../screens/comunidad_screen.dart';
 import '../models/vinyl_record.dart';
 
 class AppRouter {
-  static Route<dynamic> generate(RouteSettings settings) {
-    late final Widget page;
+  static final GoRouter router = GoRouter(
+    initialLocation: '/',
+    routes: [
+      GoRoute(
+        path: '/',
+        name: 'welcome',
+        pageBuilder:
+            (context, state) => _fadePage(const WelcomeScreen(), state),
+      ),
+      GoRoute(
+        path: '/login',
+        name: 'login',
+        pageBuilder: (context, state) => _fadePage(const LoginScreen(), state),
+      ),
+      GoRoute(
+        path: '/register',
+        name: 'register',
+        pageBuilder:
+            (context, state) => _fadePage(const RegisterScreen(), state),
+      ),
+      GoRoute(
+        path: '/home',
+        name: 'home',
+        pageBuilder: (context, state) => _fadePage(const HomeScreen(), state),
+      ),
+      GoRoute(
+        path: '/nuevo_disco',
+        name: 'nuevo_disco',
+        pageBuilder:
+            (context, state) => _fadePage(const NuevoDiscoScreen(), state),
+      ),
+      GoRoute(
+        path: '/coleccion',
+        name: 'coleccion',
+        pageBuilder:
+            (context, state) => _fadePage(const CollectionScreen(), state),
+      ),
+      GoRoute(
+        path: '/mapa_tiendas',
+        name: 'mapa_tiendas',
+        pageBuilder: (context, state) => _fadePage(const MapScreen(), state),
+      ),
+      GoRoute(
+        path: '/detalle_disco',
+        name: 'detalle_disco',
+        pageBuilder: (context, state) {
+          final record = state.extra as VinylRecord;
+          return _fadePage(DetalleDiscoScreen(record: record), state);
+        },
+      ),
+      GoRoute(
+        path: '/editar_disco',
+        name: 'editar_disco',
+        pageBuilder: (context, state) {
+          final record = state.extra as VinylRecord;
+          return _fadePage(EditDiscoScreen(record: record), state);
+        },
+      ),
+    ],
+    errorPageBuilder:
+        (context, state) => MaterialPage(child: const WelcomeScreen()),
+  );
 
-    switch (settings.name) {
-      case '/':
-        page = const WelcomeScreen();
-        break;
-      case '/login':
-        page = const LoginScreen();
-        break;
-      case '/register':
-        page = const RegisterScreen();
-        break;
-      case '/home':
-        page = const HomeScreen();
-        break;
-      case '/nuevo_disco':
-        page = const NuevoDiscoScreen();
-        break;
-      case '/coleccion':
-        page = const CollectionScreen();
-        break;
-      case '/mapa_tiendas':
-        page = const MapScreen();
-        break;
-      /*case '/comunidad':                         
-        page = const ComunidadScreen();
-        break;*/
-      case '/detalle_disco':
-        final record = settings.arguments as VinylRecord;
-        page = DetalleDiscoScreen(record: record);
-        break;
-      case '/editar_disco':
-        final recordToEdit = settings.arguments as VinylRecord;
-        page = EditDiscoScreen(record: recordToEdit);
-        break;
-      default:
-        page = const WelcomeScreen();
-    }
-
-    return FadePageRoute(page: page);
+  // Helper para crear la página con FadeTransition
+  static CustomTransitionPage<void> _fadePage(
+    Widget child,
+    GoRouterState state,
+  ) {
+    return CustomTransitionPage<void>(
+      key: state.pageKey,
+      child: child,
+      transitionsBuilder:
+          (context, animation, secondary, child) =>
+              FadeTransition(opacity: animation, child: child),
+    );
   }
 }
