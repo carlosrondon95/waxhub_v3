@@ -8,6 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 
 import '../services/discogs_service.dart';
+import '../models/artist_result.dart';
+import '../models/release_result.dart';
 import '../models/vinyl_record.dart';
 import '../core/image_proxy.dart'; // 👈 helper para CORS
 
