@@ -2,14 +2,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import 'core/theme.dart';
+import 'core/app_scroll_behavior.dart';
 import 'firebase_options.dart';
 import 'routes/app_router.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/vinyl_provider.dart';
-import 'providers/collection_provider.dart'; // nuevo proveedor
+import 'providers/collection_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +36,19 @@ class MyApp extends StatelessWidget {
         theme: AppTheme,
         initialRoute: '/',
         onGenerateRoute: AppRouter.generate,
+        scrollBehavior: AppScrollBehavior(),
+
+        // aquí aplicamos responsive_framework para toda la app
+        builder:
+            (context, child) => ResponsiveBreakpoints.builder(
+              child: child!,
+              breakpoints: const [
+                Breakpoint(start: 0, end: 450, name: MOBILE),
+                Breakpoint(start: 451, end: 800, name: TABLET),
+                Breakpoint(start: 801, end: 1200, name: DESKTOP),
+                Breakpoint(start: 1201, end: double.infinity, name: '4K'),
+              ],
+            ),
       ),
     );
   }

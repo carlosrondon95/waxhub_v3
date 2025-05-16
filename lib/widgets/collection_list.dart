@@ -1,6 +1,9 @@
 // lib/widgets/collection_list.dart
 import 'package:flutter/material.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+
 import '../models/vinyl_record.dart';
+import '../core/image_proxy.dart';
 
 class CollectionList extends StatelessWidget {
   final List<VinylRecord> records;
@@ -10,48 +13,65 @@ class CollectionList extends StatelessWidget {
   final void Function(String, bool) onFavoriteToggle;
 
   const CollectionList({
-    Key? key,
+    super.key,
     required this.records,
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
     required this.onFavoriteToggle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+
+    final leadingSize = isDesktop ? 80.0 : 60.0;
+    final cardPadding = isDesktop ? 12.0 : 8.0;
+
     return ListView.builder(
       itemCount: records.length,
-      itemBuilder: (context, index) {
-        final record = records[index];
+      itemBuilder: (_, index) {
+        final r = records[index];
         return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          margin: EdgeInsets.symmetric(
+            vertical: cardPadding / 2,
+            horizontal: cardPadding,
+          ),
           child: ListTile(
-            leading: Image.network(
-              record.portadaUrl,
-              width: 60,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+            leading: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: leadingSize,
+                maxHeight: leadingSize,
+              ),
+              child: Image.network(
+                proxiedImage(r.portadaUrl),
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+              ),
             ),
-            title: Text(record.artista),
-            subtitle: Text('${record.titulo} (${record.anio})'),
-            onTap: () => onTap(record),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
+            title: Text(r.artista),
+            subtitle: Text('${r.titulo} (${r.anio})'),
+            onTap: () => onTap(r),
+            trailing: Wrap(
+              spacing: 4,
               children: [
+                // ----- Favorito -----
                 IconButton(
+                  tooltip:
+                      r.favorito ? 'Quitar de favoritos' : 'Marcar favorito',
                   icon: Icon(
-                    record.favorito ? Icons.favorite : Icons.favorite_border,
-                    color: record.favorito ? Colors.red : null,
+                    r.favorito ? Icons.favorite : Icons.favorite_border,
+                    color: r.favorito ? Colors.red : null,
                   ),
-                  onPressed: () => onFavoriteToggle(record.id, record.favorito),
+                  onPressed: () => onFavoriteToggle(r.id, r.favorito),
                 ),
+                // ----- Menú “⋮” -----
                 PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'editar')
-                      onEdit(record);
-                    else if (value == 'eliminar')
-                      onDelete(record.id);
+                  tooltip: 'Opciones',
+                  icon: const Icon(Icons.more_vert),
+                  onSelected: (v) {
+                    if (v == 'editar') onEdit(r);
+                    if (v == 'eliminar') onDelete(r.id);
                   },
                   itemBuilder:
                       (_) => [

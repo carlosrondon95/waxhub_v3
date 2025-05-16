@@ -1,5 +1,5 @@
-// lib/providers/collection_provider.dart
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +12,7 @@ class CollectionProvider extends ChangeNotifier {
 
   StreamSubscription<QuerySnapshot>? _subscription;
 
+  /* ─── Estado ───────────────────────────────────────────── */
   List<VinylRecord> _allRecords = [];
   String _searchQuery = '';
   String _sortBy = 'titulo';
@@ -19,19 +20,22 @@ class CollectionProvider extends ChangeNotifier {
   String _viewMode = 'lista';
   bool _isLoading = false;
 
+  /* ─── Constructor ─────────────────────────────────────── */
   CollectionProvider() {
-    // Listen to auth changes and subscribe accordingly
+    // Cada vez que cambia la sesión, ajusta la suscripción
     _auth.authStateChanges().listen((user) {
       _subscription?.cancel();
       if (user != null) {
         _subscribeToRecords(user.uid);
       } else {
         _allRecords = [];
+        _isLoading = false;
         notifyListeners();
       }
     });
   }
 
+  /* ─── Suscripción a Firestore ─────────────────────────── */
   void _subscribeToRecords(String uid) {
     _isLoading = true;
     notifyListeners();
@@ -47,7 +51,8 @@ class CollectionProvider extends ChangeNotifier {
             _isLoading = false;
             notifyListeners();
           },
-          onError: (_) {
+          onError: (e) {
+            debugPrint('Firestore listener error: $e');
             _isLoading = false;
             notifyListeners();
           },
@@ -60,30 +65,34 @@ class CollectionProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  // Getters
+  /* ─── Getters (públicos) ───────────────────────────────── */
+
   List<VinylRecord> get allRecords => List.unmodifiable(_allRecords);
+
   List<VinylRecord> get filteredRecords {
     final q = _searchQuery.toLowerCase();
+
     var list =
-        _allRecords.where((record) {
-          final matchesSearch =
-              record.titulo.toLowerCase().contains(q) ||
-              record.artista.toLowerCase().contains(q) ||
-              record.genero.toLowerCase().contains(q);
-          final matchesFavorites = !_showFavorites || record.favorito;
-          return matchesSearch && matchesFavorites;
+        _allRecords.where((r) {
+          final matchSearch =
+              r.titulo.toLowerCase().contains(q) ||
+              r.artista.toLowerCase().contains(q) ||
+              r.genero.toLowerCase().contains(q);
+          final matchFav = !_showFavorites || r.favorito;
+          return matchSearch && matchFav;
         }).toList();
 
     list.sort((a, b) {
       switch (_sortBy) {
         case 'artista':
-          return a.artista.compareTo(b.artista);
+          return a.artista.toLowerCase().compareTo(b.artista.toLowerCase());
         case 'anio':
           return a.anio.compareTo(b.anio);
         default:
-          return a.titulo.compareTo(b.titulo);
+          return a.titulo.toLowerCase().compareTo(b.titulo.toLowerCase());
       }
     });
+
     return list;
   }
 
@@ -93,9 +102,10 @@ class CollectionProvider extends ChangeNotifier {
   String get viewMode => _viewMode;
   bool get isLoading => _isLoading;
 
-  // Setters
-  void setSearchQuery(String query) {
-    _searchQuery = query;
+  /* ─── Setters (filtros y vista) ───────────────────────── */
+
+  void setSearchQuery(String q) {
+    _searchQuery = q;
     notifyListeners();
   }
 
@@ -104,8 +114,8 @@ class CollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setShowFavorites(bool value) {
-    _showFavorites = value;
+  void setShowFavorites(bool v) {
+    _showFavorites = v;
     notifyListeners();
   }
 
@@ -114,34 +124,20 @@ class CollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Write operations
+  /* ─── Operaciones de escritura ────────────────────────── */
+
   Future<void> deleteRecord(String id) async {
-    try {
-      await _firestore.collection('discos').doc(id).delete();
-      // changes will be reflected by listener
-    } catch (_) {
-      // handle error
-    }
+    await _firestore.collection('discos').doc(id).delete();
+    // El listener actualizará la lista
   }
 
   Future<void> toggleFavorite(String id, bool current) async {
-    try {
-      await _firestore.collection('discos').doc(id).update({
-        'favorito': !current,
-      });
-    } catch (_) {
-      // handle error
-    }
+    await _firestore.collection('discos').doc(id).update({
+      'favorito': !current,
+    });
   }
 
   Future<void> updateRecord(VinylRecord updated) async {
-    try {
-      await _firestore
-          .collection('discos')
-          .doc(updated.id)
-          .set(updated.toMap());
-    } catch (_) {
-      // handle error
-    }
+    await _firestore.collection('discos').doc(updated.id).set(updated.toMap());
   }
 }

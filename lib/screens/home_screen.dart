@@ -1,51 +1,85 @@
+// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
+
+  void _goTo(BuildContext context, String route) =>
+      Navigator.pushNamed(context, route);
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('WaxHub'),
-        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         automaticallyImplyLeading: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0, bottom: 4.0),
+            child: GestureDetector(
+              onTap: () => _goTo(context, '/opciones_usuario'),
+              child: CircleAvatar(
+                backgroundColor: colors.secondaryContainer,
+                radius: 20,
+                child: Icon(Icons.person, size: 24, color: colors.primary),
+              ),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            // ← aquí
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo
                 Image.asset('assets/images/waxhub.png', height: 150),
+                const SizedBox(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: _IconLabel(
+                        icon: Icons.add,
+                        label: 'Añadir\nDisco',
+                        size: 42,
+                        onTap: () => _goTo(context, '/nuevo_disco'),
+                      ),
+                    ),
+                    Expanded(
+                      child: _IconLabel(
+                        icon: Icons.collections,
+                        label: 'Colección',
+                        size: 42,
+                        onTap: () => _goTo(context, '/coleccion'),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 24),
-
-                // Opciones de menú
-                MenuOption(
-                  title: 'Añadir Disco',
-                  icon: Icons.add,
-                  onTap: () => Navigator.pushNamed(context, '/nuevo_disco'),
-                ),
-                const SizedBox(height: 16),
-                MenuOption(
-                  title: 'Ver Colección',
-                  icon: Icons.collections,
-                  onTap: () => Navigator.pushNamed(context, '/coleccion'),
-                ),
-                const SizedBox(height: 16),
-                MenuOption(
-                  title: 'Mapa de Tiendas',
-                  icon: Icons.map,
-                  onTap: () => Navigator.pushNamed(context, '/mapa_tiendas'),
-                ),
-                const SizedBox(height: 16),
-                MenuOption(
-                  title: 'Opciones de Usuario',
-                  icon: Icons.person,
-                  onTap:
-                      () => Navigator.pushNamed(context, '/opciones_usuario'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: _IconLabel(
+                        icon: Icons.map,
+                        label: 'Mapa\nde Tiendas',
+                        size: 42,
+                        onTap: () => _goTo(context, '/mapa_tiendas'),
+                      ),
+                    ),
+                    Expanded(
+                      child: _IconLabel(
+                        icon: Icons.group,
+                        label: 'Comunidad',
+                        size: 42,
+                        onTap: () => _goTo(context, '/comunidad'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -56,38 +90,35 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class MenuOption extends StatelessWidget {
-  final String title;
+class _IconLabel extends StatelessWidget {
   final IconData icon;
+  final String label;
+  final double size;
   final VoidCallback onTap;
-
-  const MenuOption({
-    super.key,
-    required this.title,
+  const _IconLabel({
+    Key? key,
     required this.icon,
+    required this.label,
+    this.size = 40,
     required this.onTap,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: colors.secondaryContainer,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          child: Row(
-            children: [
-              Icon(icon, size: 32, color: colors.primary),
-              const SizedBox(width: 16),
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
-            ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: size, color: colors.primary),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
-        ),
+        ],
       ),
     );
   }

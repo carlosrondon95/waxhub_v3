@@ -26,10 +26,11 @@ class CollectionFilters extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Search field
+          // — Buscador en su propia fila —feo
           TextField(
             decoration: const InputDecoration(
               labelText: 'Buscar...',
@@ -38,47 +39,48 @@ class CollectionFilters extends StatelessWidget {
             ),
             onChanged: onSearchChanged,
           ),
-          const SizedBox(height: 8),
-          // Dropdowns and toggle
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // Sort by dropdown
-              DropdownButton<String>(
-                value: sortBy,
-                onChanged: (value) {
-                  if (value != null) onSortByChanged(value);
-                },
-                items: const [
-                  DropdownMenuItem(value: 'titulo', child: Text('Título')),
-                  DropdownMenuItem(value: 'artista', child: Text('Artista')),
-                  DropdownMenuItem(value: 'anio', child: Text('Año')),
-                ],
-              ),
-              // View mode dropdown
-              DropdownButton<String>(
-                value: viewMode,
-                onChanged: (value) {
-                  if (value != null) onViewModeChanged(value);
-                },
-                items: const [
-                  DropdownMenuItem(value: 'lista', child: Text('Lista')),
-                  DropdownMenuItem(
-                    value: 'cuadricula',
-                    child: Text('Cuadrícula'),
-                  ),
-                  DropdownMenuItem(value: 'carrusel', child: Text('Carrusel')),
-                ],
-              ),
-              // Favorites toggle
-              ElevatedButton(
-                onPressed: () => onShowFavoritesChanged(!showFavorites),
-                child: Text(showFavorites ? 'Todos' : 'Favoritos'),
-              ),
-            ],
+          const SizedBox(height: 12),
+          // — Controles (Ordenar, Vista, Favoritos) debajo —
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                DropdownButton<String>(
+                  value: sortBy,
+                  onChanged: (v) => v != null ? onSortByChanged(v) : null,
+                  items: const [
+                    DropdownMenuItem(value: 'titulo', child: Text('Título')),
+                    DropdownMenuItem(value: 'artista', child: Text('Artista')),
+                    DropdownMenuItem(value: 'anio', child: Text('Año')),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                DropdownButton<String>(
+                  value: viewMode,
+                  onChanged: (v) => v != null ? onViewModeChanged(v) : null,
+                  items: const [
+                    DropdownMenuItem(value: 'lista', child: Text('Lista')),
+                    DropdownMenuItem(
+                      value: 'cuadricula',
+                      child: Text('Cuadrícula'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'carrusel',
+                      child: Text('Carrusel'),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton.icon(
+                  onPressed: () => onShowFavoritesChanged(!showFavorites),
+                  icon: Icon(showFavorites ? Icons.star : Icons.star_border),
+                  label: Text(showFavorites ? 'Todos' : 'Favoritos'),
+                ),
+              ],
+            ),
           ),
         ],
-      ),
+      ), //tonto
     );
   }
 }

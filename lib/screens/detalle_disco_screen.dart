@@ -7,7 +7,7 @@ import '../providers/collection_provider.dart';
 
 class DetalleDiscoScreen extends StatelessWidget {
   final VinylRecord record;
-  const DetalleDiscoScreen({Key? key, required this.record}) : super(key: key);
+  const DetalleDiscoScreen({super.key, required this.record});
 
   @override
   Widget build(BuildContext context) {
