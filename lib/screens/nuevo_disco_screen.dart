@@ -4,7 +4,7 @@ import '../providers/vinyl_provider.dart';
 import '../widgets/nuevo_disco_form.dart';
 
 class NuevoDiscoScreen extends StatelessWidget {
-  const NuevoDiscoScreen({Key? key}) : super(key: key);
+  const NuevoDiscoScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

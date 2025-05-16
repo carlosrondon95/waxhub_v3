@@ -48,17 +48,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyCGhFLTq3t6p9qMjXB1c0agadqmfAdq7oc',
-    appId: '1:847614059163:web:044051a708997c38421c3e',
+    appId: '1:847614059163:web:559464ee74e5429a421c3e',
     messagingSenderId: '847614059163',
     projectId: 'waxhub95',
     authDomain: 'waxhub95.firebaseapp.com',
     storageBucket: 'waxhub95.firebasestorage.app',
-    measurementId: 'G-Q37Q6N2GCR',
+    measurementId: 'G-GFZSE4W710',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCI9YZ1ZDqVkPKG8mH6CLAlslhsNX_fnQY',
-    appId: '1:847614059163:android:cb543b29001cea74421c3e',
+    appId: '1:847614059163:android:b28aea67877c3a5c421c3e',
     messagingSenderId: '847614059163',
     projectId: 'waxhub95',
     storageBucket: 'waxhub95.firebasestorage.app',

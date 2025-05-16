@@ -7,7 +7,7 @@ import '../providers/collection_provider.dart';
 
 class EditDiscoScreen extends StatefulWidget {
   final VinylRecord record;
-  const EditDiscoScreen({Key? key, required this.record}) : super(key: key);
+  const EditDiscoScreen({super.key, required this.record});
 
   @override
   State<EditDiscoScreen> createState() => _EditDiscoScreenState();

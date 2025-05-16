@@ -97,8 +97,9 @@ class VinylProvider extends ChangeNotifier {
 
   /* ───────────── Guardar disco ───────────── */
   Future<bool> saveRecord() async {
-    if (!formKey.currentState!.validate() || selectedRelease == null)
+    if (!formKey.currentState!.validate() || selectedRelease == null) {
       return false;
+    }
     final user = _auth.currentUser;
     if (user == null) return false;
 

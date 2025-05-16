@@ -8,19 +8,18 @@ import '../core/image_proxy.dart';
 class CollectionGrid extends StatelessWidget {
   final List<VinylRecord> records;
   final void Function(VinylRecord) onTap;
+
   const CollectionGrid({super.key, required this.records, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    // ----- columnas por breakpoint -----
     final bp = ResponsiveBreakpoints.of(context);
 
-    int cols = 2; // móvil
-    if (bp.largerThan(TABLET)) cols = 3; // tablet
-    if (bp.largerThan(DESKTOP)) cols = 5; // desktop/4K
+    int cols = 2;
+    if (bp.largerThan(TABLET)) cols = 3;
+    if (bp.largerThan(DESKTOP)) cols = 5;
 
-    // childAspectRatio ≈ ancho / alto → contamos la portada (1:1) + 3 líneas de texto
-    final aspectRatio = 0.8; // suficientemente alto para las tres líneas
+    const aspectRatio = 0.8;
 
     return GridView.builder(
       padding: const EdgeInsets.all(12),
@@ -31,16 +30,16 @@ class CollectionGrid extends StatelessWidget {
         mainAxisSpacing: 12,
       ),
       itemCount: records.length,
-      itemBuilder: (_, i) {
+      itemBuilder: (context, i) {
         final r = records[i];
         return GestureDetector(
           onTap: () => onTap(r),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ---------- Portada cuadrada ----------
+              // Portada 1:1
               AspectRatio(
-                aspectRatio: 1, // 1:1
+                aspectRatio: 1,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
                   child: Image.network(
@@ -53,27 +52,31 @@ class CollectionGrid extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              // ---------- Título ----------
-              Text(
-                r.titulo,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
+              // Título
+              Flexible(
+                child: Text(
+                  r.titulo,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
-              // ---------- Artista ----------
-              Text(
-                r.artista,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+              // Artista
+              Flexible(
+                child: Text(
+                  r.artista,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+                ),
               ),
-              // ---------- Año ----------
+              // Año
               Text(
-                r.anio.toString(),
+                r.anio,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall,
               ),

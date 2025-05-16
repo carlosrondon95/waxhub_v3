@@ -35,99 +35,63 @@ class _CollectionCarouselState extends State<CollectionCarousel> {
     }
 
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
-    final heightFactor =
-        isDesktop ? 0.50 : 0.40; // portada algo mayor en desktop
+    final heightFactor = isDesktop ? 0.50 : 0.40;
 
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        PageView.builder(
-          controller: _controller,
-          itemCount: widget.records.length,
-          itemBuilder: (_, index) {
-            final d = widget.records[index];
+    return PageView.builder(
+      controller: _controller,
+      itemCount: widget.records.length,
+      itemBuilder: (_, index) {
+        final d = widget.records[index];
+        return LayoutBuilder(
+          builder: (context, constraints) {
             return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  height: MediaQuery.of(context).size.height * heightFactor,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Image.network(
-                    proxiedImage(d.portadaUrl),
-                    fit: BoxFit.contain,
-                    errorBuilder:
-                        (_, __, ___) =>
-                            const Icon(Icons.broken_image, size: 80),
+                // Imagen ocupa un porcentaje fijo
+                SizedBox(
+                  height: constraints.maxHeight * heightFactor,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Image.network(
+                      proxiedImage(d.portadaUrl),
+                      fit: BoxFit.contain,
+                      errorBuilder:
+                          (_, __, ___) =>
+                              const Icon(Icons.broken_image, size: 80),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  d.artista,
-                  style: Theme.of(context).textTheme.titleMedium,
-                  textAlign: TextAlign.center,
-                ),
-                Text(
-                  d.titulo,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-                Text(
-                  '(${d.anio})',
-                  style: Theme.of(context).textTheme.bodySmall,
+                // El resto puede desplazarse si falta espacio
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 16),
+                        Text(
+                          d.artista,
+                          style: Theme.of(context).textTheme.titleMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          d.titulo,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '(${d.anio})',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             );
           },
-        ),
-
-        // Flechas solo en pantallas grandes
-        if (isDesktop) ...[
-          Positioned(
-            left: 8,
-            child: _NavArrow(
-              icon: Icons.chevron_left,
-              onTap:
-                  () => _controller.previousPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  ),
-            ),
-          ),
-          Positioned(
-            right: 8,
-            child: _NavArrow(
-              icon: Icons.chevron_right,
-              onTap:
-                  () => _controller.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _NavArrow extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  const _NavArrow({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black45,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Icon(icon, color: Colors.white, size: 32),
-        ),
-      ),
+        );
+      },
     );
   }
 }

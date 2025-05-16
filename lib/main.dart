@@ -37,16 +37,11 @@ class MyApp extends StatelessWidget {
         initialRoute: '/',
         onGenerateRoute: AppRouter.generate,
         scrollBehavior: AppScrollBehavior(),
-        // ------------ Responsive Framework ------------
+
+        // aquí aplicamos responsive_framework para toda la app
         builder:
             (context, child) => ResponsiveBreakpoints.builder(
-              child: MaxWidthBox(
-                maxWidth: 1200,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: child!,
-                ),
-              ),
+              child: child!,
               breakpoints: const [
                 Breakpoint(start: 0, end: 450, name: MOBILE),
                 Breakpoint(start: 451, end: 800, name: TABLET),

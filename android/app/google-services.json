@@ -52,12 +52,20 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:847614059163:android:cb543b29001cea74421c3e",
+        "mobilesdk_app_id": "1:847614059163:android:b28aea67877c3a5c421c3e",
         "android_client_info": {
-          "package_name": "com.example.waxhub_v2"
+          "package_name": "com.example.waxhub_v3"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "847614059163-97f00catkiv5acn17ov3olu8urgje2ri.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.waxhub_v3",
+            "certificate_hash": "02f9275129178cf4c84c36969e99b2286c18cd91"
+          }
+        },
         {
           "client_id": "847614059163-7dm7t9dtkuq58rapamic8fv512n6p74l.apps.googleusercontent.com",
           "client_type": 3
