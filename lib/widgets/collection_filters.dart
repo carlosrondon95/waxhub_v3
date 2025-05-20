@@ -12,7 +12,7 @@ class CollectionFilters extends StatelessWidget {
   final ValueChanged<String> onViewModeChanged;
 
   const CollectionFilters({
-    Key? key,
+    super.key,
     required this.searchQuery,
     required this.onSearchChanged,
     required this.sortBy,
@@ -21,7 +21,7 @@ class CollectionFilters extends StatelessWidget {
     required this.onShowFavoritesChanged,
     required this.viewMode,
     required this.onViewModeChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
