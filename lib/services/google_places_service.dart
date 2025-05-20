@@ -39,7 +39,7 @@ class GooglePlacesService {
     }
 
     // Devolvemos solo resultados con coordenadas válidas
-    return (data.results ?? [])
+    return (data.results)
         .where((r) => r.geometry?.location != null)
         .toList();
   }
