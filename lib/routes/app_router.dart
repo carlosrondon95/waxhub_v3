@@ -10,6 +10,7 @@ import '../screens/home_screen.dart';
 import '../screens/nuevo_disco_screen.dart';
 import '../screens/collection_screen.dart';
 import '../screens/map_screen.dart';
+import '../screens/user_options_screen.dart'; // ← import añadido
 import '../screens/detalle_disco_screen.dart';
 import '../screens/edit_disco_screen.dart';
 import '../models/vinyl_record.dart';
@@ -21,7 +22,6 @@ class AppRouter {
       refreshListenable: authProvider,
       redirect: (BuildContext context, GoRouterState state) {
         final loggedIn = FirebaseAuth.instance.currentUser != null;
-        // obtenemos la ruta actual como string:
         final loc = state.uri.toString();
         final goingToAuth = loc == '/' || loc == '/login' || loc == '/register';
 
@@ -65,6 +65,12 @@ class AppRouter {
           name: 'mapa_tiendas',
           pageBuilder: (_, state) => _fadePage(const MapScreen(), state),
         ),
+        GoRoute(
+          path: '/opciones_usuario',
+          name: 'opciones_usuario',
+          pageBuilder:
+              (_, state) => _fadePage(const UserOptionsScreen(), state),
+        ), // ← ruta de Opciones de Usuario
         GoRoute(
           path: '/detalle_disco',
           name: 'detalle_disco',
