@@ -27,43 +27,49 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _resetPassword() async {
     final auth = context.read<AuthProvider>();
-    final dialogEmailCtrl = TextEditingController(text: _emailCtrl.text);
+    final emailDialogCtrl = TextEditingController(text: _emailCtrl.text);
 
-    await showDialog(
+    await showDialog<void>(
       context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Restablecer contraseña'),
-            content: TextField(
-              controller: dialogEmailCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Correo electrónico',
-                hintText: 'Introduce tu email',
-              ),
-              keyboardType: TextInputType.emailAddress,
+      useRootNavigator: true, // ← aquí
+      barrierDismissible: false, // opcional: evita tap fuera para cerrar
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Restablecer contraseña'),
+          content: TextField(
+            controller: emailDialogCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Correo electrónico',
+              hintText: 'Introduce tu email',
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  Navigator.of(ctx).pop();
-                  final error = await auth.sendPasswordReset(
-                    dialogEmailCtrl.text.trim(),
-                  );
-                  final msg =
-                      error ??
-                      'Correo de restablecimiento enviado correctamente.';
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(msg)));
-                },
-                child: const Text('Enviar'),
-              ),
-            ],
+            keyboardType: TextInputType.emailAddress,
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // 1) Enviar el reset
+                final error = await auth.sendPasswordReset(
+                  emailDialogCtrl.text.trim(),
+                );
+                // 2) Cerrar sólo el diálogo
+                Navigator.of(dialogContext).pop();
+                // 3) Mostrar SnackBar en la LoginScreen
+                final msg =
+                    error ??
+                    'Enlace de recuperación de contraseña enviado al mail.';
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(msg)));
+              },
+              child: const Text('Enviar'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -91,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Correo electrónico
+              // Email
               InputFormField(
                 label: 'Correo electrónico',
                 icon: Icons.email_outlined,
@@ -100,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Contraseña
+              // Password
               InputFormField(
                 label: 'Contraseña',
                 icon: Icons.lock_outline,
@@ -110,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Recuérdame & Olvidaste tu contraseña
+              // Recuérdame & Olvidaste contraseña
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -129,8 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: TextButton(
                       onPressed: _resetPassword,
                       style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(50, 30),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: const Text(
@@ -155,8 +160,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       context,
                     ).showSnackBar(SnackBar(content: Text(err)));
                   }
-                  // al iniciar sesión, FirebaseAuth refresca authStateChanges()
-                  // y tu router redirigirá automáticamente a la pantalla “home”.
                 },
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
@@ -168,12 +171,15 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Enlace a registro
+              // Ir a registro
               MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: TextButton(
                   onPressed: () => context.pushNamed('register'),
-                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   child: const Text(
                     'Regístrate',
                     style: TextStyle(color: Color(0xFF2D79F3)),
@@ -185,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const Text('O con'),
               const SizedBox(height: 10),
 
-              // Botón Google
+              // Google Sign-In
               const GoogleSignInButton(),
             ],
           ),

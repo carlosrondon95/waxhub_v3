@@ -33,7 +33,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // ¡ojo a los paréntesis! AuthProvider() es un constructor
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => VinylProvider()),
         ChangeNotifierProvider(create: (_) => CollectionProvider()),

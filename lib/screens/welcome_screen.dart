@@ -1,4 +1,3 @@
-// lib/screens/welcome_screen.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -12,8 +11,9 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animController;
-  late Animation<double> _fadeAnim;
+  late final AnimationController _animController;
+  late final Animation<double> _fadeAnim;
+  late final Timer _timer;
 
   @override
   void initState() {
@@ -25,14 +25,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeIn);
     _animController.forward();
 
-    // Tras 5 segundos, navegamos a la pantalla de login
-    Timer(const Duration(seconds: 5), () {
-      context.pushReplacementNamed('login');
+    // Solo una vez: tras 5s, reemplaza con Login
+    _timer = Timer(const Duration(seconds: 5), () {
+      context.goNamed('login');
     });
   }
 
   @override
   void dispose() {
+    _timer.cancel();
     _animController.dispose();
     super.dispose();
   }
