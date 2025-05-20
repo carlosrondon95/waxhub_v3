@@ -1,4 +1,4 @@
-// lib/widgets/collection_carousel.dart
+ // lib/widgets/collection_carousel.dart
 import 'package:flutter/material.dart';
 import '../models/vinyl_record.dart';
 
