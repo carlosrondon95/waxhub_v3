@@ -1,3 +1,5 @@
+// lib/main.dart
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -39,8 +41,8 @@ class MyApp extends StatelessWidget {
       ],
       child: Builder(
         builder: (context) {
-          // Escuchamos el AuthProvider (ChangeNotifier) para hacer refresh al router
-          final authProvider = Provider.of<AuthProvider>(context, listen: true);
+          // Escuchamos AuthProvider para refrescar el router al hacer login/logout
+          final authProvider = Provider.of<AuthProvider>(context);
 
           return ResponsiveBreakpoints.builder(
             breakpoints: const [
@@ -53,7 +55,6 @@ class MyApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               title: 'WaxHub',
               theme: AppTheme,
-              // Le pasamos el authProvider como refreshListenable
               routerConfig: AppRouter.router(authProvider),
               scrollBehavior: AppScrollBehavior(),
             ),
