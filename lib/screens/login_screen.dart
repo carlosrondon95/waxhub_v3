@@ -1,7 +1,10 @@
-// login_screen.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // para icono de Google
+
+import '../providers/auth_provider.dart';
+import '../widgets/input_form_field.dart';
+import '../widgets/google_signin_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -22,10 +25,53 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _resetPassword() async {
+    final auth = context.read<AuthProvider>();
+    final dialogEmailCtrl = TextEditingController(text: _emailCtrl.text);
+
+    await showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Restablecer contraseña'),
+            content: TextField(
+              controller: dialogEmailCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Correo electrónico',
+                hintText: 'Introduce tu email',
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(ctx).pop();
+                  final error = await auth.sendPasswordReset(
+                    dialogEmailCtrl.text.trim(),
+                  );
+                  final msg =
+                      error ??
+                      'Correo de restablecimiento enviado correctamente.';
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(msg)));
+                },
+                child: const Text('Enviar'),
+              ),
+            ],
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // ancho fijo del formulario
-    final maxWidth = 450.0;
+    const maxWidth = 450.0;
+    final auth = context.read<AuthProvider>();
+
     return Scaffold(
       body: Center(
         child: Container(
@@ -34,19 +80,28 @@ class _LoginScreenState extends State<LoginScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildInputField(
+              // Correo electrónico
+              InputFormField(
                 label: 'Correo electrónico',
                 icon: Icons.email_outlined,
                 controller: _emailCtrl,
                 hint: 'Introduce tu correo',
-                obscure: false,
               ),
               const SizedBox(height: 10),
-              _buildInputField(
+
+              // Contraseña
+              InputFormField(
                 label: 'Contraseña',
                 icon: Icons.lock_outline,
                 controller: _passCtrl,
@@ -54,6 +109,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscure: true,
               ),
               const SizedBox(height: 10),
+
+              // Recuérdame & Olvidaste tu contraseña
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -61,31 +118,46 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Checkbox(
                         value: _rememberMe,
-                        onChanged: (v) => setState(() => _rememberMe = v!),
+                        onChanged:
+                            (v) => setState(() => _rememberMe = v ?? false),
                       ),
-                      const Text(
-                        'Recuérdame',
-                        style: TextStyle(fontWeight: FontWeight.w400),
-                      ),
+                      const Text('Recuérdame'),
                     ],
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      /* olvido de contraseña */
-                    },
-                    child: const Text(
-                      '¿Olvidaste tu contraseña?',
-                      style: TextStyle(
-                        color: Color(0xFF2D79F3),
-                        fontWeight: FontWeight.w500,
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: TextButton(
+                      onPressed: _resetPassword,
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(50, 30),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        '¿Olvidaste tu contraseña?',
+                        style: TextStyle(color: Color(0xFF2D79F3)),
                       ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
+
+              // Botón Entrar
               ElevatedButton(
-                onPressed: () => /* lógica de login */ null,
+                onPressed: () async {
+                  final err = await auth.signIn(
+                    _emailCtrl.text.trim(),
+                    _passCtrl.text,
+                  );
+                  if (err != null) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(err)));
+                  }
+                  // al iniciar sesión, FirebaseAuth refresca authStateChanges()
+                  // y tu router redirigirá automáticamente a la pantalla “home”.
+                },
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(
@@ -95,93 +167,30 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: const Text('Entrar'),
               ),
               const SizedBox(height: 10),
-              const Text('¿No tienes cuenta?'),
-              GestureDetector(
-                onTap: () => context.pushNamed('register'),
-                child: const Text(
-                  'Regístrate',
-                  style: TextStyle(
-                    color: Color(0xFF2D79F3),
-                    fontWeight: FontWeight.w500,
+
+              // Enlace a registro
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: TextButton(
+                  onPressed: () => context.pushNamed('register'),
+                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                  child: const Text(
+                    'Regístrate',
+                    style: TextStyle(color: Color(0xFF2D79F3)),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
+
               const Text('O con'),
               const SizedBox(height: 10),
-              OutlinedButton.icon(
-                onPressed: () => /* login con Google */ null,
-                icon: const FaIcon(FontAwesomeIcons.google),
-                label: const Text('Google'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                  side: const BorderSide(color: Color(0xFFededed)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
+
+              // Botón Google
+              const GoogleSignInButton(),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildInputField({
-    required String label,
-    required IconData icon,
-    required TextEditingController controller,
-    required String hint,
-    required bool obscure,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFF151717),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 5),
-        Container(
-          height: 50,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFecedec), width: 1.5),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, size: 20, color: Colors.black54),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  obscureText: obscure,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: hint,
-                  ),
-                ),
-              ),
-              if (obscure)
-                GestureDetector(
-                  onTap: () {
-                    /* mostrar/ocultar contraseña */
-                  },
-                  child: const Icon(
-                    Icons.visibility,
-                    size: 20,
-                    color: Colors.black54,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

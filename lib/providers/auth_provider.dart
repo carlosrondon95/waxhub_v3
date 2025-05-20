@@ -1,10 +1,9 @@
-// lib/providers/auth_provider.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class AuthProvider with ChangeNotifier {
+class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -13,7 +12,6 @@ class AuthProvider with ChangeNotifier {
   User? get currentUser => _auth.currentUser;
   bool get isAuthenticated => currentUser != null;
 
-  /// Comprueba si ya existe un usuario con ese nombre en Firestore
   Future<bool> usernameExists(String name) async {
     final snap =
         await _firestore
@@ -24,7 +22,6 @@ class AuthProvider with ChangeNotifier {
     return snap.docs.isNotEmpty;
   }
 
-  /// Comprueba si ya existe un usuario con ese email en Firestore
   Future<bool> emailExists(String email) async {
     final snap =
         await _firestore
