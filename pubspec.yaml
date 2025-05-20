@@ -43,6 +43,8 @@ dependencies:
   # Carga eficiente de imágenes
   cached_network_image: ^3.2.3
   flutter_svg: ^2.1.0
+  image_cropper: ^9.1.0
+  image_cropper_for_web: ^6.1.0
 
   # Navegación avanzada
   go_router: ^15.1.2

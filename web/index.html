@@ -5,7 +5,7 @@
 
     <meta charset="UTF-8">
     <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-    <meta name="description" content="A new Flutter project.">
+    <meta name="description" content="WaxHub – gestiona tu colección de vinilos">
 
     <!-- Google Sign-In -->
     <meta name="google-signin-client_id"
@@ -18,17 +18,24 @@
     <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="icon" type="image/png" href="favicon.png">
 
     <title>waxhub_v3</title>
     <link rel="manifest" href="manifest.json">
+
+    <!-- 🔹 Cropper.js – CSS (1.5.13 UMD) -->
+    <link rel="stylesheet"
+          href="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.css">
   </head>
 
   <body>
-    <!-- 🔹 Google Maps JavaScript SDK (obligatorio en Web) -->
+    <!-- 🔹 Google Maps SDK (web) -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpmV9gSDHG472GUmxC0e0JbMO4jjPQJGA&libraries=places"></script>
 
-    <!-- Flutter bootstrap (carga main.dart.js) -->
-    <script src="flutter_bootstrap.js" async></script>
+    <!-- 🔹 Cropper.js – JS (UMD)  **DEBE ir antes que main.dart.js** -->
+    <script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
+
+    <!-- 🔹 Flutter bootstrap (carga main.dart.js) -->
+    <script src="flutter_bootstrap.js" defer></script>
   </body>
 </html>

@@ -1,4 +1,3 @@
-// lib/routes/app_router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,7 +9,12 @@ import '../screens/home_screen.dart';
 import '../screens/nuevo_disco_screen.dart';
 import '../screens/collection_screen.dart';
 import '../screens/map_screen.dart';
-import '../screens/user_options_screen.dart'; // ← import añadido
+
+/* Ajustes */
+import '../screens/settings_menu_screen.dart';          // Menú principal de ajustes
+import '../screens/information_account_screen.dart';    // Información de la cuenta
+
+/* Vinilos */
 import '../screens/detalle_disco_screen.dart';
 import '../screens/edit_disco_screen.dart';
 import '../models/vinyl_record.dart';
@@ -23,75 +27,97 @@ class AppRouter {
       redirect: (BuildContext context, GoRouterState state) {
         final loggedIn = FirebaseAuth.instance.currentUser != null;
         final loc = state.uri.toString();
-        final goingToAuth = loc == '/' || loc == '/login' || loc == '/register';
+        final goingToAuth =
+            loc == '/' || loc == '/login' || loc == '/register';
 
         if (!loggedIn && !goingToAuth) return '/login';
         if (loggedIn && goingToAuth) return '/home';
         return null;
       },
       routes: [
+        /* ----------- Auth / Bienvenida ----------- */
         GoRoute(
           path: '/',
           name: 'welcome',
-          pageBuilder: (_, state) => _fadePage(const WelcomeScreen(), state),
+          pageBuilder: (_, s) => _fadePage(const WelcomeScreen(), s),
         ),
         GoRoute(
           path: '/login',
           name: 'login',
-          pageBuilder: (_, state) => _fadePage(const LoginScreen(), state),
+          pageBuilder: (_, s) => _fadePage(const LoginScreen(), s),
         ),
         GoRoute(
           path: '/register',
           name: 'register',
-          pageBuilder: (_, state) => _fadePage(const RegisterScreen(), state),
+          pageBuilder: (_, s) => _fadePage(const RegisterScreen(), s),
         ),
+
+        /* --------------- Home -------------------- */
         GoRoute(
           path: '/home',
           name: 'home',
-          pageBuilder: (_, state) => _fadePage(const HomeScreen(), state),
+          pageBuilder: (_, s) => _fadePage(const HomeScreen(), s),
         ),
+
+        /* ----------- Colección/Vinilos ----------- */
         GoRoute(
           path: '/nuevo_disco',
           name: 'nuevo_disco',
-          pageBuilder: (_, state) => _fadePage(const NuevoDiscoScreen(), state),
+          pageBuilder: (_, s) => _fadePage(const NuevoDiscoScreen(), s),
         ),
         GoRoute(
           path: '/coleccion',
           name: 'coleccion',
-          pageBuilder: (_, state) => _fadePage(const CollectionScreen(), state),
+          pageBuilder: (_, s) => _fadePage(const CollectionScreen(), s),
         ),
         GoRoute(
           path: '/mapa_tiendas',
           name: 'mapa_tiendas',
-          pageBuilder: (_, state) => _fadePage(const MapScreen(), state),
+          pageBuilder: (_, s) => _fadePage(const MapScreen(), s),
         ),
-        GoRoute(
-          path: '/opciones_usuario',
-          name: 'opciones_usuario',
-          pageBuilder:
-              (_, state) => _fadePage(const UserOptionsScreen(), state),
-        ), // ← ruta de Opciones de Usuario
         GoRoute(
           path: '/detalle_disco',
           name: 'detalle_disco',
-          pageBuilder: (_, state) {
-            final record = state.extra as VinylRecord;
-            return _fadePage(DetalleDiscoScreen(record: record), state);
+          pageBuilder: (_, s) {
+            final record = s.extra as VinylRecord;
+            return _fadePage(DetalleDiscoScreen(record: record), s);
           },
         ),
         GoRoute(
           path: '/editar_disco',
           name: 'editar_disco',
-          pageBuilder: (_, state) {
-            final record = state.extra as VinylRecord;
-            return _fadePage(EditDiscoScreen(record: record), state);
+          pageBuilder: (_, s) {
+            final record = s.extra as VinylRecord;
+            return _fadePage(EditDiscoScreen(record: record), s);
           },
         ),
+
+        /* ---------------- Ajustes ---------------- */
+        GoRoute(
+          path: '/ajustes',
+          name: 'ajustes',                               // Menú principal
+          pageBuilder: (_, s) => _fadePage(
+            const SettingsMenuScreen(),
+            s,
+          ),
+        ),
+        GoRoute(
+          path: '/cuenta',
+          name: 'cuenta',                                // Información de la cuenta
+          pageBuilder: (_, s) => _fadePage(
+            const InformationAccountScreen(),
+            s,
+          ),
+        ),
+        // → Cuando implementes más secciones (tema, idioma, etc.),
+        //   añade aquí sus rutas: /apariencia, /idioma, /notificaciones…
+
       ],
       errorPageBuilder: (_, __) => MaterialPage(child: const WelcomeScreen()),
     );
   }
 
+  /* ---------- Helper transición fade ---------- */
   static CustomTransitionPage<void> _fadePage(
     Widget child,
     GoRouterState state,
@@ -99,9 +125,8 @@ class AppRouter {
     return CustomTransitionPage<void>(
       key: state.pageKey,
       child: child,
-      transitionsBuilder:
-          (context, anim, sec, child) =>
-              FadeTransition(opacity: anim, child: child),
+      transitionsBuilder: (context, anim, sec, child) =>
+          FadeTransition(opacity: anim, child: child),
     );
   }
 }
