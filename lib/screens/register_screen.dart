@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
+import '../widgets/input_form_field.dart';
 import '../widgets/password_field.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -15,20 +16,20 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  final _nameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
 
   String? _nameError;
   String? _emailError;
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
+    _nameCtrl.dispose();
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
+    _confirmCtrl.dispose();
     super.dispose();
   }
 
@@ -39,130 +40,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return null;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Registro de usuario')),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Crea tu cuenta',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 24),
-
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Nombre de usuario',
-                      errorText: _nameError,
-                    ),
-                    validator: (_) => _nameError,
-                    onChanged: (v) async {
-                      if (v.trim().isEmpty) {
-                        setState(() => _nameError = 'Ingresa tu nombre');
-                      } else {
-                        final exists = await context
-                            .read<AuthProvider>()
-                            .usernameExists(v);
-                        setState(
-                          () =>
-                              _nameError =
-                                  exists ? 'Nombre ya registrado' : null,
-                        );
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: 'Correo electrónico',
-                      errorText: _emailError,
-                    ),
-                    validator: (_) => _emailError,
-                    onChanged: (v) async {
-                      if (!v.contains('@')) {
-                        setState(() => _emailError = 'Correo inválido');
-                      } else {
-                        final exists = await context
-                            .read<AuthProvider>()
-                            .emailExists(v);
-                        setState(
-                          () =>
-                              _emailError =
-                                  exists ? 'Correo ya registrado' : null,
-                        );
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  PasswordField(
-                    controller: _passwordController,
-                    validator: _passwordValidator,
-                  ),
-                  const SizedBox(height: 16),
-
-                  PasswordField(
-                    controller: _confirmPasswordController,
-                    label: 'Confirmar contraseña',
-                    validator:
-                        (v) =>
-                            v != _passwordController.text
-                                ? 'Las contraseñas no coinciden'
-                                : null,
-                  ),
-                  const SizedBox(height: 24),
-
-                  ElevatedButton(
-                    onPressed:
-                        (auth.isLoading ||
-                                _nameError != null ||
-                                _emailError != null)
-                            ? null
-                            : _handleRegister,
-                    child:
-                        auth.isLoading
-                            ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                            : const Text('Registrarse'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (auth.isLoading)
-            Container(
-              color: Colors.black45,
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
     final auth = context.read<AuthProvider>();
     final error = await auth.register(
-      _nameController.text.trim(),
-      _emailController.text.trim(),
-      _passwordController.text,
+      _nameCtrl.text.trim(),
+      _emailCtrl.text.trim(),
+      _passCtrl.text,
     );
     if (error != null) {
       ScaffoldMessenger.of(
@@ -177,5 +61,145 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       context.goNamed('login');
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    const maxWidth = 450.0;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Crear cuenta')),
+      body: Center(
+        child: Container(
+          width: maxWidth,
+          padding: const EdgeInsets.all(30),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    InputFormField(
+                      label: 'Nombre de usuario',
+                      icon: Icons.person_outline,
+                      controller: _nameCtrl,
+                      hint: 'Introduce tu nombre',
+                      obscure: false,
+                    ),
+                    if (_nameError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          _nameError!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                    InputFormField(
+                      label: 'Correo electrónico',
+                      icon: Icons.email_outlined,
+                      controller: _emailCtrl,
+                      hint: 'Introduce tu correo',
+                      obscure: false,
+                    ),
+                    if (_emailError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          _emailError!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                    PasswordField(
+                      controller: _passCtrl,
+                      validator: _passwordValidator,
+                    ),
+                    const SizedBox(height: 16),
+                    PasswordField(
+                      controller: _confirmCtrl,
+                      label: 'Confirmar contraseña',
+                      validator:
+                          (v) => v != _passCtrl.text ? 'No coinciden' : null,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed:
+                          auth.isLoading ||
+                                  _nameError != null ||
+                                  _emailError != null
+                              ? null
+                              : _handleRegister,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child:
+                          auth.isLoading
+                              ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                              : const Text('Registrarse'),
+                    ),
+                    const SizedBox(height: 10),
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: TextButton(
+                        onPressed: () => context.goNamed('login'),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 15,
+                          ),
+                          minimumSize: const Size(120, 0),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text(
+                          '¿Ya tienes cuenta? Inicia sesión',
+                          style: TextStyle(color: Color(0xFF2D79F3)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (auth.isLoading)
+                const Positioned.fill(
+                  child: ColoredBox(
+                    color: Colors.black45,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

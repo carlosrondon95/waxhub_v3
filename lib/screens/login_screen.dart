@@ -1,157 +1,202 @@
-// lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
-import '../widgets/password_field.dart';
+import '../widgets/input_form_field.dart';
+import '../widgets/google_signin_button.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _recoveryEmailController = TextEditingController();
-
-  bool _showRecoveryDialog = false;
+  final _emailCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
+  bool _rememberMe = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _recoveryEmailController.dispose();
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _resetPassword() async {
+    final auth = context.read<AuthProvider>();
+    final emailDialogCtrl = TextEditingController(text: _emailCtrl.text);
+
+    await showDialog<void>(
+      context: context,
+      useRootNavigator: true, // ← aquí
+      barrierDismissible: false, // opcional: evita tap fuera para cerrar
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Restablecer contraseña'),
+          content: TextField(
+            controller: emailDialogCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Correo electrónico',
+              hintText: 'Introduce tu email',
+            ),
+            keyboardType: TextInputType.emailAddress,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // 1) Enviar el reset
+                final error = await auth.sendPasswordReset(
+                  emailDialogCtrl.text.trim(),
+                );
+                // 2) Cerrar sólo el diálogo
+                Navigator.of(dialogContext).pop();
+                // 3) Mostrar SnackBar en la LoginScreen
+                final msg =
+                    error ??
+                    'Enlace de recuperación de contraseña enviado al mail.';
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(msg)));
+              },
+              child: const Text('Enviar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    const maxWidth = 450.0;
+    final auth = context.read<AuthProvider>();
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Iniciar sesión')),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 24),
-                TextField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Correo electrónico',
+      body: Center(
+        child: Container(
+          width: maxWidth,
+          padding: const EdgeInsets.all(30),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Email
+              InputFormField(
+                label: 'Correo electrónico',
+                icon: Icons.email_outlined,
+                controller: _emailCtrl,
+                hint: 'Introduce tu correo',
+              ),
+              const SizedBox(height: 10),
+
+              // Password
+              InputFormField(
+                label: 'Contraseña',
+                icon: Icons.lock_outline,
+                controller: _passCtrl,
+                hint: 'Introduce tu contraseña',
+                obscure: true,
+              ),
+              const SizedBox(height: 10),
+
+              // Recuérdame & Olvidaste contraseña
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _rememberMe,
+                        onChanged:
+                            (v) => setState(() => _rememberMe = v ?? false),
+                      ),
+                      const Text('Recuérdame'),
+                    ],
+                  ),
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: TextButton(
+                      onPressed: _resetPassword,
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        '¿Olvidaste tu contraseña?',
+                        style: TextStyle(color: Color(0xFF2D79F3)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Botón Entrar
+              ElevatedButton(
+                onPressed: () async {
+                  final err = await auth.signIn(
+                    _emailCtrl.text.trim(),
+                    _passCtrl.text,
+                  );
+                  if (err != null) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(err)));
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                const SizedBox(height: 16),
-                PasswordField(controller: _passwordController),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: auth.isLoading ? null : _handleSignIn,
-                  child: const Text('Iniciar sesión'),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: auth.isLoading ? null : _handleSignInWithGoogle,
-                  child: const Text('Iniciar sesión con Google'),
-                ),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed:
-                      auth.isLoading
-                          ? null
-                          : () => setState(() => _showRecoveryDialog = true),
-                  child: const Text('He olvidado mi contraseña'),
-                ),
-              ],
-            ),
-          ),
-          if (auth.isLoading)
-            Container(
-              color: Colors.black45,
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-        ],
-      ),
-      floatingActionButton:
-          _showRecoveryDialog ? _buildRecoveryDialog(context) : null,
-    );
-  }
+                child: const Text('Entrar'),
+              ),
+              const SizedBox(height: 10),
 
-  Future<void> _handleSignIn() async {
-    final auth = context.read<AuthProvider>();
-    final error = await auth.signIn(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-    );
-    if (error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
-    } else {
-      context.goNamed('home');
-    }
-  }
+              // Ir a registro
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: TextButton(
+                  onPressed: () => context.pushNamed('register'),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text(
+                    'Regístrate',
+                    style: TextStyle(color: Color(0xFF2D79F3)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
 
-  Future<void> _handleSignInWithGoogle() async {
-    final auth = context.read<AuthProvider>();
-    final error = await auth.signInWithGoogle();
-    if (error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
-    } else {
-      context.goNamed('home');
-    }
-  }
+              const Text('O con'),
+              const SizedBox(height: 10),
 
-  Widget _buildRecoveryDialog(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Recuperar contraseña'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Ingresa tu correo para recibir un enlace de restablecimiento.',
+              // Google Sign-In
+              const GoogleSignInButton(),
+            ],
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _recoveryEmailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'Correo electrónico'),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => setState(() => _showRecoveryDialog = false),
-          child: const Text('Cancelar'),
         ),
-        ElevatedButton(
-          onPressed: () async {
-            setState(() => _showRecoveryDialog = false);
-            final auth = context.read<AuthProvider>();
-            final error = await auth.sendPasswordReset(
-              _recoveryEmailController.text.trim(),
-            );
-            if (error != null) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(error)));
-            } else {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Enlace enviado.')));
-            }
-          },
-          child: const Text('Enviar'),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -1,90 +1,61 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:go_router/go_router.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({Key? key}) : super(key: key);
 
-  // Ancho máximo para los botones
-  static const double _buttonMaxWidth = 300.0;
+  @override
+  _WelcomeScreenState createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animController;
+  late final Animation<double> _fadeAnim;
+  late final Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeIn);
+    _animController.forward();
+
+    // Solo una vez: tras 5s, reemplaza con Login
+    _timer = Timer(const Duration(seconds: 5), () {
+      context.goNamed('login');
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    _animController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'WAXHUB',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(letterSpacing: 2),
-                ),
-                const SizedBox(height: 24),
-                Image.asset('assets/images/waxhub.png', height: 180),
-                const SizedBox(height: 40),
-                // Diseño según plataforma
-                if (kIsWeb)
-                  // Web: botones en fila con ancho limitado
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: _buttonMaxWidth),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () => context.pushNamed('login'),
-                            child: const Text('Iniciar Sesión'),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: _buttonMaxWidth),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: () => context.pushNamed('register'),
-                            child: const Text('Crear Cuenta'),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  // Móvil: botones apilados con ancho máximo
-                  Column(
-                    children: [
-                      ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: _buttonMaxWidth),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () => context.pushNamed('login'),
-                            child: const Text('Iniciar Sesión'),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: _buttonMaxWidth),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: () => context.pushNamed('register'),
-                            child: const Text('Crear Cuenta'),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
+      body: Center(
+        child: FadeTransition(
+          opacity: _fadeAnim,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'WAXHUB',
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineMedium?.copyWith(letterSpacing: 4),
+              ),
+              const SizedBox(height: 20),
+              Image.asset('assets/images/waxhub.png', height: 120),
+            ],
           ),
         ),
       ),
