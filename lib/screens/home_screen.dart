@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   void _goTo(BuildContext context, String route) => context.push(route);
 
@@ -95,12 +95,11 @@ class _IconLabel extends StatelessWidget {
   final double size;
   final VoidCallback onTap;
   const _IconLabel({
-    Key? key,
     required this.icon,
     required this.label,
     this.size = 40,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
