@@ -19,7 +19,7 @@ class HomeScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 12.0, bottom: 4.0),
             child: GestureDetector(
-              onTap: () => _goTo(context, '/opciones_usuario'),
+              onTap: () => _goTo(context, '/ajustes'),
               child: CircleAvatar(
                 backgroundColor: colors.secondaryContainer,
                 radius: 20,
