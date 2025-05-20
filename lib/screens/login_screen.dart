@@ -1,155 +1,185 @@
-// lib/screens/login_screen.dart
+// login_screen.dart
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-
-import '../providers/auth_provider.dart';
-import '../widgets/password_field.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // para icono de Google
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _recoveryEmailController = TextEditingController();
-
-  bool _showRecoveryDialog = false;
+  final _emailCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
+  bool _rememberMe = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _recoveryEmailController.dispose();
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    // ancho fijo del formulario
+    final maxWidth = 450.0;
     return Scaffold(
-      appBar: AppBar(title: const Text('Iniciar sesión')),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 24),
-                TextField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Correo electrónico',
+      body: Center(
+        child: Container(
+          width: maxWidth,
+          padding: const EdgeInsets.all(30),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildInputField(
+                label: 'Correo electrónico',
+                icon: Icons.email_outlined,
+                controller: _emailCtrl,
+                hint: 'Introduce tu correo',
+                obscure: false,
+              ),
+              const SizedBox(height: 10),
+              _buildInputField(
+                label: 'Contraseña',
+                icon: Icons.lock_outline,
+                controller: _passCtrl,
+                hint: 'Introduce tu contraseña',
+                obscure: true,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _rememberMe,
+                        onChanged: (v) => setState(() => _rememberMe = v!),
+                      ),
+                      const Text(
+                        'Recuérdame',
+                        style: TextStyle(fontWeight: FontWeight.w400),
+                      ),
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      /* olvido de contraseña */
+                    },
+                    child: const Text(
+                      '¿Olvidaste tu contraseña?',
+                      style: TextStyle(
+                        color: Color(0xFF2D79F3),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => /* lógica de login */ null,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                const SizedBox(height: 16),
-                PasswordField(controller: _passwordController),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: auth.isLoading ? null : _handleSignIn,
-                  child: const Text('Iniciar sesión'),
+                child: const Text('Entrar'),
+              ),
+              const SizedBox(height: 10),
+              const Text('¿No tienes cuenta?'),
+              GestureDetector(
+                onTap: () => context.pushNamed('register'),
+                child: const Text(
+                  'Regístrate',
+                  style: TextStyle(
+                    color: Color(0xFF2D79F3),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: auth.isLoading ? null : _handleSignInWithGoogle,
-                  child: const Text('Iniciar sesión con Google'),
+              ),
+              const SizedBox(height: 20),
+              const Text('O con'),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: () => /* login con Google */ null,
+                icon: const FaIcon(FontAwesomeIcons.google),
+                label: const Text('Google'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  side: const BorderSide(color: Color(0xFFededed)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed:
-                      auth.isLoading
-                          ? null
-                          : () => setState(() => _showRecoveryDialog = true),
-                  child: const Text('He olvidado mi contraseña'),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          if (auth.isLoading)
-            Container(
-              color: Colors.black45,
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-        ],
-      ),
-      floatingActionButton:
-          _showRecoveryDialog ? _buildRecoveryDialog(context) : null,
-    );
-  }
-
-  Future<void> _handleSignIn() async {
-    final auth = context.read<AuthProvider>();
-    final error = await auth.signIn(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-    );
-    if (error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
-    } else {
-      context.goNamed('home');
-    }
-  }
-
-  Future<void> _handleSignInWithGoogle() async {
-    final auth = context.read<AuthProvider>();
-    final error = await auth.signInWithGoogle();
-    if (error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
-    } else {
-      context.goNamed('home');
-    }
-  }
-
-  Widget _buildRecoveryDialog(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Recuperar contraseña'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Ingresa tu correo para recibir un enlace de restablecimiento.',
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _recoveryEmailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'Correo electrónico'),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => setState(() => _showRecoveryDialog = false),
-          child: const Text('Cancelar'),
         ),
-        ElevatedButton(
-          onPressed: () async {
-            setState(() => _showRecoveryDialog = false);
-            final auth = context.read<AuthProvider>();
-            final error = await auth.sendPasswordReset(
-              _recoveryEmailController.text.trim(),
-            );
-            if (error != null) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(error)));
-            } else {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Enlace enviado.')));
-            }
-          },
-          child: const Text('Enviar'),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required IconData icon,
+    required TextEditingController controller,
+    required String hint,
+    required bool obscure,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF151717),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Container(
+          height: 50,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color(0xFFecedec), width: 1.5),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: Colors.black54),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  obscureText: obscure,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: hint,
+                  ),
+                ),
+              ),
+              if (obscure)
+                GestureDetector(
+                  onTap: () {
+                    /* mostrar/ocultar contraseña */
+                  },
+                  child: const Icon(
+                    Icons.visibility,
+                    size: 20,
+                    color: Colors.black54,
+                  ),
+                ),
+            ],
+          ),
         ),
       ],
     );
