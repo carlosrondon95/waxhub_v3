@@ -36,6 +36,7 @@ dependencies:
   google_maps_flutter: ^2.2.0
   flutter_google_maps_webservices: ^1.1.1
   location: ^8.0.0
+  flutter_dotenv: ^5.2.1
 
   # Networking
   dio: ^5.0.0

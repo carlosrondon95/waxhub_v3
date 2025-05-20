@@ -1,30 +1,46 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:flutter_google_maps_webservices/places.dart' as g_places;
 
-/// Servicio ligero para consultar Google Places y obtener tiendas de vinilo.
+/// Servicio que consulta la Cloud Function `nearbyVinylStores`
+/// y devuelve las tiendas de vinilo cercanas como modelos de
+/// `flutter_google_maps_webservices`.
 class GooglePlacesService {
-  static const _apiKey = 'AIzaSyBpmV9gSDHG472GUmxC0e0JbMO4jjPQJGA';
+  // URL del proxy HTTPS (ajusta si cambias región/proyecto)
+  static const _proxyUrl =
+      'https://europe-west1-waxhub95.cloudfunctions.net/nearbyVinylStores';
 
-  final _places = g_places.GoogleMapsPlaces(apiKey: _apiKey);
-
-  /// Busca “vinyl record store” en un radio (m) alrededor de [lat,lng].
+  /// Busca “vinyl record store” cerca de [lat,lng] en un radio de [radius] m.
   Future<List<g_places.PlacesSearchResult>> buscarTiendas({
     required double lat,
     required double lng,
-    int radius = 50000, // 50 km
+    int radius = 10_000, // 10 km
   }) async {
-    final resp = await _places.searchNearbyWithRadius(
-      g_places.Location(lat: lat, lng: lng),
-      radius,
-      keyword: 'vinyl record store',
-    );
+    final uri = Uri.parse(_proxyUrl).replace(queryParameters: {
+      'lat': '$lat',
+      'lng': '$lng',
+      'radius': '$radius',
+    });
 
-    if (!resp.isOkay) {
+    final resp = await http.get(uri);
+    if (resp.statusCode != 200) {
       throw Exception(
-        'Places API error: ${resp.status} – ${resp.errorMessage}',
-      );
+          'Proxy error ${resp.statusCode}: ${resp.reasonPhrase}');
     }
 
-    // Filtra resultados que SÍ tienen geometry
-    return resp.results.where((r) => r.geometry?.location != null).toList();
+    final data = g_places.PlacesSearchResponse.fromJson(
+      json.decode(resp.body),
+    );
+
+    if (!data.isOkay) {
+      throw Exception(
+          'Places API error: ${data.status} – ${data.errorMessage}');
+    }
+
+    // Devolvemos solo resultados con coordenadas válidas
+    return (data.results ?? [])
+        .where((r) => r.geometry?.location != null)
+        .toList();
   }
 }

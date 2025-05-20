@@ -1,42 +1,48 @@
-// functions/index.js (GCF v2 – Node 22)
+/**
+ * functions/index.js
+ * -------------------------------------------
+ * Cloud Function HTTPS que actúa de proxy para la Places API
+ */
 
-import { onRequest } from 'firebase-functions/v2/https';
-import fetch from 'node-fetch';
-import cors from 'cors';
+const { onRequest } = require("firebase-functions/v2/https");
+const logger = require("firebase-functions/logger");
 
-const corsHandler = cors({ origin: true });
-
-export const imageProxy = onRequest(
-  { region: 'us-central1', timeoutSeconds: 10, memory: '256MiB' },
-  (req, res) => {
-    corsHandler(req, res, async () => {
-      try {
-        const url = req.query.url;
-        if (!url) {
-          res.status(400).send('Missing url param');
-          return;
-        }
-
-        const resp = await fetch(url.toString(), {
-          headers: { 'User-Agent': 'WaxHubProxy/1.0 (+https://waxhub.app)' },
-        });
-
-        if (!resp.ok) {
-          res.status(resp.status).send(`Upstream error: ${resp.statusText}`);
-          return;
-        }
-
-        // Copia tipo & longitud si existen
-        res.set('Content-Type', resp.headers.get('content-type') || 'image/jpeg');
-        const len = resp.headers.get('content-length');
-        if (len) res.set('Content-Length', len);
-
-        // Stream directo
-        resp.body.pipe(res);
-      } catch (e) {
-        console.error(e);
-        res.status(500).send('Proxy error');
+// ⬇️ Aquí empieza la definición -----------------------------
+exports.nearbyVinylStores = onRequest(
+  {
+    region: "europe-west1",   // ← tu región
+    cors: true,               // CORS abierto
+    timeoutSeconds: 15,
+    secrets: ["PLACES_KEY"],  // ← ¡IMPORTANTE! indica qué secreto usar
+  },
+  async (req, res) => {
+    try {
+      const { lat, lng, radius = 10000 } = req.query;
+      if (!lat || !lng) {
+        return res.status(400).json({ error: "coords missing (lat,lng)" });
       }
-    });
+
+      const apiKey = process.env.PLACES_KEY;   // ya disponible
+      if (!apiKey) {
+        logger.error("PLACES_KEY undefined");
+        return res.status(500).json({ error: "server misconfigured" });
+      }
+
+      const url =
+        "https://maps.googleapis.com/maps/api/place/nearbysearch/json" +
+        `?location=${lat},${lng}` +
+        "&keyword=vinyl+record+store" +
+        `&radius=${radius}` +
+        `&key=${apiKey}`;
+
+      const apiResp = await fetch(url);
+      const data = await apiResp.json();
+
+      res.json(data);
+    } catch (err) {
+      logger.error("nearbyVinylStores error", err);
+      res.status(500).json({ error: "internal", details: err.message });
+    }
   }
 );
+// ⬆️ Aquí termina la definición ------------------------------

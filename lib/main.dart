@@ -1,7 +1,6 @@
-// lib/main.dart
-
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:provider/provider.dart';
@@ -18,10 +17,19 @@ import 'providers/collection_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // ─── Cargar variables de entorno solo en móvil/desktop ──────────────
+  if (!kIsWeb) {
+    await dotenv.load(fileName: '.env');
+  }
+
+  // ─── Inicializar Firebase ────────────────────────────────────────────
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // ─── Mantener la sesión en Web ───────────────────────────────────────
   if (kIsWeb) {
-    // Persistencia LOCAL en web: mantiene sesión tras cerrar pestaña
     await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
   }
 

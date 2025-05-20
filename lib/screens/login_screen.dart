@@ -10,12 +10,12 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
   final _emailCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
+  final _passCtrl  = TextEditingController();
   bool _rememberMe = false;
 
   @override
@@ -25,45 +25,44 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  /// Diálogo para restablecer contraseña
   Future<void> _resetPassword() async {
     final auth = context.read<AuthProvider>();
     final emailDialogCtrl = TextEditingController(text: _emailCtrl.text);
 
     await showDialog<void>(
       context: context,
-      useRootNavigator: true, // ← aquí
-      barrierDismissible: false, // opcional: evita tap fuera para cerrar
-      builder: (dialogContext) {
+      useRootNavigator: true,
+      barrierDismissible: false,
+      builder: (dialogCtx) {
         return AlertDialog(
           title: const Text('Restablecer contraseña'),
           content: TextField(
             controller: emailDialogCtrl,
+            autofocus: true,
+            keyboardType: TextInputType.emailAddress,
             decoration: const InputDecoration(
               labelText: 'Correo electrónico',
               hintText: 'Introduce tu email',
             ),
-            keyboardType: TextInputType.emailAddress,
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
+              onPressed: () => Navigator.of(dialogCtx).pop(),
               child: const Text('Cancelar'),
             ),
             ElevatedButton(
               onPressed: () async {
-                // 1) Enviar el reset
                 final error = await auth.sendPasswordReset(
                   emailDialogCtrl.text.trim(),
                 );
-                // 2) Cerrar sólo el diálogo
-                Navigator.of(dialogContext).pop();
-                // 3) Mostrar SnackBar en la LoginScreen
-                final msg =
-                    error ??
-                    'Enlace de recuperación de contraseña enviado al mail.';
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(msg)));
+                Navigator.of(dialogCtx).pop(); // cierra diálogo
+
+                if (!mounted) return; // ← evita usar context desmontado
+                final msg = error ??
+                    'Enlace de recuperación enviado. Revisa tu correo.';
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(msg)));
               },
               child: const Text('Enviar'),
             ),
@@ -73,10 +72,28 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  /// Inicia sesión con correo/contraseña
+  Future<void> _submit() async {
+    final auth = context.read<AuthProvider>();
+
+    final err = await auth.signIn(
+      _emailCtrl.text.trim(),
+      _passCtrl.text,
+    );
+
+    if (!mounted) return;
+    if (err != null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(err)));
+    } else {
+      // Navega a Home y limpia pila
+      context.goNamed('home');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     const maxWidth = 450.0;
-    final auth = context.read<AuthProvider>();
 
     return Scaffold(
       body: Center(
@@ -97,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Email
+              // ─── Email ──────────────────────────────────────────────
               InputFormField(
                 label: 'Correo electrónico',
                 icon: Icons.email_outlined,
@@ -106,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Password
+              // ─── Contraseña ─────────────────────────────────────────
               InputFormField(
                 label: 'Contraseña',
                 icon: Icons.lock_outline,
@@ -116,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Recuérdame & Olvidaste contraseña
+              // ─── Recuérdame & Olvidaste contraseña ─────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -124,43 +141,30 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Checkbox(
                         value: _rememberMe,
-                        onChanged:
-                            (v) => setState(() => _rememberMe = v ?? false),
+                        onChanged: (v) =>
+                            setState(() => _rememberMe = v ?? false),
                       ),
                       const Text('Recuérdame'),
                     ],
                   ),
-                  MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: TextButton(
-                      onPressed: _resetPassword,
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text(
-                        '¿Olvidaste tu contraseña?',
-                        style: TextStyle(color: Color(0xFF2D79F3)),
-                      ),
+                  TextButton(
+                    onPressed: _resetPassword,
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text(
+                      '¿Olvidaste tu contraseña?',
+                      style: TextStyle(color: Color(0xFF2D79F3)),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
 
-              // Botón Entrar
+              // ─── Botón Entrar ──────────────────────────────────────
               ElevatedButton(
-                onPressed: () async {
-                  final err = await auth.signIn(
-                    _emailCtrl.text.trim(),
-                    _passCtrl.text,
-                  );
-                  if (err != null) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(err)));
-                  }
-                },
+                onPressed: _submit,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(
@@ -171,19 +175,16 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Ir a registro
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: TextButton(
-                  onPressed: () => context.pushNamed('register'),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text(
-                    'Regístrate',
-                    style: TextStyle(color: Color(0xFF2D79F3)),
-                  ),
+              // ─── Ir a Registro ─────────────────────────────────────
+              TextButton(
+                onPressed: () => context.pushNamed('register'),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  'Regístrate',
+                  style: TextStyle(color: Color(0xFF2D79F3)),
                 ),
               ),
               const SizedBox(height: 20),
@@ -191,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const Text('O con'),
               const SizedBox(height: 10),
 
-              // Google Sign-In
+              // ─── Google Sign-In ────────────────────────────────────
               const GoogleSignInButton(),
             ],
           ),
