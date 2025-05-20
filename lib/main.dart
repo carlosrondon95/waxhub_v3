@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:provider/provider.dart';
@@ -16,10 +17,19 @@ import 'providers/collection_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // ─── Cargar variables de entorno solo en móvil/desktop ──────────────
+  if (!kIsWeb) {
+    await dotenv.load(fileName: '.env');
+  }
+
+  // ─── Inicializar Firebase ────────────────────────────────────────────
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // ─── Mantener la sesión en Web ───────────────────────────────────────
   if (kIsWeb) {
-    // Persistencia LOCAL en web: mantiene sesión tras cerrar pestaña
     await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
   }
 
@@ -39,8 +49,8 @@ class MyApp extends StatelessWidget {
       ],
       child: Builder(
         builder: (context) {
-          // Escuchamos el AuthProvider (ChangeNotifier) para hacer refresh al router
-          final authProvider = Provider.of<AuthProvider>(context, listen: true);
+          // Escuchamos AuthProvider para refrescar el router al hacer login/logout
+          final authProvider = Provider.of<AuthProvider>(context);
 
           return ResponsiveBreakpoints.builder(
             breakpoints: const [
@@ -53,7 +63,6 @@ class MyApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               title: 'WaxHub',
               theme: AppTheme,
-              // Le pasamos el authProvider como refreshListenable
               routerConfig: AppRouter.router(authProvider),
               scrollBehavior: AppScrollBehavior(),
             ),

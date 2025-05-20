@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,7 +12,7 @@ import '../services/discogs_service.dart';
 import '../models/artist_result.dart';
 import '../models/release_result.dart';
 import '../models/vinyl_record.dart';
-import '../core/image_proxy.dart'; // 👈 helper para CORS
+import '../core/image_proxy.dart';
 
 class VinylProvider extends ChangeNotifier {
   /* ─── Form & controllers ─── */
@@ -73,7 +74,7 @@ class VinylProvider extends ChangeNotifier {
     yearController.text = detail.year ?? '';
     labelController.text = detail.label ?? '';
 
-    coverUrl = proxiedImage(detail.coverUrl); // 👈 usa helper
+    coverUrl = proxiedImage(detail.coverUrl);
 
     isLoading = false;
     notifyListeners();
@@ -89,7 +90,18 @@ class VinylProvider extends ChangeNotifier {
 
     try {
       final ref = _storage.ref('covers/${_uuid.v4()}.jpg');
-      await ref.putFile(File(picked.path));
+
+      if (kIsWeb) {
+        // Web: subir bytes en lugar de File
+        final bytes = await picked.readAsBytes();
+        await ref.putData(
+          bytes,
+          SettableMetadata(contentType: 'image/jpeg'),
+        );
+      } else {
+        await ref.putFile(File(picked.path));
+      }
+
       coverUrl = await ref.getDownloadURL();
     } finally {
       isLoading = false;

@@ -1,4 +1,3 @@
-// lib/screens/collection_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +9,7 @@ import '../widgets/collection_grid.dart';
 import '../widgets/collection_carousel.dart';
 
 class CollectionScreen extends StatelessWidget {
-  const CollectionScreen({super.key});
+  const CollectionScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,44 +36,40 @@ class CollectionScreen extends StatelessWidget {
 
             // Contenido o spinner
             Expanded(
-              child:
-                  collection.isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : Builder(
-                        builder: (_) {
-                          final items = collection.filteredRecords;
-                          switch (collection.viewMode) {
-                            case 'cuadricula':
-                              return CollectionGrid(
-                                records: items,
-                                onTap:
-                                    (r) => context.pushNamed(
-                                      'detalle_disco',
-                                      extra: r,
-                                    ),
-                              );
-                            case 'carrusel':
-                              return CollectionCarousel(records: items);
-                            case 'lista':
-                            default:
-                              return CollectionList(
-                                records: items,
-                                onTap:
-                                    (r) => context.pushNamed(
-                                      'detalle_disco',
-                                      extra: r,
-                                    ),
-                                onEdit:
-                                    (r) => context.pushNamed(
-                                      'editar_disco',
-                                      extra: r,
-                                    ),
-                                onDelete: collection.deleteRecord,
-                                onFavoriteToggle: collection.toggleFavorite,
-                              );
-                          }
-                        },
-                      ),
+              child: collection.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Builder(
+                      builder: (_) {
+                        final items = collection.filteredRecords;
+                        switch (collection.viewMode) {
+                          case 'cuadricula':
+                            return CollectionGrid(
+                              records: items,
+                              onTap: (r) => context.pushNamed(
+                                'detalle_disco',
+                                extra: r,
+                              ),
+                            );
+                          case 'carrusel':
+                            return CollectionCarousel(records: items);
+                          case 'lista':
+                          default:
+                            return CollectionList(
+                              records: items,
+                              onTap: (r) => context.pushNamed(
+                                'detalle_disco',
+                                extra: r,
+                              ),
+                              onEdit: (r) => context.pushNamed(
+                                'editar_disco',
+                                extra: r,
+                              ),
+                              onDelete: collection.deleteRecord,
+                              onFavoriteToggle: collection.toggleFavorite,
+                            );
+                        }
+                      },
+                    ),
             ),
           ],
         ),

@@ -31,34 +31,35 @@ class VinylRecord {
   });
 
   Map<String, dynamic> toMap() => {
-    'userId': userId,
-    'referencia': referencia,
-    'artista': artista,
-    'titulo': titulo,
-    'genero': genero,
-    'anio': anio,
-    'sello': sello,
-    'lugarCompra': lugarCompra,
-    'descripcion': descripcion,
-    'portadaUrl': portadaUrl,
-    'favorito': favorito,
-    'timestamp': FieldValue.serverTimestamp(),
-  };
+        'userId': userId,
+        'referencia': referencia,
+        'artista': artista,
+        'titulo': titulo,
+        'genero': genero,
+        'anio': anio,
+        'sello': sello,
+        'lugarCompra': lugarCompra,
+        'descripcion': descripcion,
+        'portadaUrl': portadaUrl,
+        'favorito': favorito,
+        'timestamp': FieldValue.serverTimestamp(),
+      };
 
   factory VinylRecord.fromDoc(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+
     return VinylRecord(
       id: doc.id,
-      userId: data['userId'] as String,
-      referencia: data['referencia'] as String,
-      artista: data['artista'] as String,
-      titulo: data['titulo'] as String,
-      genero: data['genero'] as String,
-      anio: data['anio'] as String,
-      sello: data['sello'] as String,
+      userId: data['userId'] as String? ?? '',
+      referencia: data['referencia'] as String? ?? '',
+      artista: data['artista'] as String? ?? '',
+      titulo: data['titulo'] as String? ?? '',
+      genero: data['genero'] as String? ?? '',
+      anio: data['anio'] as String? ?? '',
+      sello: data['sello'] as String? ?? '',
       lugarCompra: data['lugarCompra'] as String? ?? '',
       descripcion: data['descripcion'] as String? ?? '',
-      portadaUrl: data['portadaUrl'] as String,
+      portadaUrl: data['portadaUrl'] as String? ?? '',
       favorito: data['favorito'] as bool? ?? false,
     );
   }
