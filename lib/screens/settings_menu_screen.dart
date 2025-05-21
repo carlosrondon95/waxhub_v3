@@ -1,4 +1,3 @@
-// lib/screens/settings/settings_menu_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../services/user_service.dart';
@@ -9,6 +8,7 @@ class SettingsMenuScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const maxWidth = 450.0;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Ajustes')),
       body: Center(
@@ -16,7 +16,7 @@ class SettingsMenuScreen extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: maxWidth),
           margin: const EdgeInsets.symmetric(vertical: 40),
           padding: const EdgeInsets.all(30),
-          decoration: _box,
+          decoration: _box(context),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -26,37 +26,26 @@ class SettingsMenuScreen extends StatelessWidget {
                 'Información de la cuenta',
                 () => context.pushNamed('cuenta'),
               ),
-              _tile(context, Icons.palette_outlined, 'Tema y apariencia', () {
-                /* pendiente */
-              }),
-              _tile(context, Icons.language_outlined, 'Idioma', () {
-                /* pendiente */
-              }),
+              _tile(
+                context,
+                Icons.palette_outlined,
+                'Tema y apariencia',
+                () => context.pushNamed('apariencia'),
+              ),
+              _tile(context, Icons.language_outlined, 'Idioma', () {}),
               _tile(
                 context,
                 Icons.notifications_outlined,
                 'Notificaciones',
-                () {
-                  /* pendiente */
-                },
+                () {},
               ),
-              /*_tile(
-                context,
-                Icons.lock_outline,
-                'Privacidad',
-                () {/* pendiente */},
-              ),*/
               _tile(
                 context,
                 Icons.upload_file_outlined,
                 'Exportar / Importar',
-                () {
-                  /* pendiente */
-                },
+                () {},
               ),
-              _tile(context, Icons.info_outline, 'Acerca de', () {
-                /* pendiente */
-              }),
+              _tile(context, Icons.info_outline, 'Acerca de', () {}),
               const Divider(height: 32),
               _tile(context, Icons.logout, 'Cerrar sesión', () async {
                 await UserService().logout();
@@ -84,11 +73,16 @@ class SettingsMenuScreen extends StatelessWidget {
     );
   }
 
-  static const _box = BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.all(Radius.circular(20)),
+  // Nota: dinámico según el tema
+  BoxDecoration _box(BuildContext context) => BoxDecoration(
+    color: Theme.of(context).cardColor,
+    borderRadius: const BorderRadius.all(Radius.circular(20)),
     boxShadow: [
-      BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
+      BoxShadow(
+        color: Colors.black.withOpacity(0.25),
+        blurRadius: 10,
+        offset: const Offset(0, 4),
+      ),
     ],
   );
 }

@@ -1,9 +1,9 @@
 // lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:go_router/go_router.dart';
 
 import 'core/theme.dart';
 import 'core/app_scroll_behavior.dart';
@@ -13,20 +13,18 @@ import 'routes/app_router.dart';
 import 'providers/auth_provider.dart';
 import 'providers/vinyl_provider.dart';
 import 'providers/collection_provider.dart';
+import 'services/theme_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Inicializa Firebase en todas las plataformas
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // En Web, persiste la sesión tras cerrar la pestaña
-
-  runApp(const MyApp());
+  runApp(const Bootstrap());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+/* ─────────────────────────────  PROVEEDORES  ───────────────────────────── */
+
+class Bootstrap extends StatelessWidget {
+  const Bootstrap({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,26 +33,52 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => VinylProvider()),
         ChangeNotifierProvider(create: (_) => CollectionProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeService()),
       ],
-      child: Builder(
-        builder: (context) {
-          final auth = context.watch<AuthProvider>();
-          return ResponsiveBreakpoints.builder(
-            breakpoints: const [
-              Breakpoint(start: 0, end: 450, name: MOBILE),
-              Breakpoint(start: 451, end: 800, name: TABLET),
-              Breakpoint(start: 801, end: 1200, name: DESKTOP),
-              Breakpoint(start: 1201, end: double.infinity, name: '4K'),
-            ],
-            child: MaterialApp.router(
-              debugShowCheckedModeBanner: false,
-              title: 'WaxHub',
-              theme: AppTheme,
-              routerConfig: AppRouter.router(auth),
-              scrollBehavior: AppScrollBehavior(),
-            ),
-          );
-        },
+      child: const MyApp(),
+    );
+  }
+}
+
+/* ─────────────────────────────  APP  ───────────────────────────── */
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final GoRouter _router; // se inicializa una sola vez
+
+  @override
+  void initState() {
+    super.initState();
+    // Obtenemos el AuthProvider sin suscribirnos (read).
+    final auth = context.read<AuthProvider>();
+    _router = AppRouter.router(auth);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeService = context.watch<ThemeService>();
+
+    return ResponsiveBreakpoints.builder(
+      breakpoints: const [
+        Breakpoint(start: 0, end: 450, name: MOBILE),
+        Breakpoint(start: 451, end: 800, name: TABLET),
+        Breakpoint(start: 801, end: 1200, name: DESKTOP),
+        Breakpoint(start: 1201, end: double.infinity, name: '4K'),
+      ],
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'WaxHub',
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: themeService.mode,
+        routerConfig: _router,
+        scrollBehavior: AppScrollBehavior(),
       ),
     );
   }

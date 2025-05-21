@@ -72,7 +72,7 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
           ],
         ),
         IOSUiSettings(title: 'Recortar', aspectRatioLockEnabled: true),
-        WebUiSettings(context: context), // versión web
+        WebUiSettings(context: context),
       ],
     );
     if (cropped == null) return;
@@ -178,13 +178,15 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
   @override
   Widget build(BuildContext context) {
     const maxWidth = 450.0;
+
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Información de la cuenta')),
       body: Center(
         child: Container(
-          width: maxWidth,
+          constraints: const BoxConstraints(maxWidth: maxWidth),
           padding: const EdgeInsets.all(30),
-          decoration: _box,
+          decoration: _box(context),
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -204,32 +206,22 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
                           : null,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  _name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                Text(_name, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: _pickAvatar,
                   style: ElevatedButton.styleFrom(
-                    // ↑ más aire a derecha-izquierda y ligeramente arriba-abajo
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
                       vertical: 12,
                     ),
-                    minimumSize: const Size.fromHeight(
-                      40,
-                    ), // mantiene altura mínima cómoda
+                    minimumSize: const Size.fromHeight(40),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   child: const Text('Cambiar foto'),
                 ),
-
                 if (_selected != null) ...[
                   const SizedBox(height: 4),
                   ElevatedButton(
@@ -263,7 +255,7 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
                 ElevatedButton(
                   onPressed: _confirmDelete,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                    backgroundColor: Colors.redAccent,
                     minimumSize: const Size.fromHeight(50),
                   ),
                   child: const Text('Eliminar cuenta'),
@@ -276,11 +268,16 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
     );
   }
 
-  static const _box = BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.all(Radius.circular(20)),
+  /* ---------- Decoración dinámica según tema ---------- */
+  BoxDecoration _box(BuildContext context) => BoxDecoration(
+    color: Theme.of(context).cardColor,
+    borderRadius: const BorderRadius.all(Radius.circular(20)),
     boxShadow: [
-      BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
+      BoxShadow(
+        color: Colors.black.withOpacity(0.25),
+        blurRadius: 10,
+        offset: const Offset(0, 4),
+      ),
     ],
   );
 }
