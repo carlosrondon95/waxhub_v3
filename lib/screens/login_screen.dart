@@ -15,7 +15,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _emailCtrl = TextEditingController();
-  final _passCtrl  = TextEditingController();
+  final _passCtrl = TextEditingController();
   bool _rememberMe = false;
 
   @override
@@ -59,10 +59,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 Navigator.of(dialogCtx).pop(); // cierra diálogo
 
                 if (!mounted) return; // ← evita usar context desmontado
-                final msg = error ??
+                final msg =
+                    error ??
                     'Enlace de recuperación enviado. Revisa tu correo.';
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(msg)));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(msg)));
               },
               child: const Text('Enviar'),
             ),
@@ -76,15 +78,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _submit() async {
     final auth = context.read<AuthProvider>();
 
-    final err = await auth.signIn(
-      _emailCtrl.text.trim(),
-      _passCtrl.text,
-    );
+    final err = await auth.signIn(_emailCtrl.text.trim(), _passCtrl.text);
 
     if (!mounted) return;
     if (err != null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(err)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
     } else {
       // Navega a Home y limpia pila
       context.goNamed('home');
@@ -141,8 +139,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Checkbox(
                         value: _rememberMe,
-                        onChanged: (v) =>
-                            setState(() => _rememberMe = v ?? false),
+                        onChanged:
+                            (v) => setState(() => _rememberMe = v ?? false),
                       ),
                       const Text('Recuérdame'),
                     ],
@@ -189,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 20),
 
-              const Text('O con'),
+              const Text('Inicia sesión con Google'),
               const SizedBox(height: 10),
 
               // ─── Google Sign-In ────────────────────────────────────

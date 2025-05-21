@@ -53,8 +53,10 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
   /* ---------- Avatar ---------- */
   Future<void> _pickAvatar() async {
     final picker = ImagePicker();
-    final xFile =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    final xFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
     if (xFile == null) return;
 
     final cropped = await ImageCropper().cropImage(
@@ -69,10 +71,7 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
             CropAspectRatioPreset.original,
           ],
         ),
-        IOSUiSettings(
-          title: 'Recortar',
-          aspectRatioLockEnabled: true,
-        ),
+        IOSUiSettings(title: 'Recortar', aspectRatioLockEnabled: true),
         WebUiSettings(context: context), // versión web
       ],
     );
@@ -92,12 +91,14 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
         _selected = null;
         _savingAvatar = false;
       });
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Avatar actualizado')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Avatar actualizado')));
     } catch (e) {
       setState(() => _savingAvatar = false);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -105,14 +106,23 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
   Future<void> _confirmDelete() async {
     final sure = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirmar eliminación'),
-        content: const Text('¿Estás seguro de que deseas eliminar tu cuenta?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('No')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Sí')),
-        ],
-      ),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Confirmar eliminación'),
+            content: const Text(
+              '¿Estás seguro de que deseas eliminar tu cuenta?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Sí'),
+              ),
+            ],
+          ),
     );
     if (sure != true) return;
 
@@ -130,15 +140,22 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
             keyboardType: TextInputType.number,
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, null), child: const Text('Cancelar')),
-            TextButton(onPressed: () => Navigator.pop(ctx, input), child: const Text('Enviar')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, null),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, input),
+              child: const Text('Enviar'),
+            ),
           ],
         );
       },
     );
     if (answer == null || int.tryParse(answer) != a + b) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Captcha incorrecto')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Captcha incorrecto')));
       return;
     }
 
@@ -146,12 +163,14 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
       await _profileSvc.deleteAccount();
       if (mounted) {
         Navigator.of(context).popUntil((r) => r.isFirst);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Cuenta eliminada')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Cuenta eliminada')));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -172,34 +191,57 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
                 /* Avatar + nombre */
                 CircleAvatar(
                   radius: 60,
-                  backgroundImage: _selected != null
-                      ? FileImage(_selected!)
-                      : (_avatarUrl != null
-                          ? NetworkImage(_avatarUrl!)
-                          : null) as ImageProvider<Object>?,
-                  child: _selected == null && _avatarUrl == null
-                      ? const Icon(Icons.person, size: 60)
-                      : null,
+                  backgroundImage:
+                      _selected != null
+                          ? FileImage(_selected!)
+                          : (_avatarUrl != null
+                                  ? NetworkImage(_avatarUrl!)
+                                  : null)
+                              as ImageProvider<Object>?,
+                  child:
+                      _selected == null && _avatarUrl == null
+                          ? const Icon(Icons.person, size: 60)
+                          : null,
                 ),
                 const SizedBox(height: 8),
-                Text(_name,
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w600)),
+                Text(
+                  _name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 12),
                 ElevatedButton(
-                    onPressed: _pickAvatar,
-                    child: const Text('Cambiar foto')),
+                  onPressed: _pickAvatar,
+                  style: ElevatedButton.styleFrom(
+                    // ↑ más aire a derecha-izquierda y ligeramente arriba-abajo
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    minimumSize: const Size.fromHeight(
+                      40,
+                    ), // mantiene altura mínima cómoda
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Cambiar foto'),
+                ),
+
                 if (_selected != null) ...[
                   const SizedBox(height: 4),
                   ElevatedButton(
                     onPressed: _savingAvatar ? null : _saveAvatar,
-                    child: _savingAvatar
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Guardar foto'),
+                    child:
+                        _savingAvatar
+                            ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Text('Guardar foto'),
                   ),
                   const SizedBox(height: 20),
                 ] else

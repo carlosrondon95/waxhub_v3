@@ -9,24 +9,24 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0, bottom: 4.0),
-            child: GestureDetector(
-              onTap: () => _goTo(context, '/ajustes'),
-              child: CircleAvatar(
-                backgroundColor: colors.secondaryContainer,
-                radius: 20,
-                child: Icon(Icons.person, size: 24, color: colors.primary),
-              ),
-            ),
-          ),
+          // Icono de Opciones ocultado temporalmente
+          // Padding(
+          //   padding: const EdgeInsets.only(right: 12.0, bottom: 4.0),
+          //   child: GestureDetector(
+          //     onTap: () => _goTo(context, '/ajustes'),
+          //     child: CircleAvatar(
+          //       backgroundColor: colors.secondaryContainer,
+          //       radius: 20,
+          //       child: Icon(Icons.person, size: 24, color: colors.primary),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
       body: SafeArea(
@@ -43,7 +43,7 @@ class HomeScreen extends StatelessWidget {
                     Expanded(
                       child: _IconLabel(
                         icon: Icons.add,
-                        label: 'Añadir\nDisco',
+                        label: 'Añadir disco',
                         size: 42,
                         onTap: () => _goTo(context, '/nuevo_disco'),
                       ),
@@ -65,19 +65,28 @@ class HomeScreen extends StatelessWidget {
                     Expanded(
                       child: _IconLabel(
                         icon: Icons.map,
-                        label: 'Mapa\nde Tiendas',
+                        label: 'Mapa de Tiendas',
                         size: 42,
                         onTap: () => _goTo(context, '/mapa_tiendas'),
                       ),
                     ),
                     Expanded(
                       child: _IconLabel(
-                        icon: Icons.group,
-                        label: 'Comunidad',
+                        icon: Icons.settings,
+                        label: 'Opciones',
                         size: 42,
-                        onTap: () => _goTo(context, '/comunidad'),
+                        onTap: () => _goTo(context, '/ajustes'),
                       ),
                     ),
+                    // Comentado: Comunidad (implementación futura)
+                    // Expanded(
+                    //   child: _IconLabel(
+                    //     icon: Icons.group,
+                    //     label: 'Comunidad',
+                    //     size: 42,
+                    //     onTap: () => _goTo(context, '/comunidad'),
+                    //   ),
+                    // ),
                   ],
                 ),
               ],
@@ -108,6 +117,7 @@ class _IconLabel extends StatelessWidget {
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, size: size, color: colors.primary),
           const SizedBox(height: 8),
