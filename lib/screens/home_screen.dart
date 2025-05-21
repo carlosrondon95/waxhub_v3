@@ -14,37 +14,26 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
-        actions: [
-          // Icono de Opciones ocultado temporalmente
-          // Padding(
-          //   padding: const EdgeInsets.only(right: 12.0, bottom: 4.0),
-          //   child: GestureDetector(
-          //     onTap: () => _goTo(context, '/ajustes'),
-          //     child: CircleAvatar(
-          //       backgroundColor: colors.secondaryContainer,
-          //       radius: 20,
-          //       child: Icon(Icons.person, size: 24, color: colors.primary),
-          //     ),
-          //   ),
-          // ),
-        ],
       ),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: Align(
+          alignment: const Alignment(0, -0.4), // Ajusta la posición vertical
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Image.asset('assets/images/waxhub.png', height: 150),
-                const SizedBox(height: 32),
+                // Fila superior: Añadir disco & Colección
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: _IconLabel(
                         icon: Icons.add,
                         label: 'Añadir disco',
-                        size: 42,
                         onTap: () => _goTo(context, '/nuevo_disco'),
                       ),
                     ),
@@ -52,21 +41,23 @@ class HomeScreen extends StatelessWidget {
                       child: _IconLabel(
                         icon: Icons.collections,
                         label: 'Colección',
-                        size: 42,
                         onTap: () => _goTo(context, '/coleccion'),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+                // Centro: Logo
+                Image.asset('assets/images/waxhub.png', height: 150),
+                const SizedBox(height: 16),
+                // Fila inferior: Mapa de Tiendas & Opciones
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: _IconLabel(
                         icon: Icons.map,
                         label: 'Mapa de Tiendas',
-                        size: 42,
                         onTap: () => _goTo(context, '/mapa_tiendas'),
                       ),
                     ),
@@ -74,19 +65,9 @@ class HomeScreen extends StatelessWidget {
                       child: _IconLabel(
                         icon: Icons.settings,
                         label: 'Opciones',
-                        size: 42,
                         onTap: () => _goTo(context, '/ajustes'),
                       ),
                     ),
-                    // Comentado: Comunidad (implementación futura)
-                    // Expanded(
-                    //   child: _IconLabel(
-                    //     icon: Icons.group,
-                    //     label: 'Comunidad',
-                    //     size: 42,
-                    //     onTap: () => _goTo(context, '/comunidad'),
-                    //   ),
-                    // ),
                   ],
                 ),
               ],
@@ -103,10 +84,11 @@ class _IconLabel extends StatelessWidget {
   final String label;
   final double size;
   final VoidCallback onTap;
+
   const _IconLabel({
     required this.icon,
     required this.label,
-    this.size = 40,
+    this.size = 42,
     required this.onTap,
   });
 

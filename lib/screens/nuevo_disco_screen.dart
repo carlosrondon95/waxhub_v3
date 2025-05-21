@@ -1,4 +1,3 @@
-// lib/screens/nuevo_disco_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,10 +13,7 @@ class NuevoDiscoScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Añadir disco')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(key: vinyl.formKey, child: const NuevoDiscoForm()),
-      ),
+      body: Form(key: vinyl.formKey, child: const NuevoDiscoForm()),
     );
   }
 }

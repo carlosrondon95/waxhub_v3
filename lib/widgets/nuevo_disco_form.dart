@@ -1,4 +1,3 @@
-// lib/widgets/nuevo_disco_form.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:provider/provider.dart';
@@ -18,175 +17,189 @@ class NuevoDiscoForm extends StatelessWidget {
     final bp = ResponsiveBreakpoints.of(context);
     final isDesktop = bp.largerThan(TABLET);
 
-    // Limita el ancho máx. y aplica padding homogéneo
     return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 600),
-        child: ListView(
-          padding: const EdgeInsets.all(24),
-          children: [
-            // ------------- Línea 1: Artista + Título -------------
-            ResponsiveRowColumn(
-              layout:
-                  isDesktop
-                      ? ResponsiveRowColumnType.ROW
-                      : ResponsiveRowColumnType.COLUMN,
-              columnSpacing: 12,
-              rowSpacing: 12,
-              children: [
-                ResponsiveRowColumnItem(
-                  rowFlex: 1,
-                  child: _ArtistField(vinyl: vinyl),
-                ),
-                ResponsiveRowColumnItem(
-                  rowFlex: 1,
-                  child: _TitleField(vinyl: vinyl),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // ------------- Línea 2: Género + Año -------------
-            ResponsiveRowColumn(
-              layout:
-                  isDesktop
-                      ? ResponsiveRowColumnType.ROW
-                      : ResponsiveRowColumnType.COLUMN,
-              columnSpacing: 12,
-              rowSpacing: 12,
-              children: [
-                ResponsiveRowColumnItem(
-                  rowFlex: 1,
-                  child: TextFormField(
-                    controller: vinyl.genreController,
-                    decoration: const InputDecoration(labelText: 'Género'),
-                    validator: _required,
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: ListView(
+            padding: const EdgeInsets.all(24),
+            children: [
+              // —— Línea 1: Artista + Título ——
+              ResponsiveRowColumn(
+                layout:
+                    isDesktop
+                        ? ResponsiveRowColumnType.ROW
+                        : ResponsiveRowColumnType.COLUMN,
+                columnSpacing: 12,
+                rowSpacing: 12,
+                children: [
+                  ResponsiveRowColumnItem(
+                    rowFlex: 1,
+                    child: _ArtistField(vinyl: vinyl),
                   ),
-                ),
-                ResponsiveRowColumnItem(
-                  rowFlex: 1,
-                  child: TextFormField(
-                    controller: vinyl.yearController,
-                    decoration: const InputDecoration(labelText: 'Año'),
-                    keyboardType: TextInputType.number,
-                    validator: _required,
+                  ResponsiveRowColumnItem(
+                    rowFlex: 1,
+                    child: _TitleField(vinyl: vinyl),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // ------------- Línea 3: Sello + Compra -------------
-            ResponsiveRowColumn(
-              layout:
-                  isDesktop
-                      ? ResponsiveRowColumnType.ROW
-                      : ResponsiveRowColumnType.COLUMN,
-              columnSpacing: 12,
-              rowSpacing: 12,
-              children: [
-                ResponsiveRowColumnItem(
-                  rowFlex: 1,
-                  child: TextFormField(
-                    controller: vinyl.labelController,
-                    decoration: const InputDecoration(labelText: 'Sello'),
-                    validator: _required,
-                  ),
-                ),
-                ResponsiveRowColumnItem(
-                  rowFlex: 1,
-                  child: TextFormField(
-                    controller: vinyl.buyController,
-                    decoration: const InputDecoration(
-                      labelText: 'Lugar de compra',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // ------------- Descripción -------------
-            TextFormField(
-              controller: vinyl.descController,
-              decoration: const InputDecoration(labelText: 'Descripción'),
-              maxLines: null,
-            ),
-            const SizedBox(height: 24),
-
-            // ------------- Portada -------------
-            Column(
-              children: [
-                if (vinyl.coverUrl != null && vinyl.coverUrl!.isNotEmpty)
-                  Image.network(
-                    proxiedImage(vinyl.coverUrl),
-                    height: 150,
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (_, __, ___) =>
-                            const Icon(Icons.broken_image, size: 80),
-                  )
-                else
-                  Container(
-                    height: 150,
-                    width: double.infinity,
-                    color: Colors.grey[200],
-                    child: const Center(child: Text('Sin portada')),
-                  ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: vinyl.isLoading ? null : vinyl.pickCoverImage,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ), // ↑ más aire
-                    minimumSize: const Size.fromHeight(
-                      40,
-                    ), // altura mínima cómoda
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text('Elegir portada manualmente'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // ------------- Guardar -------------
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed:
-                    vinyl.isLoading
-                        ? null
-                        : () async {
-                          final ok = await vinyl.saveRecord();
-                          if (ok) Navigator.of(context).pop();
-                        },
-                child:
-                    vinyl.isLoading
-                        ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                        : const Text('Guardar disco'),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+
+              // —— Línea 2: Género + Año ——
+              ResponsiveRowColumn(
+                layout:
+                    isDesktop
+                        ? ResponsiveRowColumnType.ROW
+                        : ResponsiveRowColumnType.COLUMN,
+                columnSpacing: 12,
+                rowSpacing: 12,
+                children: [
+                  ResponsiveRowColumnItem(
+                    rowFlex: 1,
+                    child: TextFormField(
+                      controller: vinyl.genreController,
+                      decoration: const InputDecoration(
+                        labelText: 'Género',
+                        prefixIcon: Icon(Icons.music_note),
+                      ),
+                      validator: _required,
+                    ),
+                  ),
+                  ResponsiveRowColumnItem(
+                    rowFlex: 1,
+                    child: TextFormField(
+                      controller: vinyl.yearController,
+                      decoration: const InputDecoration(
+                        labelText: 'Año',
+                        prefixIcon: Icon(Icons.calendar_today),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: _required,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // —— Línea 3: Sello + Procedencia ——
+              ResponsiveRowColumn(
+                layout:
+                    isDesktop
+                        ? ResponsiveRowColumnType.ROW
+                        : ResponsiveRowColumnType.COLUMN,
+                columnSpacing: 12,
+                rowSpacing: 12,
+                children: [
+                  ResponsiveRowColumnItem(
+                    rowFlex: 1,
+                    child: TextFormField(
+                      controller: vinyl.labelController,
+                      decoration: const InputDecoration(
+                        labelText: 'Sello',
+                        prefixIcon: Icon(Icons.library_music),
+                      ),
+                      validator: _required,
+                    ),
+                  ),
+                  ResponsiveRowColumnItem(
+                    rowFlex: 1,
+                    child: TextFormField(
+                      controller: vinyl.buyController,
+                      decoration: const InputDecoration(
+                        labelText: 'Procedencia', // antes: Cómo llegó a ti
+                        prefixIcon: Icon(Icons.card_giftcard),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // —— Descripción ——
+              TextFormField(
+                controller: vinyl.descController,
+                decoration: const InputDecoration(
+                  labelText: 'Descripción',
+                  prefixIcon: Icon(Icons.description),
+                ),
+                maxLines: null,
+              ),
+              const SizedBox(height: 24),
+
+              // —— Portada ——
+              Column(
+                children: [
+                  if (vinyl.coverUrl != null && vinyl.coverUrl!.isNotEmpty)
+                    Image.network(
+                      proxiedImage(vinyl.coverUrl),
+                      height: 150,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (_, __, ___) =>
+                              const Icon(Icons.broken_image, size: 80),
+                    )
+                  else
+                    Container(
+                      height: 150,
+                      width: double.infinity,
+                      color: Colors.grey[200],
+                      child: const Center(child: Text('Sin portada')),
+                    ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: vinyl.isLoading ? null : vinyl.pickCoverImage,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      minimumSize: const Size.fromHeight(40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text('Elegir portada manualmente'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // —— Guardar ——
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed:
+                      vinyl.isLoading
+                          ? null
+                          : () async {
+                            final ok = await vinyl.saveRecord();
+                            if (ok) Navigator.of(context).pop();
+                          },
+                  child:
+                      vinyl.isLoading
+                          ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : const Text('Guardar disco'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // ------ validadores y campos auxiliares ------
-
+  // —— Validación genérica ——
   String? _required(String? v) =>
       (v == null || v.isEmpty) ? 'Campo requerido' : null;
 }
 
+/* Campos con TypeAhead mantienen la misma decoración con iconos */
 class _ArtistField extends StatelessWidget {
   final VinylProvider vinyl;
   const _ArtistField({required this.vinyl});
@@ -198,7 +211,10 @@ class _ArtistField extends StatelessWidget {
           (ctx, ctrl, node) => TextFormField(
             controller: ctrl,
             focusNode: node,
-            decoration: const InputDecoration(labelText: 'Artista'),
+            decoration: const InputDecoration(
+              labelText: 'Artista',
+              prefixIcon: Icon(Icons.person),
+            ),
             validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
           ),
       suggestionsCallback: (q) => q.length < 2 ? [] : vinyl.searchArtists(q),
@@ -222,7 +238,10 @@ class _TitleField extends StatelessWidget {
     if (vinyl.selectedArtist == null) {
       return TextFormField(
         controller: vinyl.titleController,
-        decoration: const InputDecoration(labelText: 'Título'),
+        decoration: const InputDecoration(
+          labelText: 'Título',
+          prefixIcon: Icon(Icons.album),
+        ),
         enabled: false,
       );
     }
@@ -232,7 +251,10 @@ class _TitleField extends StatelessWidget {
           (ctx, ctrl, node) => TextFormField(
             controller: ctrl,
             focusNode: node,
-            decoration: const InputDecoration(labelText: 'Título'),
+            decoration: const InputDecoration(
+              labelText: 'Título',
+              prefixIcon: Icon(Icons.album),
+            ),
             validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
           ),
       suggestionsCallback: (q) => q.isEmpty ? [] : vinyl.searchReleases(q),
