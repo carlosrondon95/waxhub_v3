@@ -13,8 +13,8 @@ import '../screens/map_screen.dart';
 
 /* Ajustes */
 import '../screens/settings_menu_screen.dart';
-import '../screens/appearance_settings_screen.dart';
 import '../screens/information_account_screen.dart';
+import '../screens/about_screen.dart';
 
 /* Vinilos */
 import '../screens/detalle_disco_screen.dart';
@@ -51,13 +51,11 @@ class AppRouter {
           name: 'register',
           pageBuilder: (_, s) => _fadePage(const RegisterScreen(), s),
         ),
-
         GoRoute(
           path: '/home',
           name: 'home',
           pageBuilder: (_, s) => _fadePage(const HomeScreen(), s),
         ),
-
         GoRoute(
           path: '/nuevo_disco',
           name: 'nuevo_disco',
@@ -102,9 +100,9 @@ class AppRouter {
           pageBuilder: (_, s) => _fadePage(const InformationAccountScreen(), s),
         ),
         GoRoute(
-          path: '/apariencia',
-          name: 'apariencia',
-          pageBuilder: (_, s) => _fadePage(const AppearanceSettingsScreen(), s),
+          path: '/acerca',
+          name: 'acerca',
+          pageBuilder: (_, s) => _fadePage(const AboutScreen(), s),
         ),
       ],
       errorPageBuilder: (_, __) => MaterialPage(child: const WelcomeScreen()),
