@@ -1,3 +1,4 @@
+// lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -25,23 +26,24 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  /// Diálogo para restablecer contraseña
   Future<void> _resetPassword() async {
     final auth = context.read<AuthProvider>();
     final emailDialogCtrl = TextEditingController(text: _emailCtrl.text);
 
     await showDialog<void>(
       context: context,
-      useRootNavigator: true,
       barrierDismissible: false,
       builder: (dialogCtx) {
         return AlertDialog(
-          title: const Text('Restablecer contraseña'),
+          title: Text(
+            'Restablecer contraseña',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           content: TextField(
             controller: emailDialogCtrl,
             autofocus: true,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Correo electrónico',
               hintText: 'Introduce tu email',
             ),
@@ -56,9 +58,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 final error = await auth.sendPasswordReset(
                   emailDialogCtrl.text.trim(),
                 );
-                Navigator.of(dialogCtx).pop(); // cierra diálogo
-
-                if (!mounted) return; // ← evita usar context desmontado
+                Navigator.of(dialogCtx).pop();
+                if (!mounted) return;
                 final msg =
                     error ??
                     'Enlace de recuperación enviado. Revisa tu correo.';
@@ -74,17 +75,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  /// Inicia sesión con correo/contraseña
   Future<void> _submit() async {
     final auth = context.read<AuthProvider>();
-
     final err = await auth.signIn(_emailCtrl.text.trim(), _passCtrl.text);
-
     if (!mounted) return;
     if (err != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
     } else {
-      // Navega a Home y limpia pila
       context.goNamed('home');
     }
   }
@@ -94,25 +91,25 @@ class _LoginScreenState extends State<LoginScreen> {
     const maxWidth = 450.0;
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Container(
           width: maxWidth,
           padding: const EdgeInsets.all(30),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Colors.black12,
+                color: Colors.black.withOpacity(0.12),
                 blurRadius: 10,
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ─── Email ──────────────────────────────────────────────
               InputFormField(
                 label: 'Correo electrónico',
                 icon: Icons.email_outlined,
@@ -120,8 +117,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 hint: 'Introduce tu correo',
               ),
               const SizedBox(height: 10),
-
-              // ─── Contraseña ─────────────────────────────────────────
               InputFormField(
                 label: 'Contraseña',
                 icon: Icons.lock_outline,
@@ -130,8 +125,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscure: true,
               ),
               const SizedBox(height: 10),
-
-              // ─── Recuérdame & Olvidaste contraseña ─────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -142,7 +135,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         onChanged:
                             (v) => setState(() => _rememberMe = v ?? false),
                       ),
-                      const Text('Recuérdame'),
+                      Text(
+                        'Recuérdame',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ],
                   ),
                   TextButton(
@@ -151,16 +147,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       padding: EdgeInsets.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    child: const Text(
+                    child: Text(
                       '¿Olvidaste tu contraseña?',
-                      style: TextStyle(color: Color(0xFF2D79F3)),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
-
-              // ─── Botón Entrar ──────────────────────────────────────
               ElevatedButton(
                 onPressed: _submit,
                 style: ElevatedButton.styleFrom(
@@ -172,25 +168,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: const Text('Entrar'),
               ),
               const SizedBox(height: 10),
-
-              // ─── Ir a Registro ─────────────────────────────────────
               TextButton(
                 onPressed: () => context.pushNamed('register'),
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                child: const Text(
+                child: Text(
                   'Regístrate',
-                  style: TextStyle(color: Color(0xFF2D79F3)),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
-
-              const Text('Inicia sesión con Google'),
+              Text(
+                'Inicia sesión con Google',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const SizedBox(height: 10),
-
-              // ─── Google Sign-In ────────────────────────────────────
               const GoogleSignInButton(),
             ],
           ),

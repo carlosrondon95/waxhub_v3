@@ -1,4 +1,3 @@
-// lib/widgets/password_field.dart
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -10,11 +9,11 @@ class PasswordField extends StatefulWidget {
   final Validator? validator;
 
   const PasswordField({
-    super.key,
+    Key? key,
     required this.controller,
     this.label = 'Contraseña',
     this.validator,
-  });
+  }) : super(key: key);
 
   @override
   State<PasswordField> createState() => _PasswordFieldState();
@@ -23,16 +22,19 @@ class PasswordField extends StatefulWidget {
 class _PasswordFieldState extends State<PasswordField> {
   bool _obscure = true;
 
-  String? _defaultValidator(String? value) {
-    if (value == null || value.isEmpty) return 'Campo requerido';
-    if (value.length < 7) return 'Mínimo 7 caracteres';
-    if (!RegExp(r'[A-Z]').hasMatch(value)) {
-      return 'Debe incluir al menos una letra mayúscula';
-    }
-    if (!RegExp(r'\d').hasMatch(value)) {
-      return 'Debe incluir al menos un número';
-    }
-    return null;
+  OutlineInputBorder _border(BuildContext ctx, {required bool focused}) {
+    final theme = Theme.of(ctx);
+    final baseColor =
+        theme.brightness == Brightness.light
+            ? Colors.grey.shade300
+            : Colors.white24;
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(
+        color: focused ? theme.colorScheme.primary : baseColor,
+        width: focused ? 2 : 1,
+      ),
+    );
   }
 
   @override
@@ -42,12 +44,25 @@ class _PasswordFieldState extends State<PasswordField> {
     return TextFormField(
       controller: widget.controller,
       obscureText: _obscure,
-      validator: widget.validator ?? _defaultValidator,
+      validator: widget.validator,
       decoration: InputDecoration(
+        prefixIcon: Icon(
+          Icons.lock_outline,
+          color: Theme.of(context).iconTheme.color,
+        ),
         labelText: widget.label,
+        filled: true,
+        fillColor: Theme.of(context).cardColor,
+        enabledBorder: _border(context, focused: false),
+        focusedBorder: _border(context, focused: true),
+        errorBorder: _border(context, focused: false),
+        focusedErrorBorder: _border(context, focused: true),
         suffixIcon: IconButton(
           iconSize: isDesktop ? 28 : 24,
-          icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+          icon: Icon(
+            _obscure ? Icons.visibility_off : Icons.visibility,
+            color: Theme.of(context).iconTheme.color,
+          ),
           onPressed: () => setState(() => _obscure = !_obscure),
         ),
       ),

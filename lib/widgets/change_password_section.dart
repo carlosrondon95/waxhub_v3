@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
+import 'password_field.dart';
 
 class ChangePasswordSection extends StatefulWidget {
   final bool isGoogle;
+
   const ChangePasswordSection({Key? key, required this.isGoogle})
     : super(key: key);
 
@@ -11,111 +13,99 @@ class ChangePasswordSection extends StatefulWidget {
 }
 
 class _ChangePasswordSectionState extends State<ChangePasswordSection> {
-  final _svc = UserService();
-  final _oldCtr = TextEditingController();
-  final _newCtr = TextEditingController();
-  final _confCtr = TextEditingController();
+  final _currentCtrl = TextEditingController();
+  final _newCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _saving = false;
+  String? _error;
 
-  bool _showOld = false, _showNew = false, _showConf = false;
-
-  @override
-  void dispose() {
-    _oldCtr.dispose();
-    _newCtr.dispose();
-    _confCtr.dispose();
-    super.dispose();
+  String? _passwordValidator(String? v) {
+    if (v == null || v.length < 7) return 'Mínimo 7 caracteres';
+    if (!RegExp(r'[A-Z]').hasMatch(v)) return 'Debe incluir una mayúscula';
+    if (!RegExp(r'\d').hasMatch(v)) return 'Debe incluir un número';
+    return null;
   }
 
-  Future<void> _submit() async {
-    if (_newCtr.text != _confCtr.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Las contraseñas no coinciden')),
-      );
-      return;
-    }
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+
     try {
-      await _svc.updatePassword(_oldCtr.text, _newCtr.text);
+      await UserService().updatePassword(_currentCtrl.text, _newCtrl.text);
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Contraseña actualizada')));
-      _oldCtr.clear();
-      _newCtr.clear();
-      _confCtr.clear();
+      _currentCtrl.clear();
+      _newCtrl.clear();
+      _confirmCtrl.clear();
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      if (!mounted) return;
+      setState(() => _error = e.toString());
     }
-  }
 
-  Widget _pwField(
-    TextEditingController ctr,
-    String hint,
-    bool show,
-    VoidCallback toggle,
-  ) {
-    return TextField(
-      controller: ctr,
-      obscureText: !show,
-      decoration: InputDecoration(
-        hintText: hint,
-        prefixIcon: const Icon(
-          Icons.lock_outline,
-          size: 20,
-          color: Colors.black54,
-        ),
-        suffixIcon: IconButton(
-          icon: Icon(show ? Icons.visibility : Icons.visibility_off),
-          onPressed: toggle,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFecedec), width: 1.5),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 15,
-        ),
-      ),
-    );
+    if (mounted) setState(() => _saving = false);
   }
 
   @override
-  Widget build(BuildContext ctx) {
+  Widget build(BuildContext context) {
     if (widget.isGoogle) return const SizedBox.shrink();
+
+    final headerStyle = Theme.of(
+      context,
+    ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _pwField(
-          _oldCtr,
-          'Contraseña actual',
-          _showOld,
-          () => setState(() => _showOld = !_showOld),
-        ),
-        const SizedBox(height: 16),
-        _pwField(
-          _newCtr,
-          'Nueva contraseña',
-          _showNew,
-          () => setState(() => _showNew = !_showNew),
-        ),
-        const SizedBox(height: 16),
-        _pwField(
-          _confCtr,
-          'Confirmar contraseña',
-          _showConf,
-          () => setState(() => _showConf = !_showConf),
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: _submit,
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size.fromHeight(50),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+        Text('Cambiar contraseña', style: headerStyle),
+        const SizedBox(height: 6),
+        Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              PasswordField(
+                controller: _currentCtrl,
+                label: 'Contraseña actual',
+                validator:
+                    (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
+              ),
+              const SizedBox(height: 12),
+              PasswordField(
+                controller: _newCtrl,
+                label: 'Nueva contraseña',
+                validator: _passwordValidator,
+              ),
+              const SizedBox(height: 12),
+              PasswordField(
+                controller: _confirmCtrl,
+                label: 'Confirmar contraseña',
+                validator: (v) => v != _newCtrl.text ? 'No coinciden' : null,
+              ),
+            ],
           ),
-          child: const Text('Actualizar contraseña'),
+        ),
+        if (_error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(_error!, style: const TextStyle(color: Colors.red)),
+          ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          onPressed: _saving ? null : _save,
+          child:
+              _saving
+                  ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                  : const Text('Guardar contraseña'),
         ),
       ],
     );

@@ -102,7 +102,7 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
     }
   }
 
-  /* ---------- Eliminar cuenta con doble confirmación ---------- */
+  /* ---------- Eliminar cuenta ---------- */
   Future<void> _confirmDelete() async {
     final sure = await showDialog<bool>(
       context: context,
@@ -190,7 +190,6 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                /* Avatar + nombre */
                 CircleAvatar(
                   radius: 60,
                   backgroundImage:
@@ -238,8 +237,6 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
                   const SizedBox(height: 20),
                 ] else
                   const SizedBox(height: 20),
-
-                /* Nombre, email, contraseña */
                 ChangeNameSection(
                   initialName: _name,
                   canChange: _canChangeName,
@@ -250,8 +247,6 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
                 const SizedBox(height: 24),
                 ChangePasswordSection(isGoogle: _isGoogle),
                 const SizedBox(height: 24),
-
-                /* Eliminar cuenta */
                 ElevatedButton(
                   onPressed: _confirmDelete,
                   style: ElevatedButton.styleFrom(
@@ -268,16 +263,25 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
     );
   }
 
-  /* ---------- Decoración dinámica según tema ---------- */
-  BoxDecoration _box(BuildContext context) => BoxDecoration(
-    color: Theme.of(context).cardColor,
-    borderRadius: const BorderRadius.all(Radius.circular(20)),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.25),
-        blurRadius: 10,
-        offset: const Offset(0, 4),
-      ),
-    ],
-  );
+  /* ---------- Contenedor coherente al tema ---------- */
+  BoxDecoration _box(BuildContext context) {
+    final theme = Theme.of(context);
+    final borderColor =
+        theme.brightness == Brightness.light
+            ? Colors.grey.shade300
+            : Colors.white24;
+
+    return BoxDecoration(
+      color: theme.cardColor,
+      borderRadius: const BorderRadius.all(Radius.circular(20)),
+      border: Border.all(color: borderColor, width: 1),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.15),
+          blurRadius: 8,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    );
+  }
 }

@@ -5,7 +5,9 @@ class InputFormField extends StatefulWidget {
   final IconData icon;
   final TextEditingController controller;
   final String hint;
-  final bool obscure; // si es true, muestra ojo para alternar
+  final bool obscure;
+  final String? Function(String?)? validator;
+  final TextInputType? keyboardType;
 
   const InputFormField({
     Key? key,
@@ -14,10 +16,12 @@ class InputFormField extends StatefulWidget {
     required this.controller,
     required this.hint,
     this.obscure = false,
+    this.validator,
+    this.keyboardType,
   }) : super(key: key);
 
   @override
-  _InputFormFieldState createState() => _InputFormFieldState();
+  State<InputFormField> createState() => _InputFormFieldState();
 }
 
 class _InputFormFieldState extends State<InputFormField> {
@@ -29,53 +33,49 @@ class _InputFormFieldState extends State<InputFormField> {
     _obscureText = widget.obscure;
   }
 
+  OutlineInputBorder _border(BuildContext ctx, {required bool focused}) {
+    final theme = Theme.of(ctx);
+    final baseColor =
+        theme.brightness == Brightness.light
+            ? Colors.grey.shade300
+            : Colors.white24;
+
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(
+        color: focused ? theme.colorScheme.primary : baseColor,
+        width: focused ? 2 : 1,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.label,
-          style: const TextStyle(
-            color: Color(0xFF151717),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 5),
-        Container(
-          height: 50,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFecedec), width: 1.5),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              Icon(widget.icon, size: 20, color: Colors.black54),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: widget.controller,
-                  obscureText: _obscureText,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: widget.hint,
+    return TextFormField(
+      controller: widget.controller,
+      obscureText: _obscureText,
+      validator: widget.validator,
+      keyboardType: widget.keyboardType,
+      decoration: InputDecoration(
+        prefixIcon: Icon(widget.icon),
+        labelText: widget.label,
+        hintText: widget.hint,
+        filled: true,
+        fillColor: Theme.of(context).cardColor,
+        enabledBorder: _border(context, focused: false),
+        focusedBorder: _border(context, focused: true),
+        errorBorder: _border(context, focused: false),
+        focusedErrorBorder: _border(context, focused: true),
+        suffixIcon:
+            widget.obscure
+                ? IconButton(
+                  icon: Icon(
+                    _obscureText ? Icons.visibility_off : Icons.visibility,
                   ),
-                ),
-              ),
-              if (widget.obscure)
-                GestureDetector(
-                  onTap: () => setState(() => _obscureText = !_obscureText),
-                  child: Icon(
-                    _obscureText ? Icons.visibility : Icons.visibility_off,
-                    size: 20,
-                    color: Colors.black54,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ],
+                  onPressed: () => setState(() => _obscureText = !_obscureText),
+                )
+                : null,
+      ),
     );
   }
 }

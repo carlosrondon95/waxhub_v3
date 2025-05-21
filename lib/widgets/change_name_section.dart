@@ -1,6 +1,7 @@
-import 'dart:async';
+// lib/widgets/change_name_section.dart
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
+import 'input_form_field.dart';
 
 class ChangeNameSection extends StatefulWidget {
   final String initialName;
@@ -19,127 +20,94 @@ class ChangeNameSection extends StatefulWidget {
 }
 
 class _ChangeNameSectionState extends State<ChangeNameSection> {
-  final _svc = UserService();
-  final _ctr = TextEditingController();
-  bool? _available;
-  bool _loading = false;
-  bool _touched = false; // Para mostrar error solo tras interacción
-  Timer? _debounce;
+  final _nameCtrl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _saving = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _ctr.text = widget.initialName;
+    _nameCtrl.text = widget.initialName;
   }
 
-  void _onChanged(String v) {
-    _touched = true; // Marca que el usuario ya interactuó
-    _debounce?.cancel();
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() {
-      _loading = true;
-      _available = null;
+      _saving = true;
+      _error = null;
     });
-    _debounce = Timer(const Duration(milliseconds: 500), () async {
-      final ok = v.trim().length > 5 && await _svc.isNameAvailable(v.trim());
-      setState(() {
-        _available = ok;
-        _loading = false;
-      });
-    });
-  }
 
-  @override
-  void dispose() {
-    _ctr.dispose();
-    _debounce?.cancel();
-    super.dispose();
+    final svc = UserService();
+    try {
+      await svc.updateName(
+        _nameCtrl.text.trim(),
+        "extraArgument",
+      ); // ← ahora no esperamos un retorno
+      if (!mounted) return;
+      widget.onSaved(); // refresca datos en pantalla
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Nombre actualizado')));
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    }
+
+    if (mounted) setState(() => _saving = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.canChange) return const SizedBox.shrink();
-    final isValidLength = _ctr.text.trim().length > 5;
-    final showError = _touched && !isValidLength;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text(
-          'Nuevo nombre',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF151717),
+    /* Si ya no puede cambiar su nombre, mostrar solo el actual */
+    if (!widget.canChange) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Nombre de usuario',
+            style: Theme.of(context).textTheme.titleSmall,
           ),
-        ),
-        const SizedBox(height: 6),
-        TextField(
-          controller: _ctr,
-          onChanged: _onChanged,
-          onTap: () {
-            if (!_touched) setState(() => _touched = true);
-          },
-          decoration: InputDecoration(
-            hintText: 'Mínimo 6 caracteres',
-            prefixIcon: const Icon(
-              Icons.edit_outlined,
-              size: 20,
-              color: Colors.black54,
+          const SizedBox(height: 6),
+          Text(widget.initialName),
+        ],
+      );
+    }
+
+    /* Formulario */
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InputFormField(
+            label: 'Nuevo nombre',
+            icon: Icons.person_outline,
+            controller: _nameCtrl,
+            hint: 'Introduce tu nombre',
+            validator:
+                (v) => (v == null || v.isEmpty) ? 'Campo requerido' : null,
+          ),
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(_error!, style: const TextStyle(color: Colors.red)),
             ),
-            suffixIcon:
-                _loading
+          const SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: _saving ? null : _save,
+            child:
+                _saving
                     ? const SizedBox(
-                      width: 20,
-                      height: 20,
+                      width: 24,
+                      height: 24,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                    : (_available == true
-                        ? const Icon(Icons.check, color: Colors.green)
-                        : (_available == false
-                            ? const Icon(Icons.close, color: Colors.red)
-                            : null)),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(
-                color: Color(0xFFecedec),
-                width: 1.5,
-              ),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 15,
-            ),
+                    : const Text('Guardar nombre'),
           ),
-        ),
-        if (showError)
-          const Padding(
-            padding: EdgeInsets.only(top: 4),
-            child: Text(
-              'El nombre debe tener al menos 6 caracteres',
-              style: TextStyle(color: Colors.red, fontSize: 12),
-            ),
-          ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed:
-              (_available == true && isValidLength)
-                  ? () async {
-                    final info = await _svc.loadUserInfo();
-                    await _svc.updateName(
-                      info['uid'] as String,
-                      _ctr.text.trim(),
-                    );
-                    widget.onSaved();
-                  }
-                  : null,
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size.fromHeight(50),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: const Text('Guardar nombre'),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

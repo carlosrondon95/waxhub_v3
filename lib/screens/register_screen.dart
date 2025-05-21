@@ -8,7 +8,7 @@ import '../widgets/input_form_field.dart';
 import '../widgets/password_field.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -54,8 +54,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ).showSnackBar(SnackBar(content: Text(error)));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registro exitoso. Revisa tu correo para verificar.'),
+        SnackBar(
+          content: const Text(
+            'Registro exitoso. Revisa tu correo para verificar.',
+          ),
           backgroundColor: Colors.green,
         ),
       );
@@ -69,19 +71,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
     const maxWidth = 450.0;
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Crear cuenta')),
       body: Center(
         child: Container(
           width: maxWidth,
           padding: const EdgeInsets.all(30),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Colors.black12,
+                color: Colors.black.withOpacity(0.12),
                 blurRadius: 10,
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -97,7 +100,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       icon: Icons.person_outline,
                       controller: _nameCtrl,
                       hint: 'Introduce tu nombre',
-                      obscure: false,
                     ),
                     if (_nameError != null)
                       Padding(
@@ -116,7 +118,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       icon: Icons.email_outlined,
                       controller: _emailCtrl,
                       hint: 'Introduce tu correo',
-                      obscure: false,
                     ),
                     if (_emailError != null)
                       Padding(
@@ -143,12 +144,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed:
-                          auth.isLoading ||
-                                  _nameError != null ||
-                                  _emailError != null
-                              ? null
-                              : _handleRegister,
+                      onPressed: auth.isLoading ? null : _handleRegister,
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size.fromHeight(50),
                         shape: RoundedRectangleBorder(
@@ -168,21 +164,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               : const Text('Registrarse'),
                     ),
                     const SizedBox(height: 10),
-                    MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: TextButton(
-                        onPressed: () => context.goNamed('login'),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 8,
-                            horizontal: 15,
-                          ),
-                          minimumSize: const Size(120, 0),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    TextButton(
+                      onPressed: () => context.goNamed('login'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 15,
                         ),
-                        child: const Text(
-                          '¿Ya tienes cuenta? Inicia sesión',
-                          style: TextStyle(color: Color(0xFF2D79F3)),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        '¿Ya tienes cuenta? Inicia sesión',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
