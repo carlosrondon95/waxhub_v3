@@ -12,26 +12,21 @@ class DetalleDiscoScreen extends StatelessWidget {
   final VinylRecord record;
   const DetalleDiscoScreen({super.key, required this.record});
 
-  // ────────────────────────────────────────────────────────────────────────────
-  //  Helpers genéricos de lanzamiento seguro
-  // ────────────────────────────────────────────────────────────────────────────
-  Future<void> _safeLaunch(BuildContext context, Uri uri) async {
+  // Dimensiones homogéneas para los botones de acción
+  static const double _buttonWidth = 140;
+  static const double _buttonHeight = 48;
+
+  //──────────────────────────────────────────────────────────────────────────────
+  //  Helpers deep‑link con feedback seguro
+  //──────────────────────────────────────────────────────────────────────────────
+  Future<void> _safeLaunch(BuildContext context, Uri url) async {
     try {
-      final launched = await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
-      if (!launched && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo abrir el enlace')),
-        );
-      }
+      await launchUrl(url, mode: LaunchMode.externalApplication);
     } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo abrir el enlace')),
-        );
-      }
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el enlace')),
+      );
     }
   }
 
@@ -41,9 +36,10 @@ class DetalleDiscoScreen extends StatelessWidget {
     String album,
   ) async {
     final query = Uri.encodeComponent('$artist $album');
-    // Abrimos la URL https, el sistema redirigirá a la app si está instalada
-    final uri = Uri.parse('https://open.spotify.com/search/$query');
-    await _safeLaunch(context, uri);
+    await _safeLaunch(
+      context,
+      Uri.parse('https://open.spotify.com/search/$query'),
+    );
   }
 
   Future<void> _launchYouTubeSearch(
@@ -52,10 +48,32 @@ class DetalleDiscoScreen extends StatelessWidget {
     String album,
   ) async {
     final query = Uri.encodeComponent('$artist $album full album');
-    final uri = Uri.parse(
-      'https://www.youtube.com/results?search_query=$query',
+    await _safeLaunch(
+      context,
+      Uri.parse('https://www.youtube.com/results?search_query=$query'),
     );
-    await _safeLaunch(context, uri);
+  }
+
+  //──────────────────────────────────────────────────────────────────────────────
+  //  Builder reutilizable para los botones de plataforma
+  //──────────────────────────────────────────────────────────────────────────────
+  Widget _platformButton({
+    required Color color,
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return FilledButton.icon(
+      style: FilledButton.styleFrom(
+        backgroundColor: color,
+        fixedSize: const Size(_buttonWidth, _buttonHeight),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+      ),
+      onPressed: onPressed,
+      icon: FaIcon(icon, size: 20),
+      label: Text(label),
+    );
   }
 
   @override
@@ -100,7 +118,6 @@ class DetalleDiscoScreen extends StatelessWidget {
                       ],
                     ),
               );
-
               if (confirmed == true) {
                 await collection.deleteRecord(updatedRecord.id);
                 if (context.mounted) context.pop();
@@ -186,43 +203,35 @@ class DetalleDiscoScreen extends StatelessWidget {
                     label: 'Descripción',
                     value: updatedRecord.descripcion,
                   ),
-
                 const SizedBox(height: 24),
-
-                // Fila de botones Spotify / YouTube
+                //───────────────────────────────────────────────────────────────
+                //  Botones Spotify / YouTube con tamaño fijo y colores marca
+                //───────────────────────────────────────────────────────────────
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        onPressed:
-                            () => _launchSpotifySearch(
-                              context,
-                              updatedRecord.artista,
-                              updatedRecord.titulo,
-                            ),
-                        icon: const FaIcon(FontAwesomeIcons.spotify, size: 20),
-                        label: const Text('Spotify'),
-                      ),
+                    _platformButton(
+                      color: const Color(0xFF1DB954), // verde Spotify
+                      icon: FontAwesomeIcons.spotify,
+                      label: 'Spotify',
+                      onPressed:
+                          () => _launchSpotifySearch(
+                            context,
+                            updatedRecord.artista,
+                            updatedRecord.titulo,
+                          ),
                     ),
                     const SizedBox(width: 16),
-                    Expanded(
-                      child: FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.redAccent,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        onPressed:
-                            () => _launchYouTubeSearch(
-                              context,
-                              updatedRecord.artista,
-                              updatedRecord.titulo,
-                            ),
-                        icon: const FaIcon(FontAwesomeIcons.youtube, size: 20),
-                        label: const Text('YouTube'),
-                      ),
+                    _platformButton(
+                      color: Colors.redAccent, // rojo YouTube
+                      icon: FontAwesomeIcons.youtube,
+                      label: 'YouTube',
+                      onPressed:
+                          () => _launchYouTubeSearch(
+                            context,
+                            updatedRecord.artista,
+                            updatedRecord.titulo,
+                          ),
                     ),
                   ],
                 ),
