@@ -1,8 +1,7 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+// lib/main.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -18,20 +17,10 @@ import 'providers/collection_provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ─── Cargar variables de entorno solo en móvil/desktop ──────────────
-  if (!kIsWeb) {
-    await dotenv.load(fileName: '.env');
-  }
+  // Inicializa Firebase en todas las plataformas
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // ─── Inicializar Firebase ────────────────────────────────────────────
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  // ─── Mantener la sesión en Web ───────────────────────────────────────
-  if (kIsWeb) {
-    await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
-  }
+  // En Web, persiste la sesión tras cerrar la pestaña
 
   runApp(const MyApp());
 }
@@ -49,9 +38,7 @@ class MyApp extends StatelessWidget {
       ],
       child: Builder(
         builder: (context) {
-          // Escuchamos AuthProvider para refrescar el router al hacer login/logout
-          final authProvider = Provider.of<AuthProvider>(context);
-
+          final auth = context.watch<AuthProvider>();
           return ResponsiveBreakpoints.builder(
             breakpoints: const [
               Breakpoint(start: 0, end: 450, name: MOBILE),
@@ -63,7 +50,7 @@ class MyApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               title: 'WaxHub',
               theme: AppTheme,
-              routerConfig: AppRouter.router(authProvider),
+              routerConfig: AppRouter.router(auth),
               scrollBehavior: AppScrollBehavior(),
             ),
           );
