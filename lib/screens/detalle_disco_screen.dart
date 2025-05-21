@@ -1,7 +1,8 @@
-// lib/screens/detalle_disco_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../models/vinyl_record.dart';
 import '../providers/collection_provider.dart';
@@ -10,6 +11,52 @@ import '../core/image_proxy.dart';
 class DetalleDiscoScreen extends StatelessWidget {
   final VinylRecord record;
   const DetalleDiscoScreen({super.key, required this.record});
+
+  // ────────────────────────────────────────────────────────────────────────────
+  //  Helpers genéricos de lanzamiento seguro
+  // ────────────────────────────────────────────────────────────────────────────
+  Future<void> _safeLaunch(BuildContext context, Uri uri) async {
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo abrir el enlace')),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo abrir el enlace')),
+        );
+      }
+    }
+  }
+
+  Future<void> _launchSpotifySearch(
+    BuildContext context,
+    String artist,
+    String album,
+  ) async {
+    final query = Uri.encodeComponent('$artist $album');
+    // Abrimos la URL https, el sistema redirigirá a la app si está instalada
+    final uri = Uri.parse('https://open.spotify.com/search/$query');
+    await _safeLaunch(context, uri);
+  }
+
+  Future<void> _launchYouTubeSearch(
+    BuildContext context,
+    String artist,
+    String album,
+  ) async {
+    final query = Uri.encodeComponent('$artist $album full album');
+    final uri = Uri.parse(
+      'https://www.youtube.com/results?search_query=$query',
+    );
+    await _safeLaunch(context, uri);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +186,46 @@ class DetalleDiscoScreen extends StatelessWidget {
                     label: 'Descripción',
                     value: updatedRecord.descripcion,
                   ),
+
+                const SizedBox(height: 24),
+
+                // Fila de botones Spotify / YouTube
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        onPressed:
+                            () => _launchSpotifySearch(
+                              context,
+                              updatedRecord.artista,
+                              updatedRecord.titulo,
+                            ),
+                        icon: const FaIcon(FontAwesomeIcons.spotify, size: 20),
+                        label: const Text('Spotify'),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.redAccent,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        onPressed:
+                            () => _launchYouTubeSearch(
+                              context,
+                              updatedRecord.artista,
+                              updatedRecord.titulo,
+                            ),
+                        icon: const FaIcon(FontAwesomeIcons.youtube, size: 20),
+                        label: const Text('YouTube'),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
