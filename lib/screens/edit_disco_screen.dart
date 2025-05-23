@@ -1,6 +1,9 @@
 // lib/screens/edit_disco_screen.dart
+
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/vinyl_record.dart';
@@ -16,13 +19,14 @@ class EditDiscoScreen extends StatefulWidget {
 
 class _EditDiscoScreenState extends State<EditDiscoScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _artistCtr,
-      _titleCtr,
-      _genreCtr,
-      _yearCtr,
-      _labelCtr,
-      _buyCtr,
-      _descCtr;
+  late TextEditingController _artistCtr;
+  late TextEditingController _titleCtr;
+  late TextEditingController _genreCtr;
+  late TextEditingController _yearCtr;
+  late TextEditingController _labelCtr;
+  late TextEditingController _buyCtr;
+  late TextEditingController _descCtr;
+  XFile? _pickedImage;
 
   @override
   void initState() {
@@ -49,6 +53,14 @@ class _EditDiscoScreenState extends State<EditDiscoScreen> {
     super.dispose();
   }
 
+  Future<void> _pickCover() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() => _pickedImage = image);
+    }
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     final provider = context.read<CollectionProvider>();
@@ -63,11 +75,12 @@ class _EditDiscoScreenState extends State<EditDiscoScreen> {
       sello: _labelCtr.text,
       lugarCompra: _buyCtr.text,
       descripcion: _descCtr.text,
-      portadaUrl: widget.record.portadaUrl,
+      portadaUrl:
+          _pickedImage != null ? _pickedImage!.path : widget.record.portadaUrl,
       favorito: widget.record.favorito,
     );
     await provider.updateRecord(updated);
-    context.pop();
+    if (context.mounted) context.pop();
   }
 
   @override
@@ -76,54 +89,148 @@ class _EditDiscoScreenState extends State<EditDiscoScreen> {
       appBar: AppBar(title: const Text('Editar disco')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _artistCtr,
-                decoration: const InputDecoration(labelText: 'Artista'),
-                validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _titleCtr,
-                decoration: const InputDecoration(labelText: 'Título'),
-                validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Cover selector (cuadrado) con cursor de mano
+                      Center(
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: _pickCover,
+                            child: Stack(
+                              children: [
+                                Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    image: DecorationImage(
+                                      image:
+                                          _pickedImage != null
+                                              ? FileImage(
+                                                    File(_pickedImage!.path),
+                                                  )
+                                                  as ImageProvider
+                                              : NetworkImage(
+                                                widget.record.portadaUrl,
+                                              ),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 4,
+                                  right: 4,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black45,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Icon(
+                                      Icons.camera_alt,
+                                      size: 20,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Campos de texto
+                      TextFormField(
+                        controller: _artistCtr,
+                        decoration: const InputDecoration(
+                          labelText: 'Artista',
+                          prefixIcon: Icon(Icons.person),
+                        ),
+                        validator:
+                            (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _titleCtr,
+                        decoration: const InputDecoration(
+                          labelText: 'Título',
+                          prefixIcon: Icon(Icons.album),
+                        ),
+                        validator:
+                            (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _genreCtr,
+                        decoration: const InputDecoration(
+                          labelText: 'Género',
+                          prefixIcon: Icon(Icons.music_note),
+                        ),
+                        validator:
+                            (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _yearCtr,
+                        decoration: const InputDecoration(
+                          labelText: 'Año',
+                          prefixIcon: Icon(Icons.calendar_today),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator:
+                            (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _labelCtr,
+                        decoration: const InputDecoration(
+                          labelText: 'Sello',
+                          prefixIcon: Icon(Icons.library_music),
+                        ),
+                        validator:
+                            (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _buyCtr,
+                        decoration: const InputDecoration(
+                          labelText: 'Lugar de compra',
+                          prefixIcon: Icon(Icons.store),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _descCtr,
+                        decoration: const InputDecoration(
+                          labelText: 'Descripción',
+                          prefixIcon: Icon(Icons.description),
+                        ),
+                        maxLines: null,
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _save,
+                        child: const Text('Guardar'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _genreCtr,
-                decoration: const InputDecoration(labelText: 'Género'),
-                validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _yearCtr,
-                decoration: const InputDecoration(labelText: 'Año'),
-                keyboardType: TextInputType.number,
-                validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _labelCtr,
-                decoration: const InputDecoration(labelText: 'Sello'),
-                validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _buyCtr,
-                decoration: const InputDecoration(labelText: 'Lugar de compra'),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _descCtr,
-                decoration: const InputDecoration(labelText: 'Descripción'),
-                maxLines: null,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(onPressed: _save, child: const Text('Guardar')),
-            ],
+            ),
           ),
         ),
       ),
