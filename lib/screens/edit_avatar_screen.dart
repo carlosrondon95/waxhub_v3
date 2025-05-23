@@ -1,8 +1,9 @@
-import 'dart:io';
+// lib/screens/settings/edit_avatar_screen.dart
+
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
-import '../../services/user_profile_service.dart';
+import '../../services/user_service.dart';
 
 class EditAvatarScreen extends StatefulWidget {
   const EditAvatarScreen({Key? key}) : super(key: key);
@@ -12,109 +13,117 @@ class EditAvatarScreen extends StatefulWidget {
 }
 
 class _EditAvatarScreenState extends State<EditAvatarScreen> {
-  final _svc = UserProfileService();
-  File? _selected;
+  final _svc = UserService();
+  XFile? _selectedImage;
+  Uint8List? _selectedBytes;
   bool _loading = false;
 
-  Future<void> _pick() async {
+  Future<void> _pickAvatar() async {
     final picker = ImagePicker();
     final img = await picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 85,
     );
     if (img == null) return;
-
-    final cropped = await ImageCropper().cropImage(
-      sourcePath: img.path,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: 'Recortar',
-          initAspectRatio: CropAspectRatioPreset.square,
-          lockAspectRatio: true,
-          aspectRatioPresets: [
-            CropAspectRatioPreset.square,
-            CropAspectRatioPreset.original,
-          ],
-        ),
-        IOSUiSettings(
-          title: 'Recortar',
-          aspectRatioLockEnabled: true,
-        ),
-        WebUiSettings(context: context), // solo context es obligatorio
-      ],
-    );
-    if (cropped == null) return;
-
-    setState(() => _selected = File(cropped.path));
+    final bytes = await img.readAsBytes();
+    setState(() {
+      _selectedImage = img;
+      _selectedBytes = bytes;
+    });
   }
 
   Future<void> _save() async {
-    if (_selected == null) return;
+    if (_selectedBytes == null || _selectedImage == null) return;
     setState(() => _loading = true);
     try {
-      final url = await _svc.uploadAvatar(_selected!);
+      final url = await _svc.uploadAvatarBytes(
+        _selectedBytes!,
+        _selectedImage!.name,
+      );
       await _svc.updateAvatarUrl(url);
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Avatar actualizado')));
-      }
+
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Avatar actualizado')));
     } catch (e) {
-      setState(() => _loading = false);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al subir avatar: $e')));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    const maxWidth = 350.0;
+    const double avatarSize = 120;
     return Scaffold(
       appBar: AppBar(title: const Text('Foto de perfil')),
       body: Center(
-        child: Container(
-          width: maxWidth,
-          padding: const EdgeInsets.all(30),
-          decoration: _box,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircleAvatar(
-                radius: 60,
-                backgroundImage:
-                    _selected != null ? FileImage(_selected!) : null,
-                child: _selected == null
-                    ? const Icon(Icons.person, size: 60)
-                    : null,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: _pickAvatar,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    CircleAvatar(
+                      radius: avatarSize / 2,
+                      backgroundImage:
+                          _selectedBytes != null
+                              ? MemoryImage(_selectedBytes!)
+                              : null,
+                      child:
+                          _selectedBytes == null
+                              ? Icon(
+                                Icons.person,
+                                size: avatarSize * 0.5,
+                                color: Colors.grey.shade600,
+                              )
+                              : null,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.black45,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(onPressed: _pick, child: const Text('Elegir imagen')),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: _loading ? null : _save,
-                child: _loading
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _loading ? null : _save,
+              icon:
+                  _loading
+                      ? const SizedBox(
+                        width: 20,
+                        height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           color: Colors.white,
                         ),
                       )
-                    : const Text('Guardar'),
-              ),
-            ],
-          ),
+                      : const Icon(Icons.save),
+              label: const Text('Guardar foto'),
+              style: ElevatedButton.styleFrom(minimumSize: const Size(150, 60)),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  static const _box = BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.all(Radius.circular(20)),
-    boxShadow: [
-      BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
-    ],
-  );
 }

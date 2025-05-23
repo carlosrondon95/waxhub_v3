@@ -1,16 +1,17 @@
+// lib/widgets/change_name_section.dart
+
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
-import 'input_form_field.dart';
 
 class ChangeNameSection extends StatefulWidget {
   final String initialName;
-  final bool canChange;
-  final VoidCallback onSaved;
+  final int remainingNameChanges;
+  final Future<void> Function() onSaved;
 
   const ChangeNameSection({
     Key? key,
     required this.initialName,
-    required this.canChange,
+    required this.remainingNameChanges,
     required this.onSaved,
   }) : super(key: key);
 
@@ -31,7 +32,16 @@ class _ChangeNameSectionState extends State<ChangeNameSection> {
   }
 
   Future<void> _save() async {
+    final newName = _nameCtrl.text.trim();
     if (!_formKey.currentState!.validate()) return;
+
+    if (newName != widget.initialName) {
+      final available = await UserService().isNameAvailable(newName);
+      if (!available) {
+        setState(() => _error = 'Ese nombre ya está en uso.');
+        return;
+      }
+    }
 
     setState(() {
       _saving = true;
@@ -39,33 +49,53 @@ class _ChangeNameSectionState extends State<ChangeNameSection> {
     });
 
     try {
-      await UserService().updateName(widget.initialName, _nameCtrl.text.trim());
-      if (!mounted) return;
-      widget.onSaved();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Nombre actualizado')));
+      await UserService().updateName(newName);
+      final remainingAfter = widget.remainingNameChanges - 1;
+      await showDialog(
+        context: context,
+        builder:
+            (_) => AlertDialog(
+              title: const Text('¡Nombre actualizado!'),
+              content: Text(
+                remainingAfter > 0
+                    ? 'Te quedan $remainingAfter cambios de nombre.'
+                    : 'Has agotado tus 2 cambios.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+      );
+      await widget.onSaved();
     } catch (e) {
-      if (!mounted) return;
-      setState(() => _error = e.toString());
+      setState(() => _error = 'Error: $e');
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
-
-    if (mounted) setState(() => _saving = false);
   }
 
   @override
   Widget build(BuildContext context) {
+    final canChange = widget.remainingNameChanges > 0;
     final headerStyle = Theme.of(
       context,
     ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600);
 
-    if (!widget.canChange) {
+    if (!canChange) {
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text('Nombre de usuario', style: headerStyle),
           const SizedBox(height: 6),
           Text(widget.initialName),
+          const SizedBox(height: 4),
+          const Text(
+            'Ya no puedes cambiar más tu nombre.',
+            style: TextStyle(color: Colors.red),
+          ),
         ],
       );
     }
@@ -73,17 +103,22 @@ class _ChangeNameSectionState extends State<ChangeNameSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Cambiar nombre', style: headerStyle),
+        Text(
+          'Cambiar nombre (te quedan ${widget.remainingNameChanges})',
+          style: headerStyle,
+        ),
         const SizedBox(height: 6),
         Form(
           key: _formKey,
-          child: InputFormField(
-            label: 'Nuevo nombre',
-            icon: Icons.person_outline,
+          child: TextFormField(
             controller: _nameCtrl,
-            hint: 'Introduce tu nombre',
+            decoration: const InputDecoration(
+              labelText: 'Nuevo nombre',
+              prefixIcon: Icon(Icons.person_outline),
+            ),
             validator:
-                (v) => (v == null || v.isEmpty) ? 'Campo requerido' : null,
+                (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Campo requerido' : null,
           ),
         ),
         if (_error != null)

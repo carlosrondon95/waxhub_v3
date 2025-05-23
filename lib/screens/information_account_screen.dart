@@ -1,13 +1,11 @@
 // lib/screens/settings/information_account_screen.dart
-import 'dart:io';
-import 'dart:math';
 
+import 'dart:typed_data';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
 
 import '../../services/user_service.dart';
-import '../../services/user_profile_service.dart';
 import '../../widgets/change_name_section.dart';
 import '../../widgets/change_email_section.dart';
 import '../../widgets/change_password_section.dart';
@@ -22,15 +20,16 @@ class InformationAccountScreen extends StatefulWidget {
 
 class _InformationAccountScreenState extends State<InformationAccountScreen> {
   final _userSvc = UserService();
-  final _profileSvc = UserProfileService();
+  final _profileSvc = UserService();
 
   String _name = '';
   String _email = '';
-  bool _canChangeName = false;
+  int _nameChangeCount = 0;
   bool _isGoogle = false;
   String? _avatarUrl;
 
-  File? _selected;
+  XFile? _selectedImage;
+  Uint8List? _selectedBytes;
   bool _savingAvatar = false;
 
   @override
@@ -44,65 +43,65 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
     setState(() {
       _name = info['nombre'] as String;
       _email = info['email'] as String;
-      _canChangeName = !(info['nombreCambiado'] as bool);
+      _nameChangeCount = info['nombreCambioCount'] as int;
       _isGoogle = info['isGoogle'] as bool;
-      _avatarUrl = info['photoURL'] as String?;
+      _avatarUrl = info['avatarUrl'] as String?;
+      _selectedImage = null;
+      _selectedBytes = null;
+      _savingAvatar = false;
     });
   }
 
-  /* ---------- Avatar ---------- */
   Future<void> _pickAvatar() async {
-    final picker = ImagePicker();
-    final xFile = await picker.pickImage(
+    final img = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       imageQuality: 85,
     );
-    if (xFile == null) return;
-
-    final cropped = await ImageCropper().cropImage(
-      sourcePath: xFile.path,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: 'Recortar',
-          initAspectRatio: CropAspectRatioPreset.square,
-          lockAspectRatio: true,
-          aspectRatioPresets: [
-            CropAspectRatioPreset.square,
-            CropAspectRatioPreset.original,
-          ],
-        ),
-        IOSUiSettings(title: 'Recortar', aspectRatioLockEnabled: true),
-        WebUiSettings(context: context),
-      ],
-    );
-    if (cropped == null) return;
-
-    setState(() => _selected = File(cropped.path));
+    if (img == null) return;
+    final bytes = await img.readAsBytes();
+    setState(() {
+      _selectedImage = img;
+      _selectedBytes = bytes;
+    });
   }
 
   Future<void> _saveAvatar() async {
-    if (_selected == null) return;
+    if (_selectedBytes == null || _selectedImage == null) return;
     setState(() => _savingAvatar = true);
     try {
-      final url = await _profileSvc.uploadAvatar(_selected!);
+      final url = await _profileSvc.uploadAvatarBytes(
+        _selectedBytes!,
+        _selectedImage!.name,
+      );
       await _profileSvc.updateAvatarUrl(url);
+      await precacheImage(NetworkImage(url), context);
       setState(() {
         _avatarUrl = url;
-        _selected = null;
-        _savingAvatar = false;
+        _selectedImage = null;
+        _selectedBytes = null;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Avatar actualizado')));
+      await showDialog(
+        context: context,
+        builder:
+            (_) => AlertDialog(
+              title: const Text('¡Avatar actualizado!'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+      );
     } catch (e) {
-      setState(() => _savingAvatar = false);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ).showSnackBar(SnackBar(content: Text('Error al subir avatar: $e')));
+    } finally {
+      if (mounted) setState(() => _savingAvatar = false);
     }
   }
 
-  /* ---------- Eliminar cuenta ---------- */
   Future<void> _confirmDelete() async {
     final sure = await showDialog<bool>(
       context: context,
@@ -136,7 +135,7 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
           title: const Text('Captcha'),
           content: TextField(
             onChanged: (v) => input = v,
-            decoration: InputDecoration(labelText: '¿Cuánto es $a + $b?'),
+            decoration: InputDecoration(labelText: '¿Cuánto es \$a + \$b?'),
             keyboardType: TextInputType.number,
           ),
           actions: [
@@ -170,13 +169,13 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ).showSnackBar(SnackBar(content: Text('Error: \$e')));
     }
   }
 
-  /* ---------- UI ---------- */
   @override
   Widget build(BuildContext context) {
+    final remainingNameChanges = (2 - _nameChangeCount).clamp(0, 2);
     const maxWidth = 450.0;
 
     return Scaffold(
@@ -190,56 +189,61 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                CircleAvatar(
-                  radius: 60,
-                  backgroundImage:
-                      _selected != null
-                          ? FileImage(_selected!)
-                          : (_avatarUrl != null
-                                  ? NetworkImage(_avatarUrl!)
-                                  : null)
-                              as ImageProvider<Object>?,
-                  child:
-                      _selected == null && _avatarUrl == null
-                          ? const Icon(Icons.person, size: 60)
-                          : null,
-                ),
-                const SizedBox(height: 8),
-                Text(_name, style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: _pickAvatar,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    minimumSize: const Size.fromHeight(40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                GestureDetector(
+                  onTap: _pickAvatar,
+                  child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      CircleAvatar(
+                        radius: 60,
+                        backgroundImage:
+                            _selectedBytes != null
+                                ? MemoryImage(_selectedBytes!)
+                                : (_avatarUrl != null
+                                        ? NetworkImage(_avatarUrl!)
+                                        : null)
+                                    as ImageProvider<Object>?,
+                        child:
+                            _selectedBytes == null && _avatarUrl == null
+                                ? const Icon(Icons.person, size: 60)
+                                : null,
+                      ),
+                      const CircleAvatar(
+                        backgroundColor: Colors.black45,
+                        radius: 14,
+                        child: Icon(
+                          Icons.camera_alt,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
-                  child: const Text('Cambiar foto'),
                 ),
-                if (_selected != null) ...[
-                  const SizedBox(height: 4),
+                const SizedBox(height: 12),
+                if (_selectedBytes != null)
                   ElevatedButton(
                     onPressed: _savingAvatar ? null : _saveAvatar,
                     child:
                         _savingAvatar
                             ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
                             )
                             : const Text('Guardar foto'),
-                  ),
+                  )
+                else
                   const SizedBox(height: 20),
-                ] else
-                  const SizedBox(height: 20),
+                // Mostrar siempre el nombre de usuario debajo del avatar
+                Text(_name, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 24),
                 ChangeNameSection(
                   initialName: _name,
-                  canChange: _canChangeName,
+                  remainingNameChanges: remainingNameChanges,
                   onSaved: _load,
                 ),
                 const SizedBox(height: 24),
@@ -263,14 +267,12 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
     );
   }
 
-  /* ---------- Contenedor coherente al tema ---------- */
   BoxDecoration _box(BuildContext context) {
     final theme = Theme.of(context);
     final borderColor =
         theme.brightness == Brightness.light
             ? Colors.grey.shade300
             : Colors.white24;
-
     return BoxDecoration(
       color: theme.cardColor,
       borderRadius: const BorderRadius.all(Radius.circular(20)),

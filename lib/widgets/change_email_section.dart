@@ -1,8 +1,11 @@
+// lib/widgets/change_email_section.dart
+
 import 'package:flutter/material.dart';
-import '../services/user_profile_service.dart';
+import '../services/user_service.dart';
 
 class ChangeEmailSection extends StatefulWidget {
   final String initialEmail;
+
   const ChangeEmailSection({Key? key, required this.initialEmail})
     : super(key: key);
 
@@ -11,89 +14,120 @@ class ChangeEmailSection extends StatefulWidget {
 }
 
 class _ChangeEmailSectionState extends State<ChangeEmailSection> {
-  final _svc = UserProfileService();
-  final _emailCtr = TextEditingController();
-  final _passCtr = TextEditingController();
-  bool _showPass = false;
+  final _emailCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _saving = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _emailCtr.text = widget.initialEmail;
-  }
-
-  @override
-  void dispose() {
-    _emailCtr.dispose();
-    _passCtr.dispose();
-    super.dispose();
+    _emailCtrl.text = widget.initialEmail;
   }
 
   Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final newEmail = _emailCtrl.text.trim();
+    final password = _passCtrl.text;
+
+    if (newEmail != widget.initialEmail) {
+      final available = await UserService().isEmailAvailable(newEmail);
+      if (!available) {
+        setState(() => _error = 'Ese email ya está registrado.');
+        return;
+      }
+    }
+
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+
     try {
-      await _svc.updateEmail(_passCtr.text, _emailCtr.text.trim());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Correo actualizado. Revisa tu email para verificar.'),
-        ),
+      await UserService().updateEmail(password, newEmail);
+      await showDialog(
+        context: context,
+        builder:
+            (_) => AlertDialog(
+              title: const Text('¡Email actualizado!'),
+              content: const Text(
+                'Se ha enviado un correo de verificación a tu nueva dirección.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: \$e')));
+      setState(() => _error = 'Error: $e');
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
 
-  InputDecoration _dec(String hint, {Widget? prefix, Widget? suffix}) =>
-      InputDecoration(
-        hintText: hint,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        prefixIcon: prefix ?? const Icon(Icons.email_outlined, size: 20),
-        suffixIcon: suffix,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 15,
-        ),
-      );
-
   @override
-  Widget build(BuildContext ctx) {
+  Widget build(BuildContext context) {
+    final headerStyle = Theme.of(
+      context,
+    ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Nuevo correo',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
+        Text('Cambiar email', style: headerStyle),
         const SizedBox(height: 6),
-        TextField(
-          controller: _emailCtr,
-          keyboardType: TextInputType.emailAddress,
-          decoration: _dec('Introduce nuevo correo'),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _passCtr,
-          obscureText: !_showPass,
-          decoration: _dec(
-            'Contraseña actual',
-            prefix: const Icon(Icons.lock_outline, size: 20),
-            suffix: IconButton(
-              icon: Icon(_showPass ? Icons.visibility : Icons.visibility_off),
-              onPressed: () => setState(() => _showPass = !_showPass),
-            ),
+        Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _emailCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Nuevo email',
+                  prefixIcon: Icon(Icons.email_outlined),
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return 'Campo requerido';
+                  final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+                  if (!emailRegex.hasMatch(v.trim())) return 'Email inválido';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _passCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Contraseña actual',
+                  prefixIcon: Icon(Icons.lock_outline),
+                ),
+                obscureText: true,
+                validator:
+                    (v) => (v == null || v.isEmpty) ? 'Campo requerido' : null,
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 16),
+        if (_error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(_error!, style: const TextStyle(color: Colors.red)),
+          ),
+        const SizedBox(height: 8),
         ElevatedButton(
-          onPressed: _save,
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size.fromHeight(50),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: const Text('Guardar correo'),
+          onPressed: _saving ? null : _save,
+          child:
+              _saving
+                  ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                  : const Text('Guardar email'),
         ),
       ],
     );
