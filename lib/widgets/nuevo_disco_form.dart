@@ -1,3 +1,5 @@
+// lib/widgets/nuevo_disco_form.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:provider/provider.dart';
@@ -45,6 +47,7 @@ class NuevoDiscoForm extends StatelessWidget {
                   ),
                 ],
               ),
+
               const SizedBox(height: 12),
 
               // —— Línea 2: Género + Año ——
@@ -81,6 +84,7 @@ class NuevoDiscoForm extends StatelessWidget {
                   ),
                 ],
               ),
+
               const SizedBox(height: 12),
 
               // —— Línea 3: Sello + Procedencia ——
@@ -108,13 +112,14 @@ class NuevoDiscoForm extends StatelessWidget {
                     child: TextFormField(
                       controller: vinyl.buyController,
                       decoration: const InputDecoration(
-                        labelText: 'Procedencia', // antes: Cómo llegó a ti
+                        labelText: 'Procedencia',
                         prefixIcon: Icon(Icons.card_giftcard),
                       ),
                     ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 12),
 
               // —— Descripción ——
@@ -126,6 +131,7 @@ class NuevoDiscoForm extends StatelessWidget {
                 ),
                 maxLines: null,
               ),
+
               const SizedBox(height: 24),
 
               // —— Portada ——
@@ -133,7 +139,7 @@ class NuevoDiscoForm extends StatelessWidget {
                 children: [
                   if (vinyl.coverUrl != null && vinyl.coverUrl!.isNotEmpty)
                     Image.network(
-                      proxiedImage(vinyl.coverUrl),
+                      proxiedImage(vinyl.coverUrl!),
                       height: 150,
                       fit: BoxFit.cover,
                       errorBuilder:
@@ -164,9 +170,10 @@ class NuevoDiscoForm extends StatelessWidget {
                   ),
                 ],
               ),
+
               const SizedBox(height: 24),
 
-              // —— Guardar ——
+              // —— Botón Guardar con diálogos ——
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -174,8 +181,80 @@ class NuevoDiscoForm extends StatelessWidget {
                       vinyl.isLoading
                           ? null
                           : () async {
+                            // 1) Diálogo de carga
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder:
+                                  (_) => const AlertDialog(
+                                    content: Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                        SizedBox(width: 16),
+                                        Expanded(
+                                          child: Text('Añadiendo disco...'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                            );
+                            await Future.delayed(
+                              const Duration(milliseconds: 100),
+                            );
+
+                            // 2) Guardar
                             final ok = await vinyl.saveRecord();
-                            if (ok) Navigator.of(context).pop();
+
+                            // 3) Cerrar carga
+                            Navigator.of(context, rootNavigator: true).pop();
+
+                            if (ok) {
+                              // 4) Éxito
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder:
+                                    (_) => AlertDialog(
+                                      content: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.check_circle,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                          ),
+                                          const SizedBox(width: 16),
+                                          const Expanded(
+                                            child: Text(
+                                              'Disco añadido a tu colección',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                              );
+                              await Future.delayed(const Duration(seconds: 2));
+                              Navigator.of(context, rootNavigator: true).pop();
+
+                              // 5) Limpiar formulario para seguir añadiendo
+                              vinyl.clearForm();
+                            } else {
+                              // 6) Error
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Error al añadir el disco. Intenta de nuevo.',
+                                  ),
+                                ),
+                              );
+                            }
                           },
                   child:
                       vinyl.isLoading
@@ -200,6 +279,7 @@ class NuevoDiscoForm extends StatelessWidget {
 }
 
 /* Campos con TypeAhead mantienen la misma decoración con iconos */
+
 class _ArtistField extends StatelessWidget {
   final VinylProvider vinyl;
   const _ArtistField({required this.vinyl});

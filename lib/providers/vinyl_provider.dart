@@ -1,3 +1,5 @@
+// lib/providers/vinyl_provider.dart
+
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -40,6 +42,12 @@ class VinylProvider extends ChangeNotifier {
   String? coverUrl;
   bool isLoading = false;
 
+  /* ───────────── Helper para el loading ───────────── */
+  void setLoading(bool value) {
+    isLoading = value;
+    notifyListeners();
+  }
+
   /* ───────────── Discogs search ───────────── */
   Future<List<ArtistResult>> searchArtists(String q) async =>
       q.length < 2 ? [] : _discogs.searchArtists(q);
@@ -63,8 +71,7 @@ class VinylProvider extends ChangeNotifier {
 
   /* ───────────── Select release ───────────── */
   Future<void> selectRelease(ReleaseResult release) async {
-    isLoading = true;
-    notifyListeners();
+    setLoading(true);
 
     selectedRelease = release;
     final detail = await _discogs.fetchRelease(release.id);
@@ -73,11 +80,9 @@ class VinylProvider extends ChangeNotifier {
     genreController.text = detail.genre ?? '';
     yearController.text = detail.year ?? '';
     labelController.text = detail.label ?? '';
-
     coverUrl = proxiedImage(detail.coverUrl);
 
-    isLoading = false;
-    notifyListeners();
+    setLoading(false);
   }
 
   /* ───────────── Imagen manual ───────────── */
@@ -85,27 +90,20 @@ class VinylProvider extends ChangeNotifier {
     final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
     if (picked == null) return;
 
-    isLoading = true;
-    notifyListeners();
-
+    setLoading(true);
     try {
       final ref = _storage.ref('covers/${_uuid.v4()}.jpg');
 
       if (kIsWeb) {
-        // Web: subir bytes en lugar de File
         final bytes = await picked.readAsBytes();
-        await ref.putData(
-          bytes,
-          SettableMetadata(contentType: 'image/jpeg'),
-        );
+        await ref.putData(bytes, SettableMetadata(contentType: 'image/jpeg'));
       } else {
         await ref.putFile(File(picked.path));
       }
 
       coverUrl = await ref.getDownloadURL();
     } finally {
-      isLoading = false;
-      notifyListeners();
+      setLoading(false);
     }
   }
 
@@ -117,8 +115,7 @@ class VinylProvider extends ChangeNotifier {
     final user = _auth.currentUser;
     if (user == null) return false;
 
-    isLoading = true;
-    notifyListeners();
+    setLoading(true);
 
     final record = VinylRecord(
       id: '',
@@ -140,9 +137,25 @@ class VinylProvider extends ChangeNotifier {
     } catch (_) {
       return false;
     } finally {
-      isLoading = false;
-      notifyListeners();
+      setLoading(false);
     }
+  }
+
+  /* ───────────── Retroactividad / Clear form ───────────── */
+  void clearForm() {
+    formKey.currentState?.reset();
+    artistController.clear();
+    titleController.clear();
+    genreController.clear();
+    yearController.clear();
+    labelController.clear();
+    buyController.clear();
+    descController.clear();
+    selectedArtist = null;
+    selectedRelease = null;
+    coverUrl = null;
+    // no toques isLoading aquí
+    notifyListeners();
   }
 
   /* ───────────── Clean up ───────────── */
