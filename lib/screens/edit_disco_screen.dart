@@ -83,10 +83,78 @@ class _EditDiscoScreenState extends State<EditDiscoScreen> {
     if (context.mounted) context.pop();
   }
 
+  Future<void> _delete() async {
+    final provider = context.read<CollectionProvider>();
+
+    // 1) Confirmación
+    final confirm = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Confirmar eliminación'),
+            content: const Text('¿Seguro que quieres eliminar este disco?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              SizedBox(width: 16),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  'Eliminar',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+            ],
+          ),
+    );
+
+    if (confirm == true) {
+      // 2) Eliminar
+      await provider.deleteRecord(widget.record.id);
+      // 3) Éxito como Alert
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder:
+            (_) => AlertDialog(
+              content: OutlinedButton(
+                onPressed: () {},
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                  side: BorderSide(color: Theme.of(context).colorScheme.error),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('Disco eliminado correctamente'),
+              ),
+            ),
+      );
+      // 4) Cierre y retroceso
+      await Future.delayed(const Duration(seconds: 2));
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop(); // cierra el success
+        context.pop(); // vuelve atrás
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Editar disco')),
+      appBar: AppBar(
+        title: const Text('Editar disco'),
+        actions: [
+          IconButton(
+            tooltip: 'Eliminar',
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: _delete,
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Center(
@@ -104,7 +172,7 @@ class _EditDiscoScreenState extends State<EditDiscoScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Cover selector (cuadrado) con cursor de mano
+                      // ... resto de campos idénticos a antes ...
                       Center(
                         child: MouseRegion(
                           cursor: SystemMouseCursors.click,
@@ -153,7 +221,6 @@ class _EditDiscoScreenState extends State<EditDiscoScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      // Campos de texto
                       TextFormField(
                         controller: _artistCtr,
                         decoration: const InputDecoration(

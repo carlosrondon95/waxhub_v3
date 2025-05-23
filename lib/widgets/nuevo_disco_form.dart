@@ -215,25 +215,34 @@ class NuevoDiscoForm extends StatelessWidget {
                             Navigator.of(context, rootNavigator: true).pop();
 
                             if (ok) {
-                              // 4) Éxito
+                              // 4) Éxito (estilo igual al eliminado)
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
                                 builder:
                                     (_) => AlertDialog(
-                                      content: Row(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Icon(
-                                            Icons.check_circle,
+                                            Icons.check_circle_outline,
+                                            size: 48,
                                             color:
                                                 Theme.of(
                                                   context,
                                                 ).colorScheme.primary,
                                           ),
-                                          const SizedBox(width: 16),
-                                          const Expanded(
-                                            child: Text(
-                                              'Disco añadido a tu colección',
+                                          const SizedBox(height: 16),
+                                          Text(
+                                            'Disco añadido a tu colección',
+                                            textAlign: TextAlign.center,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleMedium?.copyWith(
+                                              fontWeight: FontWeight.w600,
                                             ),
                                           ),
                                         ],
@@ -277,8 +286,6 @@ class NuevoDiscoForm extends StatelessWidget {
   String? _required(String? v) =>
       (v == null || v.isEmpty) ? 'Campo requerido' : null;
 }
-
-/* Campos con TypeAhead mantienen la misma decoración con iconos */
 
 class _ArtistField extends StatelessWidget {
   final VinylProvider vinyl;

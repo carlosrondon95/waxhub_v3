@@ -14,7 +14,6 @@ class DetalleDiscoScreen extends StatelessWidget {
   final VinylRecord record;
   const DetalleDiscoScreen({super.key, required this.record});
 
-  // Dimensiones homogéneas para los botones de acción
   static const double _buttonWidth = 140;
   static const double _buttonHeight = 48;
 
@@ -53,6 +52,96 @@ class DetalleDiscoScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _confirmAndDelete(
+    BuildContext context,
+    CollectionProvider coll,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (_) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: Theme.of(context).dividerColor.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            title: const Text('Eliminar disco'),
+            content: const Text(
+              '¿Seguro que quieres eliminar este disco de tu colección?',
+            ),
+            actionsPadding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  'Eliminar',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true) {
+      await coll.deleteRecord(record.id);
+      // éxito como dialog estilizado
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder:
+            (_) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 1.5,
+                ),
+              ),
+              content: Row(
+                children: [
+                  Icon(
+                    Icons.check_circle,
+                    size: 28,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Disco eliminado correctamente',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+      );
+      await Future.delayed(const Duration(seconds: 2));
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop(); // cierra éxito
+        context.pop(); // vuelve atrás
+      }
+    }
+  }
+
   Widget _platformButton({
     required Color color,
     required IconData icon,
@@ -75,26 +164,58 @@ class DetalleDiscoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final collection = context.watch<CollectionProvider>();
-    final updatedRecord = collection.allRecords.firstWhere(
+    final updated = collection.allRecords.firstWhere(
       (r) => r.id == record.id,
       orElse: () => record,
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(updatedRecord.titulo)),
+      appBar: AppBar(
+        title: Text(updated.titulo),
+        actions: [
+          PopupMenuButton<String>(
+            tooltip: 'Opciones',
+            icon: const Icon(Icons.more_vert),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(
+                color: Theme.of(context).dividerColor.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            onSelected: (value) {
+              if (value == 'editar') {
+                context.pushNamed('editar_disco', extra: updated);
+              } else if (value == 'eliminar') {
+                _confirmAndDelete(context, collection);
+              }
+            },
+            itemBuilder:
+                (_) => [
+                  const PopupMenuItem(
+                    value: 'editar',
+                    child: ListTile(
+                      leading: Icon(Icons.edit),
+                      title: Text('Editar'),
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'eliminar',
+                    child: ListTile(
+                      leading: Icon(Icons.delete, color: Colors.red),
+                      title: Text('Eliminar'),
+                    ),
+                  ),
+                ],
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         tooltip:
-            updatedRecord.favorito
-                ? 'Quitar de favoritos'
-                : 'Marcar como favorito',
+            updated.favorito ? 'Quitar de favoritos' : 'Marcar como favorito',
         onPressed:
-            () => collection.toggleFavorite(
-              updatedRecord.id,
-              updatedRecord.favorito,
-            ),
-        child: Icon(
-          updatedRecord.favorito ? Icons.favorite : Icons.favorite_border,
-        ),
+            () => collection.toggleFavorite(updated.id, updated.favorito),
+        child: Icon(updated.favorito ? Icons.favorite : Icons.favorite_border),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -109,15 +230,13 @@ class DetalleDiscoScreen extends StatelessWidget {
                   ),
                   elevation: 4,
                   child: Padding(
-                    // Aumentamos el padding superior para separar del botón
                     padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Título dentro del contenedor, máximo 2 líneas
                         Center(
                           child: Text(
-                            updatedRecord.titulo,
+                            updated.titulo,
                             style: Theme.of(context).textTheme.titleLarge,
                             textAlign: TextAlign.center,
                             maxLines: 2,
@@ -125,12 +244,11 @@ class DetalleDiscoScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // Portada
                         Center(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
-                              proxiedImage(updatedRecord.portadaUrl),
+                              proxiedImage(updated.portadaUrl),
                               height: 220,
                               fit: BoxFit.cover,
                               errorBuilder:
@@ -140,46 +258,44 @@ class DetalleDiscoScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // Información del disco
                         _InfoTile(
                           icon: Icons.person,
                           label: 'Artista',
-                          value: updatedRecord.artista,
+                          value: updated.artista,
                         ),
                         _InfoTile(
                           icon: Icons.album,
                           label: 'Título',
-                          value: updatedRecord.titulo,
+                          value: updated.titulo,
                         ),
                         _InfoTile(
                           icon: Icons.music_note,
                           label: 'Género',
-                          value: updatedRecord.genero,
+                          value: updated.genero,
                         ),
                         _InfoTile(
                           icon: Icons.calendar_today,
                           label: 'Año',
-                          value: updatedRecord.anio,
+                          value: updated.anio,
                         ),
                         _InfoTile(
                           icon: Icons.library_music,
                           label: 'Sello',
-                          value: updatedRecord.sello,
+                          value: updated.sello,
                         ),
-                        if (updatedRecord.lugarCompra.isNotEmpty)
+                        if (updated.lugarCompra.isNotEmpty)
                           _InfoTile(
                             icon: Icons.store_mall_directory,
                             label: 'Adquirido en',
-                            value: updatedRecord.lugarCompra,
+                            value: updated.lugarCompra,
                           ),
-                        if (updatedRecord.descripcion.isNotEmpty)
+                        if (updated.descripcion.isNotEmpty)
                           _InfoTile(
                             icon: Icons.description,
                             label: 'Descripción',
-                            value: updatedRecord.descripcion,
+                            value: updated.descripcion,
                           ),
                         const SizedBox(height: 24),
-                        // Botones Spotify / YouTube
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -190,8 +306,8 @@ class DetalleDiscoScreen extends StatelessWidget {
                               onPressed:
                                   () => _launchSpotifySearch(
                                     context,
-                                    updatedRecord.artista,
-                                    updatedRecord.titulo,
+                                    updated.artista,
+                                    updated.titulo,
                                   ),
                             ),
                             const SizedBox(width: 16),
@@ -202,62 +318,14 @@ class DetalleDiscoScreen extends StatelessWidget {
                               onPressed:
                                   () => _launchYouTubeSearch(
                                     context,
-                                    updatedRecord.artista,
-                                    updatedRecord.titulo,
+                                    updated.artista,
+                                    updated.titulo,
                                   ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                  ),
-                ),
-                // Botones editar y eliminar en esquina del contenedor
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Row(
-                    children: [
-                      IconButton(
-                        tooltip: 'Editar',
-                        icon: const Icon(Icons.edit),
-                        onPressed:
-                            () => context.pushNamed(
-                              'editar_disco',
-                              extra: updatedRecord,
-                            ),
-                      ),
-                      IconButton(
-                        tooltip: 'Eliminar',
-                        icon: const Icon(Icons.delete),
-                        onPressed: () async {
-                          final confirmed = await showDialog<bool>(
-                            context: context,
-                            builder:
-                                (_) => AlertDialog(
-                                  title: const Text('Eliminar disco'),
-                                  content: const Text(
-                                    '¿Seguro que quieres eliminar este disco de tu colección?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => context.pop(false),
-                                      child: const Text('Cancelar'),
-                                    ),
-                                    FilledButton(
-                                      onPressed: () => context.pop(true),
-                                      child: const Text('Eliminar'),
-                                    ),
-                                  ],
-                                ),
-                          );
-                          if (confirmed == true) {
-                            await collection.deleteRecord(updatedRecord.id);
-                            if (context.mounted) context.pop();
-                          }
-                        },
-                      ),
-                    ],
                   ),
                 ),
               ],
