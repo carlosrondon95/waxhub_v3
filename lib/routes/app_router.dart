@@ -1,4 +1,5 @@
 // lib/routes/app_router.dart
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,6 +14,7 @@ import '../screens/map_screen.dart';
 
 /* Ajustes */
 import '../screens/settings_menu_screen.dart';
+import '../screens/appearance_settings_screen.dart';
 import '../screens/information_account_screen.dart';
 import '../screens/about_screen.dart';
 
@@ -93,6 +95,11 @@ class AppRouter {
           path: '/ajustes',
           name: 'ajustes',
           pageBuilder: (_, s) => _fadePage(const SettingsMenuScreen(), s),
+        ),
+        GoRoute(
+          path: '/apariencia',
+          name: 'apariencia',
+          pageBuilder: (_, s) => _fadePage(const AppearanceSettingsScreen(), s),
         ),
         GoRoute(
           path: '/cuenta',

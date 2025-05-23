@@ -1,4 +1,5 @@
 // lib/screens/settings/settings_menu_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../services/user_service.dart';
@@ -9,6 +10,9 @@ class SettingsMenuScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const maxWidth = 450.0;
+    final cardColor = Theme.of(context).cardColor;
+    final shadowColor = Theme.of(context).shadowColor.withOpacity(0.1);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Ajustes')),
       body: Center(
@@ -16,14 +20,14 @@ class SettingsMenuScreen extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: maxWidth),
           margin: const EdgeInsets.symmetric(vertical: 40),
           padding: const EdgeInsets.all(30),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: const BorderRadius.all(Radius.circular(20)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black12,
+                color: shadowColor,
                 blurRadius: 10,
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -36,9 +40,12 @@ class SettingsMenuScreen extends StatelessWidget {
                 'Información de la cuenta',
                 () => context.pushNamed('cuenta'),
               ),
-              _tile(context, Icons.palette_outlined, 'Tema y apariencia', () {
-                /* pendiente */
-              }),
+              _tile(
+                context,
+                Icons.palette_outlined,
+                'Tema y apariencia',
+                () => context.pushNamed('apariencia'),
+              ),
               _tile(context, Icons.language_outlined, 'Idioma', () {
                 /* pendiente */
               }),
@@ -87,9 +94,13 @@ class SettingsMenuScreen extends StatelessWidget {
   ) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon),
-      title: Text(text),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      leading: Icon(icon, color: Theme.of(ctx).iconTheme.color),
+      title: Text(text, style: Theme.of(ctx).textTheme.bodyLarge),
+      trailing: Icon(
+        Icons.arrow_forward_ios,
+        size: 16,
+        color: Theme.of(ctx).iconTheme.color,
+      ),
       onTap: onTap,
     );
   }
