@@ -1,3 +1,4 @@
+// lib/routes/app_router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,7 +10,7 @@ import '../screens/home_screen.dart';
 import '../screens/nuevo_disco_screen.dart';
 import '../screens/collection_screen.dart';
 import '../screens/map_screen.dart';
-import '../screens/map_settings_screen.dart'; // ← Fíjate en esta ruta
+import '../screens/map_settings_screen.dart'; // ← Ruta corregida
 
 /* Ajustes generales */
 import '../screens/settings_menu_screen.dart';
@@ -29,14 +30,15 @@ class AppRouter {
       refreshListenable: authProvider,
       redirect: (context, state) {
         final loggedIn = FirebaseAuth.instance.currentUser != null;
-        final loc = state.location;
+        // Antes: state.location
+        final loc = state.uri.toString();
         const authPaths = ['/', '/login', '/register'];
+
         if (!loggedIn && !authPaths.contains(loc)) return '/login';
         if (loggedIn && authPaths.contains(loc)) return '/home';
         return null;
       },
       routes: [
-        // Auth & Welcome
         GoRoute(
           path: '/',
           name: 'welcome',
@@ -52,15 +54,11 @@ class AppRouter {
           name: 'register',
           builder: (ctx, st) => const RegisterScreen(),
         ),
-
-        // Home
         GoRoute(
           path: '/home',
           name: 'home',
           builder: (ctx, st) => const HomeScreen(),
         ),
-
-        // Colección & Detalle
         GoRoute(
           path: '/nuevo_disco',
           name: 'nuevo_disco',
@@ -137,6 +135,7 @@ class AppRouter {
           builder: (ctx, st) => const AboutScreen(),
         ),
       ],
+      // En go_router 15 se llama errorBuilder
       errorBuilder: (ctx, st) => const WelcomeScreen(),
     );
   }
