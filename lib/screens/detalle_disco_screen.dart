@@ -1,3 +1,5 @@
+// lib/screens/detalle_disco_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -16,9 +18,6 @@ class DetalleDiscoScreen extends StatelessWidget {
   static const double _buttonWidth = 140;
   static const double _buttonHeight = 48;
 
-  //──────────────────────────────────────────────────────────────────────────────
-  //  Helpers deep‑link con feedback seguro
-  //──────────────────────────────────────────────────────────────────────────────
   Future<void> _safeLaunch(BuildContext context, Uri url) async {
     try {
       await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -54,9 +53,6 @@ class DetalleDiscoScreen extends StatelessWidget {
     );
   }
 
-  //──────────────────────────────────────────────────────────────────────────────
-  //  Builder reutilizable para los botones de plataforma
-  //──────────────────────────────────────────────────────────────────────────────
   Widget _platformButton({
     required Color color,
     required IconData icon,
@@ -85,47 +81,7 @@ class DetalleDiscoScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(updatedRecord.titulo),
-        actions: [
-          IconButton(
-            tooltip: 'Editar',
-            icon: const Icon(Icons.edit),
-            onPressed:
-                () => context.pushNamed('editar_disco', extra: updatedRecord),
-          ),
-          IconButton(
-            tooltip: 'Eliminar',
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder:
-                    (_) => AlertDialog(
-                      title: const Text('Eliminar disco'),
-                      content: const Text(
-                        '¿Seguro que quieres eliminar este disco de tu colección?',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => context.pop(false),
-                          child: const Text('Cancelar'),
-                        ),
-                        FilledButton(
-                          onPressed: () => context.pop(true),
-                          child: const Text('Eliminar'),
-                        ),
-                      ],
-                    ),
-              );
-              if (confirmed == true) {
-                await collection.deleteRecord(updatedRecord.id);
-                if (context.mounted) context.pop();
-              }
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(updatedRecord.titulo)),
       floatingActionButton: FloatingActionButton(
         tooltip:
             updatedRecord.favorito
@@ -142,98 +98,167 @@ class DetalleDiscoScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          elevation: 4,
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Stack(
               children: [
-                Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      proxiedImage(updatedRecord.portadaUrl),
-                      height: 220,
-                      fit: BoxFit.cover,
-                      errorBuilder:
-                          (_, __, ___) =>
-                              const Icon(Icons.broken_image, size: 120),
-                    ),
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                ),
-                const SizedBox(height: 24),
-                _InfoTile(
-                  icon: Icons.person,
-                  label: 'Artista',
-                  value: updatedRecord.artista,
-                ),
-                _InfoTile(
-                  icon: Icons.album,
-                  label: 'Título',
-                  value: updatedRecord.titulo,
-                ),
-                _InfoTile(
-                  icon: Icons.music_note,
-                  label: 'Género',
-                  value: updatedRecord.genero,
-                ),
-                _InfoTile(
-                  icon: Icons.calendar_today,
-                  label: 'Año',
-                  value: updatedRecord.anio,
-                ),
-                _InfoTile(
-                  icon: Icons.library_music,
-                  label: 'Sello',
-                  value: updatedRecord.sello,
-                ),
-                if (updatedRecord.lugarCompra.isNotEmpty)
-                  _InfoTile(
-                    icon: Icons.store_mall_directory,
-                    label: 'Adquirido en',
-                    value: updatedRecord.lugarCompra,
-                  ),
-                if (updatedRecord.descripcion.isNotEmpty)
-                  _InfoTile(
-                    icon: Icons.description,
-                    label: 'Descripción',
-                    value: updatedRecord.descripcion,
-                  ),
-                const SizedBox(height: 24),
-                //───────────────────────────────────────────────────────────────
-                //  Botones Spotify / YouTube con tamaño fijo y colores marca
-                //───────────────────────────────────────────────────────────────
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _platformButton(
-                      color: const Color(0xFF1DB954), // verde Spotify
-                      icon: FontAwesomeIcons.spotify,
-                      label: 'Spotify',
-                      onPressed:
-                          () => _launchSpotifySearch(
-                            context,
-                            updatedRecord.artista,
+                  elevation: 4,
+                  child: Padding(
+                    // Aumentamos el padding superior para separar del botón
+                    padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Título dentro del contenedor, máximo 2 líneas
+                        Center(
+                          child: Text(
                             updatedRecord.titulo,
+                            style: Theme.of(context).textTheme.titleLarge,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.visible,
                           ),
-                    ),
-                    const SizedBox(width: 16),
-                    _platformButton(
-                      color: Colors.redAccent, // rojo YouTube
-                      icon: FontAwesomeIcons.youtube,
-                      label: 'YouTube',
-                      onPressed:
-                          () => _launchYouTubeSearch(
-                            context,
-                            updatedRecord.artista,
-                            updatedRecord.titulo,
+                        ),
+                        const SizedBox(height: 16),
+                        // Portada
+                        Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              proxiedImage(updatedRecord.portadaUrl),
+                              height: 220,
+                              fit: BoxFit.cover,
+                              errorBuilder:
+                                  (_, __, ___) =>
+                                      const Icon(Icons.broken_image, size: 120),
+                            ),
                           ),
+                        ),
+                        const SizedBox(height: 24),
+                        // Información del disco
+                        _InfoTile(
+                          icon: Icons.person,
+                          label: 'Artista',
+                          value: updatedRecord.artista,
+                        ),
+                        _InfoTile(
+                          icon: Icons.album,
+                          label: 'Título',
+                          value: updatedRecord.titulo,
+                        ),
+                        _InfoTile(
+                          icon: Icons.music_note,
+                          label: 'Género',
+                          value: updatedRecord.genero,
+                        ),
+                        _InfoTile(
+                          icon: Icons.calendar_today,
+                          label: 'Año',
+                          value: updatedRecord.anio,
+                        ),
+                        _InfoTile(
+                          icon: Icons.library_music,
+                          label: 'Sello',
+                          value: updatedRecord.sello,
+                        ),
+                        if (updatedRecord.lugarCompra.isNotEmpty)
+                          _InfoTile(
+                            icon: Icons.store_mall_directory,
+                            label: 'Adquirido en',
+                            value: updatedRecord.lugarCompra,
+                          ),
+                        if (updatedRecord.descripcion.isNotEmpty)
+                          _InfoTile(
+                            icon: Icons.description,
+                            label: 'Descripción',
+                            value: updatedRecord.descripcion,
+                          ),
+                        const SizedBox(height: 24),
+                        // Botones Spotify / YouTube
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _platformButton(
+                              color: const Color(0xFF1DB954),
+                              icon: FontAwesomeIcons.spotify,
+                              label: 'Spotify',
+                              onPressed:
+                                  () => _launchSpotifySearch(
+                                    context,
+                                    updatedRecord.artista,
+                                    updatedRecord.titulo,
+                                  ),
+                            ),
+                            const SizedBox(width: 16),
+                            _platformButton(
+                              color: Colors.redAccent,
+                              icon: FontAwesomeIcons.youtube,
+                              label: 'YouTube',
+                              onPressed:
+                                  () => _launchYouTubeSearch(
+                                    context,
+                                    updatedRecord.artista,
+                                    updatedRecord.titulo,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                ),
+                // Botones editar y eliminar en esquina del contenedor
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        tooltip: 'Editar',
+                        icon: const Icon(Icons.edit),
+                        onPressed:
+                            () => context.pushNamed(
+                              'editar_disco',
+                              extra: updatedRecord,
+                            ),
+                      ),
+                      IconButton(
+                        tooltip: 'Eliminar',
+                        icon: const Icon(Icons.delete),
+                        onPressed: () async {
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder:
+                                (_) => AlertDialog(
+                                  title: const Text('Eliminar disco'),
+                                  content: const Text(
+                                    '¿Seguro que quieres eliminar este disco de tu colección?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => context.pop(false),
+                                      child: const Text('Cancelar'),
+                                    ),
+                                    FilledButton(
+                                      onPressed: () => context.pop(true),
+                                      child: const Text('Eliminar'),
+                                    ),
+                                  ],
+                                ),
+                          );
+                          if (confirmed == true) {
+                            await collection.deleteRecord(updatedRecord.id);
+                            if (context.mounted) context.pop();
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
