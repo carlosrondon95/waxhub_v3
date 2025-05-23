@@ -1,4 +1,3 @@
-// lib/screens/settings/about_screen.dart
 import 'package:flutter/material.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -6,7 +5,11 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = Theme.of(context).colorScheme.primary;
+    final colorScheme = Theme.of(context).colorScheme;
+    final onBg = colorScheme.onBackground;
+    final onBgMedium = onBg.withOpacity(0.8);
+    final onBgLight = onBg.withOpacity(0.6);
+    final accent = colorScheme.primary;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Acerca de')),
@@ -20,10 +23,9 @@ class AboutScreen extends StatelessWidget {
             Center(
               child: Text(
                 'WaxHub',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: accent,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -31,69 +33,68 @@ class AboutScreen extends StatelessWidget {
             Center(
               child: Text(
                 'Versión 1.0.0',
-                style: TextStyle(fontSize: 18, color: accent.withOpacity(0.8)),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: onBgMedium),
               ),
             ),
             const SizedBox(height: 24),
             Text(
               'WaxHub es una plataforma diseñada especialmente para coleccionistas de vinilos. '
               'Su interfaz te permite:',
-              style: TextStyle(
-                fontSize: 16,
-                height: 1.5,
-                color: Colors.black87,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: onBg, height: 1.5),
             ),
             const SizedBox(height: 12),
             _bullet(
               context,
               'Añadir y catalogar discos de forma ágil.',
               accent,
+              onBg,
             ),
             _bullet(
               context,
               'Crear listas personalizadas y destacar tus favoritos.',
               accent,
+              onBg,
             ),
             _bullet(
               context,
               'Explorar un mapa interactivo de tiendas cercanas.',
               accent,
+              onBg,
             ),
             _bullet(
               context,
               'Disfrutar de acceso seguro y sincronización en la nube.',
               accent,
+              onBg,
             ),
             const SizedBox(height: 24),
             Text(
               'Con WaxHub tendrás tu colección siempre bajo control.',
-              style: TextStyle(
-                fontSize: 16,
-                height: 1.5,
-                color: Colors.black87,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: onBg, height: 1.5),
             ),
             const SizedBox(height: 24),
-            Divider(color: Colors.black12, thickness: 1),
+            Divider(color: Theme.of(context).dividerColor, thickness: 1),
             const SizedBox(height: 16),
             Text(
               'Licencia MIT\n© 2025 WaxHub. Todos los derechos reservados.',
-              style: TextStyle(
-                fontSize: 14,
-                height: 1.4,
-                color: Colors.black54,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: onBgLight, height: 1.4),
             ),
             const SizedBox(height: 24),
             Text(
               'Desarrollado por Carlos Rondón Pérez\n'
               'Proyecto de Fin de Ciclo\n'
               'CFGS Desarrollo de Aplicaciones Multiplataforma',
-              style: TextStyle(
-                fontSize: 14,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: onBgLight,
                 fontStyle: FontStyle.italic,
-                color: Colors.black54,
                 height: 1.4,
               ),
             ),
@@ -103,7 +104,7 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _bullet(BuildContext context, String text, Color accent) {
+  Widget _bullet(BuildContext context, String text, Color accent, Color onBg) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -114,7 +115,9 @@ class AboutScreen extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 16, height: 1.4),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: onBg, height: 1.4),
             ),
           ),
         ],
