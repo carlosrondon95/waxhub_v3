@@ -1,4 +1,3 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +12,7 @@ import 'routes/app_router.dart';
 import 'providers/auth_provider.dart';
 import 'providers/vinyl_provider.dart';
 import 'providers/collection_provider.dart';
+import 'providers/map_provider.dart'; // ← Asegúrate de este import
 import 'services/theme_service.dart';
 
 Future<void> main() async {
@@ -20,8 +20,6 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const Bootstrap());
 }
-
-/* ─────────────────────────────  PROVEEDORES  ───────────────────────────── */
 
 class Bootstrap extends StatelessWidget {
   const Bootstrap({super.key});
@@ -34,13 +32,14 @@ class Bootstrap extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => VinylProvider()),
         ChangeNotifierProvider(create: (_) => CollectionProvider()),
         ChangeNotifierProvider(create: (_) => ThemeService()),
+        ChangeNotifierProvider(
+          create: (_) => MapProvider()..init(),
+        ), // ← Proveedor global
       ],
       child: const MyApp(),
     );
   }
 }
-
-/* ─────────────────────────────  APP  ───────────────────────────── */
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -50,12 +49,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late final GoRouter _router; // se inicializa una sola vez
+  late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
-    // Obtenemos el AuthProvider sin suscribirnos (read).
     final auth = context.read<AuthProvider>();
     _router = AppRouter.router(auth);
   }

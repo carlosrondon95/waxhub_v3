@@ -1,5 +1,3 @@
-// lib/screens/settings/settings_menu_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../services/user_service.dart';
@@ -46,27 +44,31 @@ class SettingsMenuScreen extends StatelessWidget {
                 'Tema y apariencia',
                 () => context.pushNamed('apariencia'),
               ),
-              _tile(context, Icons.language_outlined, 'Idioma', () {
-                /* pendiente */
-              }),
+              _tile(
+                context,
+                Icons.language_outlined,
+                'Idioma',
+                () => context.pushNamed('idioma'),
+              ),
               _tile(
                 context,
                 Icons.notifications_outlined,
                 'Notificaciones',
-                () {
-                  /* pendiente */
-                },
+                () => context.pushNamed('notificaciones'),
               ),
-              _tile(context, Icons.lock_outline, 'Privacidad', () {
-                /* pendiente */
-              }),
+              _tile(
+                context,
+                Icons.map_outlined,
+                'Ajustes de mapa',
+                () => context.pushNamed(
+                  'mapSettings',
+                ), // ← coincide con app_router
+              ),
               _tile(
                 context,
                 Icons.upload_file_outlined,
                 'Exportar / Importar',
-                () {
-                  /* pendiente */
-                },
+                () => context.pushNamed('exportImport'),
               ),
               _tile(
                 context,

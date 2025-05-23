@@ -1,5 +1,3 @@
-// lib/routes/app_router.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,8 +9,9 @@ import '../screens/home_screen.dart';
 import '../screens/nuevo_disco_screen.dart';
 import '../screens/collection_screen.dart';
 import '../screens/map_screen.dart';
+import '../screens/map_settings_screen.dart'; // ← Fíjate en esta ruta
 
-/* Ajustes */
+/* Ajustes generales */
 import '../screens/settings_menu_screen.dart';
 import '../screens/appearance_settings_screen.dart';
 import '../screens/information_account_screen.dart';
@@ -24,108 +23,121 @@ import '../screens/edit_disco_screen.dart';
 import '../models/vinyl_record.dart';
 
 class AppRouter {
-  static GoRouter router(ChangeNotifier authProvider) {
+  static GoRouter router(Listenable authProvider) {
     return GoRouter(
       initialLocation: '/',
       refreshListenable: authProvider,
-      redirect: (BuildContext context, GoRouterState state) {
+      redirect: (context, state) {
         final loggedIn = FirebaseAuth.instance.currentUser != null;
-        final loc = state.uri.toString();
-        final goingToAuth = loc == '/' || loc == '/login' || loc == '/register';
-
-        if (!loggedIn && !goingToAuth) return '/login';
-        if (loggedIn && goingToAuth) return '/home';
+        final loc = state.location;
+        const authPaths = ['/', '/login', '/register'];
+        if (!loggedIn && !authPaths.contains(loc)) return '/login';
+        if (loggedIn && authPaths.contains(loc)) return '/home';
         return null;
       },
       routes: [
+        // Auth & Welcome
         GoRoute(
           path: '/',
           name: 'welcome',
-          pageBuilder: (_, s) => _fadePage(const WelcomeScreen(), s),
+          builder: (ctx, st) => const WelcomeScreen(),
         ),
         GoRoute(
           path: '/login',
           name: 'login',
-          pageBuilder: (_, s) => _fadePage(const LoginScreen(), s),
+          builder: (ctx, st) => const LoginScreen(),
         ),
         GoRoute(
           path: '/register',
           name: 'register',
-          pageBuilder: (_, s) => _fadePage(const RegisterScreen(), s),
+          builder: (ctx, st) => const RegisterScreen(),
         ),
+
+        // Home
         GoRoute(
           path: '/home',
           name: 'home',
-          pageBuilder: (_, s) => _fadePage(const HomeScreen(), s),
+          builder: (ctx, st) => const HomeScreen(),
         ),
+
+        // Colección & Detalle
         GoRoute(
           path: '/nuevo_disco',
           name: 'nuevo_disco',
-          pageBuilder: (_, s) => _fadePage(const NuevoDiscoScreen(), s),
+          builder: (ctx, st) => const NuevoDiscoScreen(),
         ),
         GoRoute(
           path: '/coleccion',
           name: 'coleccion',
-          pageBuilder: (_, s) => _fadePage(const CollectionScreen(), s),
-        ),
-        GoRoute(
-          path: '/mapa_tiendas',
-          name: 'mapa_tiendas',
-          pageBuilder: (_, s) => _fadePage(const MapScreen(), s),
+          builder: (ctx, st) => const CollectionScreen(),
         ),
         GoRoute(
           path: '/detalle_disco',
           name: 'detalle_disco',
-          pageBuilder: (_, s) {
-            final record = s.extra as VinylRecord;
-            return _fadePage(DetalleDiscoScreen(record: record), s);
+          builder: (ctx, st) {
+            final record = st.extra as VinylRecord;
+            return DetalleDiscoScreen(record: record);
           },
         ),
         GoRoute(
           path: '/editar_disco',
           name: 'editar_disco',
-          pageBuilder: (_, s) {
-            final record = s.extra as VinylRecord;
-            return _fadePage(EditDiscoScreen(record: record), s);
+          builder: (ctx, st) {
+            final record = st.extra as VinylRecord;
+            return EditDiscoScreen(record: record);
           },
         ),
 
-        /* Ajustes */
+        // Mapa & Ajustes de Mapa
+        GoRoute(
+          path: '/mapa_tiendas',
+          name: 'mapa_tiendas',
+          builder: (ctx, st) => const MapScreen(),
+        ),
+        GoRoute(
+          path: '/ajustes/mapa',
+          name: 'mapSettings',
+          builder: (ctx, st) => const MapSettingsScreen(),
+        ),
+
+        // Ajustes generales
         GoRoute(
           path: '/ajustes',
           name: 'ajustes',
-          pageBuilder: (_, s) => _fadePage(const SettingsMenuScreen(), s),
+          builder: (ctx, st) => const SettingsMenuScreen(),
         ),
         GoRoute(
           path: '/apariencia',
           name: 'apariencia',
-          pageBuilder: (_, s) => _fadePage(const AppearanceSettingsScreen(), s),
+          builder: (ctx, st) => const AppearanceSettingsScreen(),
         ),
         GoRoute(
           path: '/cuenta',
           name: 'cuenta',
-          pageBuilder: (_, s) => _fadePage(const InformationAccountScreen(), s),
+          builder: (ctx, st) => const InformationAccountScreen(),
+        ),
+        GoRoute(
+          path: '/idioma',
+          name: 'idioma',
+          builder: (ctx, st) => const InformationAccountScreen(),
+        ),
+        GoRoute(
+          path: '/notificaciones',
+          name: 'notificaciones',
+          builder: (ctx, st) => const InformationAccountScreen(),
+        ),
+        GoRoute(
+          path: '/exportImport',
+          name: 'exportImport',
+          builder: (ctx, st) => const InformationAccountScreen(),
         ),
         GoRoute(
           path: '/acerca',
           name: 'acerca',
-          pageBuilder: (_, s) => _fadePage(const AboutScreen(), s),
+          builder: (ctx, st) => const AboutScreen(),
         ),
       ],
-      errorPageBuilder: (_, __) => MaterialPage(child: const WelcomeScreen()),
-    );
-  }
-
-  static CustomTransitionPage<void> _fadePage(
-    Widget child,
-    GoRouterState state,
-  ) {
-    return CustomTransitionPage<void>(
-      key: state.pageKey,
-      child: child,
-      transitionsBuilder:
-          (context, anim, sec, child) =>
-              FadeTransition(opacity: anim, child: child),
+      errorBuilder: (ctx, st) => const WelcomeScreen(),
     );
   }
 }
