@@ -12,7 +12,7 @@ import 'routes/app_router.dart';
 import 'providers/auth_provider.dart';
 import 'providers/vinyl_provider.dart';
 import 'providers/collection_provider.dart';
-import 'providers/map_provider.dart';
+import 'providers/map_provider.dart'; // ← Asegúrate de este import
 import 'services/theme_service.dart';
 
 Future<void> main() async {
@@ -32,7 +32,9 @@ class Bootstrap extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => VinylProvider()),
         ChangeNotifierProvider(create: (_) => CollectionProvider()),
         ChangeNotifierProvider(create: (_) => ThemeService()),
-        ChangeNotifierProvider(create: (_) => MapProvider()..init()),
+        ChangeNotifierProvider(
+          create: (_) => MapProvider()..init(),
+        ), // ← Proveedor global
       ],
       child: const MyApp(),
     );

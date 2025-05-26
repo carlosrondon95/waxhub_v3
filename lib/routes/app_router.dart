@@ -1,5 +1,3 @@
-// lib/routes/app_router.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,7 +10,6 @@ import '../screens/nuevo_disco_screen.dart';
 import '../screens/collection_screen.dart';
 import '../screens/map_screen.dart';
 import '../screens/map_settings_screen.dart';
-import '../screens/discogs_settings_screen.dart';
 
 /* Ajustes generales */
 import '../screens/settings_menu_screen.dart';
@@ -97,13 +94,6 @@ class AppRouter {
           path: '/ajustes/mapa',
           name: 'mapSettings',
           builder: (ctx, st) => const MapSettingsScreen(),
-        ),
-
-        // Discogs
-        GoRoute(
-          path: '/ajustes/discogs',
-          name: 'discogsSettings',
-          builder: (ctx, st) => const DiscogsSettingsScreen(),
         ),
 
         // Ajustes generales
