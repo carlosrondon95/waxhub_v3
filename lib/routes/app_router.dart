@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../services/notification_service.dart';
 
 import '../screens/welcome_screen.dart';
 import '../screens/login_screen.dart';
@@ -19,8 +20,9 @@ import '../screens/appearance_settings_screen.dart';
 import '../screens/information_account_screen.dart';
 import '../screens/notifications_settings_screen.dart';
 import '../screens/informe_uso_screen.dart';
+import '../screens/faq_screen.dart';
+//import '../screens/help_support_screen.dart';
 import '../screens/about_screen.dart';
-import '../services/notification_service.dart';
 
 /* Vinilos */
 import '../screens/detalle_disco_screen.dart';
@@ -63,6 +65,7 @@ class AppRouter {
           name: 'home',
           builder: (ctx, st) => const HomeScreen(),
         ),
+
         GoRoute(
           path: '/nuevo_disco',
           name: 'nuevo_disco',
@@ -90,7 +93,7 @@ class AppRouter {
           },
         ),
 
-        // Mapa & Ajustes de Mapa
+        // Mapa & ajustes de mapa
         GoRoute(
           path: '/mapa_tiendas',
           name: 'mapa_tiendas',
@@ -128,6 +131,16 @@ class AppRouter {
           name: 'informe_uso',
           builder: (ctx, st) => const InformeUsoScreen(),
         ),
+        GoRoute(
+          path: '/faq',
+          name: 'faq',
+          builder: (ctx, st) => const FaqScreen(),
+        ),
+        /*GoRoute(
+          path: '/ayuda',
+          name: 'help',
+          builder: (ctx, st) => const HelpSupportScreen(),
+        ),*/
         GoRoute(
           path: '/acerca',
           name: 'acerca',
