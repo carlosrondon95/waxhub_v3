@@ -42,6 +42,12 @@
 @import flutter_keyboard_visibility;
 #endif
 
+#if __has_include(<flutter_local_notifications/FlutterLocalNotificationsPlugin.h>)
+#import <flutter_local_notifications/FlutterLocalNotificationsPlugin.h>
+#else
+@import flutter_local_notifications;
+#endif
+
 #if __has_include(<google_maps_flutter_ios/FLTGoogleMapsPlugin.h>)
 #import <google_maps_flutter_ios/FLTGoogleMapsPlugin.h>
 #else
@@ -111,6 +117,7 @@
   [FLTFirebaseCorePlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTFirebaseCorePlugin"]];
   [FLTFirebaseStoragePlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTFirebaseStoragePlugin"]];
   [FlutterKeyboardVisibilityPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterKeyboardVisibilityPlugin"]];
+  [FlutterLocalNotificationsPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterLocalNotificationsPlugin"]];
   [FLTGoogleMapsPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTGoogleMapsPlugin"]];
   [FLTGoogleSignInPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTGoogleSignInPlugin"]];
   [FLTImageCropperPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTImageCropperPlugin"]];

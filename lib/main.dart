@@ -1,3 +1,4 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -9,15 +10,23 @@ import 'core/app_scroll_behavior.dart';
 import 'firebase_options.dart';
 import 'routes/app_router.dart';
 
+// Providers
 import 'providers/auth_provider.dart';
 import 'providers/vinyl_provider.dart';
 import 'providers/collection_provider.dart';
-import 'providers/map_provider.dart'; // ← Asegúrate de este import
+import 'providers/map_provider.dart';
+import 'providers/notifications_provider.dart';
+
+// Servicios
+import 'services/notification_service.dart';
 import 'services/theme_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  await NotificationService.init(); // ya dejamos aquí la init
+
   runApp(const Bootstrap());
 }
 
@@ -32,9 +41,8 @@ class Bootstrap extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => VinylProvider()),
         ChangeNotifierProvider(create: (_) => CollectionProvider()),
         ChangeNotifierProvider(create: (_) => ThemeService()),
-        ChangeNotifierProvider(
-          create: (_) => MapProvider()..init(),
-        ), // ← Proveedor global
+        ChangeNotifierProvider(create: (_) => MapProvider()..init()),
+        ChangeNotifierProvider(create: (_) => NotificationsProvider()),
       ],
       child: const MyApp(),
     );
@@ -75,7 +83,7 @@ class _MyAppState extends State<MyApp> {
         theme: lightTheme,
         darkTheme: darkTheme,
         themeMode: themeService.mode,
-        routerConfig: _router,
+        routerConfig: _router, // ← sólo esto
         scrollBehavior: AppScrollBehavior(),
       ),
     );

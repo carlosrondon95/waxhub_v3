@@ -13,6 +13,7 @@ dependencies:
 
   # State management
   provider: ^6.0.0
+  flutter_local_notifications: ^19.2.1
 
 
   # Firebase Core y servicios
@@ -40,6 +41,7 @@ dependencies:
   location: ^8.0.0
   flutter_dotenv: ^5.2.1
   easy_localization: ^3.0.7
+  timezone: ^0.10.1
 
   # Networking
   dio: ^5.0.0

@@ -1,9 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_google_maps_webservices/places.dart' as g_places;
+
 import '../services/google_places_service.dart';
+import '../services/notification_service.dart';
 
 class MapProvider extends ChangeNotifier {
   // ————————————————————————————————————————————— Ajustes de mapa —————————————————————————————————————————————
@@ -60,19 +64,22 @@ class MapProvider extends ChangeNotifier {
 
   /// Inicializa permisos, localización y marcadores
   Future<void> init() async {
-    // Solicita permiso
+    // Carga ajustes de mapa
+    await _loadSettings();
+
+    // Solicita permiso de ubicación
     final perm = await _loc.requestPermission();
     hasPermission = perm == PermissionStatus.granted;
     notifyListeners();
     if (!hasPermission) return;
 
-    // Consigue localización
+    // Obtiene ubicación actual
     final l = await _loc.getLocation();
     if (l.latitude == null || l.longitude == null) return;
     userLocation = LatLng(l.latitude!, l.longitude!);
     notifyListeners();
 
-    // Carga marcadores según radio actual
+    // Carga marcadores y lanza notificaciones si procede
     await _loadMarkers();
   }
 
@@ -81,13 +88,16 @@ class MapProvider extends ChangeNotifier {
 
     isLoading = true;
     notifyListeners();
+
     try {
+      // Obtiene tiendas según radio
       shops = await _places.buscarTiendas(
         lat: userLocation!.latitude,
         lng: userLocation!.longitude,
-        radius: radius, // usa radio de ajustes
+        radius: radius,
       );
 
+      // Crea marcadores para el mapa
       markers =
           shops.map((p) {
             final geo = p.geometry!.location;
@@ -97,8 +107,30 @@ class MapProvider extends ChangeNotifier {
               infoWindow: InfoWindow(title: p.name),
             );
           }).toSet();
+
+      // Comprueba preferencias para notificar tiendas cercanas
+      final prefs = await SharedPreferences.getInstance();
+      final notify = prefs.getBool('notify_nearby_shops') ?? false;
+      if (notify) {
+        for (var shop in shops) {
+          final lat2 = shop.geometry!.location.lat;
+          final lng2 = shop.geometry!.location.lng;
+          final dist = _distanceInMeters(
+            userLocation!.latitude,
+            userLocation!.longitude,
+            lat2,
+            lng2,
+          );
+          if (dist < 1000) {
+            await NotificationService.showNearbyShopNotification(
+              shop.name,
+              dist,
+            );
+          }
+        }
+      }
     } catch (e) {
-      debugPrint('Places error: $e');
+      debugPrint('Places error: \$e');
       shops = [];
       markers = {};
     } finally {
@@ -106,4 +138,21 @@ class MapProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Calcula la distancia (m) entre dos coordenadas (haversine)
+  double _distanceInMeters(double lat1, double lon1, double lat2, double lon2) {
+    const R = 6371000; // radio Tierra en metros
+    final dLat = _deg2rad(lat2 - lat1);
+    final dLon = _deg2rad(lon2 - lon1);
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
+        cos(_deg2rad(lat1)) *
+            cos(_deg2rad(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return R * c;
+  }
+
+  double _deg2rad(double deg) => deg * (pi / 180);
 }
