@@ -1,9 +1,9 @@
+// lib/routes/app_router.dart
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/notification_service.dart';
 
-// Pantallas
 import '../screens/welcome_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/register_screen.dart';
@@ -20,6 +20,7 @@ import '../screens/information_account_screen.dart';
 import '../screens/notifications_settings_screen.dart';
 import '../screens/informe_uso_screen.dart';
 import '../screens/about_screen.dart';
+import '../services/notification_service.dart';
 
 /* Vinilos */
 import '../screens/detalle_disco_screen.dart';
@@ -115,11 +116,6 @@ class AppRouter {
         GoRoute(
           path: '/cuenta',
           name: 'cuenta',
-          builder: (ctx, st) => const InformationAccountScreen(),
-        ),
-        GoRoute(
-          path: '/idioma',
-          name: 'idioma',
           builder: (ctx, st) => const InformationAccountScreen(),
         ),
         GoRoute(
