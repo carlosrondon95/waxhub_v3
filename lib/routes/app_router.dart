@@ -1,8 +1,7 @@
-// lib/routes/app_router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/notification_service.dart'; // ← para acceder al navigatorKey
+import '../services/notification_service.dart';
 
 // Pantallas
 import '../screens/welcome_screen.dart';
@@ -19,6 +18,7 @@ import '../screens/settings_menu_screen.dart';
 import '../screens/appearance_settings_screen.dart';
 import '../screens/information_account_screen.dart';
 import '../screens/notifications_settings_screen.dart';
+import '../screens/informe_uso_screen.dart';
 import '../screens/about_screen.dart';
 
 /* Vinilos */
@@ -29,7 +29,7 @@ import '../models/vinyl_record.dart';
 class AppRouter {
   static GoRouter router(Listenable authProvider) {
     return GoRouter(
-      navigatorKey: NotificationService.navigatorKey, // ← inyectamos aquí
+      navigatorKey: NotificationService.navigatorKey,
       initialLocation: '/',
       refreshListenable: authProvider,
       redirect: (context, state) {
@@ -126,6 +126,11 @@ class AppRouter {
           path: '/ajustes/notificaciones',
           name: 'notificaciones',
           builder: (ctx, st) => const NotificationsSettingsScreen(),
+        ),
+        GoRoute(
+          path: '/ajustes/informe_uso',
+          name: 'informe_uso',
+          builder: (ctx, st) => const InformeUsoScreen(),
         ),
         GoRoute(
           path: '/acerca',

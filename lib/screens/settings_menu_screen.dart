@@ -58,6 +58,12 @@ class SettingsMenuScreen extends StatelessWidget {
               ),
               _tile(
                 context,
+                Icons.insert_chart_outlined,
+                'Informe de uso',
+                () => context.pushNamed('informe_uso'),
+              ),
+              _tile(
+                context,
                 Icons.map_outlined,
                 'Ajustes de mapa',
                 () => context.pushNamed('mapSettings'),

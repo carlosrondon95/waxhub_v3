@@ -1,3 +1,5 @@
+// lib/providers/collection_provider.dart
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -22,7 +24,6 @@ class CollectionProvider extends ChangeNotifier {
 
   /* ─── Constructor ─────────────────────────────────────── */
   CollectionProvider() {
-    // Cada vez que cambia la sesión, ajusta la suscripción
     _auth.authStateChanges().listen((user) {
       _subscription?.cancel();
       if (user != null) {
@@ -65,13 +66,12 @@ class CollectionProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  /* ─── Getters (públicos) ───────────────────────────────── */
+  /* ─── Getters ──────────────────────────────────────────── */
 
   List<VinylRecord> get allRecords => List.unmodifiable(_allRecords);
 
   List<VinylRecord> get filteredRecords {
     final q = _searchQuery.toLowerCase();
-
     var list =
         _allRecords.where((r) {
           final matchSearch =
@@ -102,7 +102,7 @@ class CollectionProvider extends ChangeNotifier {
   String get viewMode => _viewMode;
   bool get isLoading => _isLoading;
 
-  /* ─── Setters (filtros y vista) ───────────────────────── */
+  /* ─── Setters ──────────────────────────────────────────── */
 
   void setSearchQuery(String q) {
     _searchQuery = q;
@@ -134,7 +134,9 @@ class CollectionProvider extends ChangeNotifier {
   Future<void> toggleFavorite(String id, bool current) async {
     await _firestore.collection('discos').doc(id).update({
       'favorito': !current,
+      'favoritedAt': !current ? FieldValue.serverTimestamp() : null,
     });
+    // El listener de snapshots propagará el cambio
   }
 
   Future<void> updateRecord(VinylRecord updated) async {

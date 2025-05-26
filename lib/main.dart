@@ -1,5 +1,7 @@
 // lib/main.dart
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -16,6 +18,7 @@ import 'providers/vinyl_provider.dart';
 import 'providers/collection_provider.dart';
 import 'providers/map_provider.dart';
 import 'providers/notifications_provider.dart';
+import 'providers/summary_provider.dart';
 
 // Servicios
 import 'services/notification_service.dart';
@@ -23,15 +26,21 @@ import 'services/theme_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  await NotificationService.init(); // ya dejamos aquí la init
+  // Forzar solo modo retrato
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await NotificationService.init();
 
   runApp(const Bootstrap());
 }
 
 class Bootstrap extends StatelessWidget {
-  const Bootstrap({super.key});
+  const Bootstrap({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +52,7 @@ class Bootstrap extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeService()),
         ChangeNotifierProvider(create: (_) => MapProvider()..init()),
         ChangeNotifierProvider(create: (_) => NotificationsProvider()),
+        ChangeNotifierProvider(create: (_) => SummaryProvider()),
       ],
       child: const MyApp(),
     );
@@ -50,7 +60,7 @@ class Bootstrap extends StatelessWidget {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -83,7 +93,7 @@ class _MyAppState extends State<MyApp> {
         theme: lightTheme,
         darkTheme: darkTheme,
         themeMode: themeService.mode,
-        routerConfig: _router, // ← sólo esto
+        routerConfig: _router,
         scrollBehavior: AppScrollBehavior(),
       ),
     );

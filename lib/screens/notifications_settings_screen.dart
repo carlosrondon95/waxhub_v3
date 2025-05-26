@@ -33,7 +33,6 @@ class NotificationsSettingsScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Opción: notificar tiendas cercanas
               ListTile(
                 leading: Icon(
                   Icons.storefront_outlined,
@@ -42,28 +41,7 @@ class NotificationsSettingsScreen extends StatelessWidget {
                 title: const Text('Tiendas cercanas'),
                 trailing: Switch(
                   value: notif.notifyNearbyShops,
-                  onChanged: (value) => notif.setNotifyNearbyShops(value),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Opción: intervalo de envío de resumen
-              ListTile(
-                leading: Icon(
-                  Icons.schedule_outlined,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-                title: const Text('Informe de uso'),
-                trailing: DropdownButton<int>(
-                  value: notif.summaryIntervalDays,
-                  items: const [
-                    DropdownMenuItem(value: 1, child: Text('Diario')),
-                    DropdownMenuItem(value: 7, child: Text('Semanal')),
-                    DropdownMenuItem(value: 14, child: Text('Cada 2 semanas')),
-                    DropdownMenuItem(value: 30, child: Text('Mensual')),
-                  ],
-                  onChanged: (days) {
-                    if (days != null) notif.setSummaryIntervalDays(days);
-                  },
+                  onChanged: notif.setNotifyNearbyShops,
                 ),
               ),
             ],
