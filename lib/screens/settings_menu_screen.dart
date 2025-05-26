@@ -1,3 +1,5 @@
+// lib/screens/settings/settings_menu_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../services/user_service.dart';
@@ -60,15 +62,13 @@ class SettingsMenuScreen extends StatelessWidget {
                 context,
                 Icons.map_outlined,
                 'Ajustes de mapa',
-                () => context.pushNamed(
-                  'mapSettings',
-                ), // ← coincide con app_router
+                () => context.pushNamed('mapSettings'),
               ),
               _tile(
                 context,
-                Icons.upload_file_outlined,
-                'Exportar / Importar',
-                () => context.pushNamed('exportImport'),
+                Icons.album_outlined,
+                'Discogs',
+                () => context.pushNamed('discogsSettings'),
               ),
               _tile(
                 context,

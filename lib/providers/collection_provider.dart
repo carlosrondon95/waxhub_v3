@@ -1,18 +1,26 @@
+// lib/providers/collection_provider.dart
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/vinyl_record.dart';
+import '../services/discogs_service.dart';
+
+/// Modo de sincronización con Discogs
+enum SyncMode { manual, auto }
 
 class CollectionProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final DiscogsService _discogsService = DiscogsService();
 
   StreamSubscription<QuerySnapshot>? _subscription;
 
-  /* ─── Estado ───────────────────────────────────────────── */
+  /* ─── Colección ───────────────────────────────────────── */
   List<VinylRecord> _allRecords = [];
   String _searchQuery = '';
   String _sortBy = 'titulo';
@@ -20,9 +28,13 @@ class CollectionProvider extends ChangeNotifier {
   String _viewMode = 'lista';
   bool _isLoading = false;
 
+  /* ─── Ajustes Discogs ─────────────────────────────────── */
+  SyncMode syncMode = SyncMode.manual;
+  int autoSyncHours = 24;
+
   /* ─── Constructor ─────────────────────────────────────── */
   CollectionProvider() {
-    // Cada vez que cambia la sesión, ajusta la suscripción
+    _loadDiscogsSettings();
     _auth.authStateChanges().listen((user) {
       _subscription?.cancel();
       if (user != null) {
@@ -33,6 +45,62 @@ class CollectionProvider extends ChangeNotifier {
         notifyListeners();
       }
     });
+  }
+
+  /// Carga desde SharedPreferences los ajustes de Discogs
+  Future<void> _loadDiscogsSettings() async {
+    final sp = await SharedPreferences.getInstance();
+    syncMode = SyncMode.values[sp.getInt('discogs_sync_mode') ?? 0];
+    autoSyncHours = sp.getInt('discogs_auto_sync_hours') ?? autoSyncHours;
+    notifyListeners();
+  }
+
+  /// Persiste en SharedPreferences los ajustes de Discogs
+  Future<void> saveDiscogsSettings() async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setInt('discogs_sync_mode', syncMode.index);
+    await sp.setInt('discogs_auto_sync_hours', autoSyncHours);
+  }
+
+  /// Importa toda la colección desde Discogs
+  Future<void> importFromDiscogs() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('No hay usuario autenticado');
+      // Usa displayName, o extrae username de email si prefieres
+      final username =
+          user.displayName ?? user.email?.split('@')[0] ?? user.uid;
+      await _discogsService.importCollection(username);
+      _subscribeToRecords(user.uid);
+    } catch (e) {
+      debugPrint('Error importando de Discogs: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Actualiza manualmente la colección desde Discogs
+  Future<void> updateFromDiscogs() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('No hay usuario autenticado');
+      final username =
+          user.displayName ?? user.email?.split('@')[0] ?? user.uid;
+      await _discogsService.updateCollection(username);
+      _subscribeToRecords(user.uid);
+    } catch (e) {
+      debugPrint('Error actualizando de Discogs: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   /* ─── Suscripción a Firestore ─────────────────────────── */
@@ -71,7 +139,6 @@ class CollectionProvider extends ChangeNotifier {
 
   List<VinylRecord> get filteredRecords {
     final q = _searchQuery.toLowerCase();
-
     var list =
         _allRecords.where((r) {
           final matchSearch =
@@ -102,7 +169,10 @@ class CollectionProvider extends ChangeNotifier {
   String get viewMode => _viewMode;
   bool get isLoading => _isLoading;
 
-  /* ─── Setters (filtros y vista) ───────────────────────── */
+  SyncMode get discogsSyncMode => syncMode;
+  int get discogsAutoSyncHours => autoSyncHours;
+
+  /* ─── Setters (filtros, vista y Discogs) ───────────────── */
 
   void setSearchQuery(String q) {
     _searchQuery = q;
@@ -124,11 +194,20 @@ class CollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setDiscogsSyncMode(SyncMode mode) {
+    syncMode = mode;
+    notifyListeners();
+  }
+
+  void setDiscogsAutoSyncHours(int hours) {
+    autoSyncHours = hours;
+    notifyListeners();
+  }
+
   /* ─── Operaciones de escritura ────────────────────────── */
 
   Future<void> deleteRecord(String id) async {
     await _firestore.collection('discos').doc(id).delete();
-    // El listener actualizará la lista
   }
 
   Future<void> toggleFavorite(String id, bool current) async {

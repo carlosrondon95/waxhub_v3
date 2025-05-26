@@ -1,4 +1,5 @@
 // lib/routes/app_router.dart
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,7 +11,8 @@ import '../screens/home_screen.dart';
 import '../screens/nuevo_disco_screen.dart';
 import '../screens/collection_screen.dart';
 import '../screens/map_screen.dart';
-import '../screens/map_settings_screen.dart'; // ← Ruta corregida
+import '../screens/map_settings_screen.dart';
+import '../screens/discogs_settings_screen.dart';
 
 /* Ajustes generales */
 import '../screens/settings_menu_screen.dart';
@@ -30,7 +32,6 @@ class AppRouter {
       refreshListenable: authProvider,
       redirect: (context, state) {
         final loggedIn = FirebaseAuth.instance.currentUser != null;
-        // Antes: state.location
         final loc = state.uri.toString();
         const authPaths = ['/', '/login', '/register'];
 
@@ -98,6 +99,13 @@ class AppRouter {
           builder: (ctx, st) => const MapSettingsScreen(),
         ),
 
+        // Discogs
+        GoRoute(
+          path: '/ajustes/discogs',
+          name: 'discogsSettings',
+          builder: (ctx, st) => const DiscogsSettingsScreen(),
+        ),
+
         // Ajustes generales
         GoRoute(
           path: '/ajustes',
@@ -125,17 +133,11 @@ class AppRouter {
           builder: (ctx, st) => const InformationAccountScreen(),
         ),
         GoRoute(
-          path: '/exportImport',
-          name: 'exportImport',
-          builder: (ctx, st) => const InformationAccountScreen(),
-        ),
-        GoRoute(
           path: '/acerca',
           name: 'acerca',
           builder: (ctx, st) => const AboutScreen(),
         ),
       ],
-      // En go_router 15 se llama errorBuilder
       errorBuilder: (ctx, st) => const WelcomeScreen(),
     );
   }

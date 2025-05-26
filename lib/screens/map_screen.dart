@@ -1,8 +1,8 @@
 // lib/screens/map_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-
 import '../providers/map_provider.dart';
 
 class MapScreen extends StatefulWidget {
@@ -14,85 +14,94 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   GoogleMapController? _mapCtrl;
-
-  /// Clave que obligará a recrear el widget GoogleMap en Web cuando
-  /// cambie el número de marcadores.
   UniqueKey _mapKey = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => MapProvider()..init(),
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Mapa de Tiendas')),
-        body: Consumer<MapProvider>(
-          builder: (_, map, __) {
-            if (!map.hasPermission) {
-              return const Center(child: Text('Permiso de ubicación denegado'));
-            }
-            if (map.isLoading || map.userLocation == null) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    // Escuchamos el provider para que al cambiar settings se reconstruya.
+    final mapProv = context.watch<MapProvider>();
 
-            // Si cambia el número de marcadores, generamos una key nueva
-            _mapKey = UniqueKey();
+    // Generamos un style JSON para ocultar POIs si hace falta.
+    final poiStyle =
+        mapProv.showPOIs
+            ? null
+            : '''[
+      {
+        "featureType": "poi",
+        "stylers": [{"visibility": "off"}]
+      }
+    ]''';
 
-            return Column(
-              children: [
-                // ─── Mapa (mitad superior) ───────────────────────────
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.45,
-                  width: double.infinity,
-                  child: GoogleMap(
-                    key: _mapKey, // 🔑 fuerza rebuild en Web
-                    initialCameraPosition: CameraPosition(
-                      target: map.userLocation!,
-                      zoom: 13,
+    // Cada vez que cambie el número de marcadores o el tipo de mapa, forzamos rebuild en Web.
+    _mapKey = UniqueKey();
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Mapa de Tiendas')),
+      body: Center(
+        child:
+            mapProv.isLoading || mapProv.userLocation == null
+                ? const CircularProgressIndicator()
+                : Column(
+                  children: [
+                    // Mapa
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.45,
+                      width: double.infinity,
+                      child: GoogleMap(
+                        key: _mapKey,
+                        mapType: mapProv.mapType, // ← Aplica el tipo de mapa
+                        initialCameraPosition: CameraPosition(
+                          target: mapProv.userLocation!,
+                          zoom: 13,
+                        ),
+                        myLocationEnabled: true,
+                        markers: mapProv.markers,
+                        onMapCreated: (controller) {
+                          _mapCtrl = controller;
+                          if (poiStyle != null) {
+                            _mapCtrl!.setMapStyle(poiStyle);
+                          }
+                        },
+                      ),
                     ),
-                    myLocationEnabled: true,
-                    markers: map.markers,
-                    onMapCreated: (c) => _mapCtrl = c,
-                  ),
-                ),
 
-                const Divider(height: 1),
+                    const Divider(height: 1),
 
-                // ─── Lista de tiendas (mitad inferior) ───────────────
-                Expanded(
-                  child:
-                      map.shops.isEmpty
-                          ? const Center(child: Text('Sin tiendas cercanas'))
-                          : ListView.separated(
-                            itemCount: map.shops.length,
-                            separatorBuilder:
-                                (_, __) => const Divider(height: 0),
-                            itemBuilder: (_, idx) {
-                              final shop = map.shops[idx];
-                              final geo = shop.geometry!.location;
-                              return ListTile(
-                                leading: const Icon(Icons.store),
-                                title: Text(shop.name),
-                                subtitle: Text(
-                                  shop.vicinity ??
-                                      '(${geo.lat.toStringAsFixed(4)}, '
-                                          '${geo.lng.toStringAsFixed(4)})',
-                                ),
-                                onTap: () {
-                                  _mapCtrl?.animateCamera(
-                                    CameraUpdate.newLatLngZoom(
-                                      LatLng(geo.lat, geo.lng),
-                                      15,
+                    // Lista de tiendas
+                    Expanded(
+                      child:
+                          mapProv.shops.isEmpty
+                              ? const Center(
+                                child: Text('Sin tiendas cercanas'),
+                              )
+                              : ListView.separated(
+                                separatorBuilder:
+                                    (_, __) => const Divider(height: 0),
+                                itemCount: mapProv.shops.length,
+                                itemBuilder: (_, i) {
+                                  final shop = mapProv.shops[i];
+                                  final loc = shop.geometry!.location;
+                                  return ListTile(
+                                    leading: const Icon(Icons.store),
+                                    title: Text(shop.name),
+                                    subtitle: Text(
+                                      shop.vicinity ??
+                                          '(${loc.lat.toStringAsFixed(4)}, ${loc.lng.toStringAsFixed(4)})',
                                     ),
+                                    onTap: () {
+                                      _mapCtrl?.animateCamera(
+                                        CameraUpdate.newLatLngZoom(
+                                          LatLng(loc.lat, loc.lng),
+                                          15,
+                                        ),
+                                      );
+                                    },
                                   );
                                 },
-                              );
-                            },
-                          ),
+                              ),
+                    ),
+                  ],
                 ),
-              ],
-            );
-          },
-        ),
       ),
     );
   }
