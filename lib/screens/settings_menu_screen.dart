@@ -1,5 +1,3 @@
-// lib/screens/settings/settings_menu_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../services/user_service.dart';

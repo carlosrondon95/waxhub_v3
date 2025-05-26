@@ -1,5 +1,3 @@
-// lib/routes/app_router.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,7 +19,7 @@ import '../screens/information_account_screen.dart';
 import '../screens/notifications_settings_screen.dart';
 import '../screens/informe_uso_screen.dart';
 import '../screens/faq_screen.dart';
-//import '../screens/help_support_screen.dart';
+import '../screens/help_support_screen.dart';
 import '../screens/about_screen.dart';
 
 /* Vinilos */
@@ -66,6 +64,7 @@ class AppRouter {
           builder: (ctx, st) => const HomeScreen(),
         ),
 
+        // Vinilos
         GoRoute(
           path: '/nuevo_disco',
           name: 'nuevo_disco',
@@ -93,7 +92,7 @@ class AppRouter {
           },
         ),
 
-        // Mapa & ajustes de mapa
+        // Mapa
         GoRoute(
           path: '/mapa_tiendas',
           name: 'mapa_tiendas',
@@ -136,11 +135,11 @@ class AppRouter {
           name: 'faq',
           builder: (ctx, st) => const FaqScreen(),
         ),
-        /*GoRoute(
+        GoRoute(
           path: '/ayuda',
           name: 'help',
           builder: (ctx, st) => const HelpSupportScreen(),
-        ),*/
+        ),
         GoRoute(
           path: '/acerca',
           name: 'acerca',
