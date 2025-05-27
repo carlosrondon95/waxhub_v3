@@ -1,7 +1,7 @@
 // lib/widgets/change_email_section.dart
 
 import 'package:flutter/material.dart';
-import '../services/user_service.dart';
+import '/services/user_service.dart';
 
 class ChangeEmailSection extends StatefulWidget {
   final String initialEmail;

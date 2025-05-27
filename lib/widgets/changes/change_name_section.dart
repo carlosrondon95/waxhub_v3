@@ -1,7 +1,7 @@
 // lib/widgets/change_name_section.dart
 
 import 'package:flutter/material.dart';
-import '../services/user_service.dart';
+import '/services/user_service.dart';
 
 class ChangeNameSection extends StatefulWidget {
   final String initialName;

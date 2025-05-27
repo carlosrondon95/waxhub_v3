@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/vinyl_provider.dart';
-import '../widgets/nuevo_disco_form.dart';
+import '/providers/vinyl_provider.dart';
+import '/widgets/fields/nuevo_disco_form.dart';
 
 class NuevoDiscoScreen extends StatelessWidget {
   const NuevoDiscoScreen({super.key});

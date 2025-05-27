@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/auth_provider.dart';
-import '../widgets/input_form_field.dart';
-import '../widgets/password_field.dart';
+import '/providers/auth_provider.dart';
+import '/widgets//fields/input_form_field.dart';
+import '/widgets/fields/password_field.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);

@@ -5,29 +5,29 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/notification_service.dart';
 
-import '../screens/welcome_screen.dart';
-import '../screens/login_screen.dart';
-import '../screens/register_screen.dart';
-import '../screens/home_screen.dart';
-import '../screens/nuevo_disco_screen.dart';
-import '../screens/collection_screen.dart';
-import '../screens/map_screen.dart';
-import '../screens/map_settings_screen.dart';
+import '/screens/app/welcome_screen.dart';
+import '/screens/app/login_screen.dart';
+import '/screens/app/register_screen.dart';
+import '/screens/app/home_screen.dart';
+import '/screens/disco/nuevo_disco_screen.dart';
+import '/screens/app/collection_screen.dart';
+import '/screens/app/map_screen.dart';
+import '/screens/settings/map_settings_screen.dart';
 
 /* Ajustes generales */
-import '../screens/settings_menu_screen.dart';
-import '../screens/appearance_settings_screen.dart';
-import '../screens/information_account_screen.dart';
-import '../screens/notifications_settings_screen.dart';
-import '../screens/informe_uso_screen.dart';
-import '../screens/faq_screen.dart';
+import '/screens/app/settings_menu_screen.dart';
+import '/screens/settings/appearance_settings_screen.dart';
+import '/screens/settings/information_account_screen.dart';
+import '/screens/settings/notifications_settings_screen.dart';
+import '/screens/settings/informe_uso_screen.dart';
+import '/screens/settings/faq_screen.dart';
 //import '../screens/help_support_screen.dart';
-import '../screens/about_screen.dart';
+import '/screens/settings/about_screen.dart';
 
 /* Vinilos */
-import '../screens/detalle_disco_screen.dart';
-import '../screens/edit_disco_screen.dart';
-import '../models/vinyl_record.dart';
+import '/screens/disco/detalle_disco_screen.dart';
+import '/screens/disco/edit_disco_screen.dart';
+import '/models/vinyl_record.dart';
 
 class AppRouter {
   static GoRouter router(Listenable authProvider) {

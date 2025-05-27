@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-import '../models/vinyl_record.dart';
-import '../core/image_proxy.dart';
+import '/models/vinyl_record.dart';
+import '/core/image_proxy.dart';
 
 class CollectionCarousel extends StatefulWidget {
   final List<VinylRecord> records;

@@ -3,9 +3,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import '../models/artist_result.dart';
-import '../models/release_result.dart';
-import '../models/release_detail.dart';
+import '/models/artist_result.dart';
+import '/models/release_result.dart';
+import '/models/release_detail.dart';
 
 /// Convierte cualquier URL http: en https:
 String httpsUrl(String? url) =>

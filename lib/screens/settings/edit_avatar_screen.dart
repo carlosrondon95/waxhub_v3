@@ -3,7 +3,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../services/user_service.dart';
+import '/services/user_service.dart';
 
 class EditAvatarScreen extends StatefulWidget {
   const EditAvatarScreen({Key? key}) : super(key: key);

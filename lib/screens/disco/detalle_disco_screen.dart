@@ -6,9 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../models/vinyl_record.dart';
-import '../providers/collection_provider.dart';
-import '../core/image_proxy.dart';
+import '/models/vinyl_record.dart';
+import '/providers/collection_provider.dart';
+import '/core/image_proxy.dart';
 
 class DetalleDiscoScreen extends StatelessWidget {
   final VinylRecord record;

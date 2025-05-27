@@ -6,8 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 
-import '../models/vinyl_record.dart';
-import '../providers/collection_provider.dart';
+import '/models/vinyl_record.dart';
+import '/providers/collection_provider.dart';
 
 class EditDiscoScreen extends StatefulWidget {
   final VinylRecord record;

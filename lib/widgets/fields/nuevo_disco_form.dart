@@ -5,10 +5,10 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-import '../models/artist_result.dart';
-import '../models/release_result.dart';
-import '../providers/vinyl_provider.dart';
-import '../core/image_proxy.dart';
+import '/models/artist_result.dart';
+import '/models/release_result.dart';
+import '/providers/vinyl_provider.dart';
+import '/core/image_proxy.dart';
 
 class NuevoDiscoForm extends StatelessWidget {
   const NuevoDiscoForm({super.key});

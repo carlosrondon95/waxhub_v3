@@ -5,10 +5,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../services/user_service.dart';
-import '../../widgets/change_name_section.dart';
-import '../../widgets/change_email_section.dart';
-import '../../widgets/change_password_section.dart';
+import '/services/user_service.dart';
+import '/widgets/changes/change_name_section.dart';
+import '/widgets/changes/change_email_section.dart';
+import '/widgets/changes/change_password_section.dart';
 
 class InformationAccountScreen extends StatefulWidget {
   const InformationAccountScreen({Key? key}) : super(key: key);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/summary_provider.dart';
+import '../../providers/summary_provider.dart';
 
 class InformeUsoScreen extends StatefulWidget {
   const InformeUsoScreen({Key? key}) : super(key: key);

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/auth_provider.dart';
-import '../widgets/input_form_field.dart';
-import '../widgets/google_signin_button.dart';
+import '/providers/auth_provider.dart';
+import '/widgets/fields/input_form_field.dart';
+import '/widgets/fields/google_signin_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);

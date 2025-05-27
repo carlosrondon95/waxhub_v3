@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/user_service.dart';
-import 'password_field.dart';
+import '/services/user_service.dart';
+import '/widgets/fields/password_field.dart';
 
 class ChangePasswordSection extends StatefulWidget {
   final bool isGoogle;

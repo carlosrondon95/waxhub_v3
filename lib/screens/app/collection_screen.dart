@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/collection_provider.dart';
-import '../widgets/collection_filters.dart';
-import '../widgets/collection_list.dart';
-import '../widgets/collection_grid.dart';
-import '../widgets/collection_carousel.dart';
+import '/providers/collection_provider.dart';
+import '/widgets/collection/collection_filters.dart';
+import '/widgets/collection/collection_list.dart';
+import '/widgets/collection/collection_grid.dart';
+import '/widgets/collection/collection_carousel.dart';
 
 class CollectionScreen extends StatelessWidget {
   const CollectionScreen({Key? key}) : super(key: key);
