@@ -1,3 +1,5 @@
+// lib/providers/map_provider.dart
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -28,9 +30,12 @@ class MapProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setRadius(int r) {
+  /// Cambia el radio, lo persiste y recarga marcadores
+  Future<void> setRadius(int r) async {
     radius = r;
     notifyListeners();
+    await saveSettings();
+    await _loadMarkers();
   }
 
   void setMapType(MapType? t) {
@@ -130,7 +135,7 @@ class MapProvider extends ChangeNotifier {
         }
       }
     } catch (e) {
-      debugPrint('Places error: \$e');
+      debugPrint('Places error: $e');
       shops = [];
       markers = {};
     } finally {

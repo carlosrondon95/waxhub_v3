@@ -1,12 +1,29 @@
-// lib/screens/settings/map_settings_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../providers/map_provider.dart';
 
-class MapSettingsScreen extends StatelessWidget {
+class MapSettingsScreen extends StatefulWidget {
   const MapSettingsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<MapSettingsScreen> createState() => _MapSettingsScreenState();
+}
+
+class _MapSettingsScreenState extends State<MapSettingsScreen> {
+  // Valor local para manejar suavemente el slider
+  late double _sliderValue;
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final prov = context.read<MapProvider>();
+      _sliderValue = prov.radius / 1000;
+      _initialized = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,14 +74,19 @@ class MapSettingsScreen extends StatelessWidget {
                   min: 1,
                   max: 50,
                   divisions: 49,
-                  label: '${(prov.radius / 1000).toStringAsFixed(1)} km',
-                  value: prov.radius / 1000,
+                  label: '${_sliderValue.toStringAsFixed(1)} km',
+                  value: _sliderValue,
                   onChanged: (km) {
+                    setState(() {
+                      _sliderValue = km;
+                    });
+                  },
+                  onChangeEnd: (km) {
                     prov.setRadius((km * 1000).toInt());
                   },
                 ),
                 trailing: Text(
-                  '${(prov.radius / 1000).toStringAsFixed(1)} km',
+                  '${_sliderValue.toStringAsFixed(1)} km',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
@@ -88,16 +110,12 @@ class MapSettingsScreen extends StatelessWidget {
                     ),
                   ],
                   onChanged: (MapType? t) {
-                    if (t != null) {
-                      prov.setMapType(t);
-                    }
+                    if (t != null) prov.setMapType(t);
                   },
                 ),
               ),
 
               const SizedBox(height: 16),
-
-              // Aquí podrías añadir más ajustes si hiciese falta...
             ],
           ),
         ),
