@@ -7,53 +7,42 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 
+// ⬇️ Aquí empieza la definición -----------------------------
 exports.nearbyVinylStores = onRequest(
   {
-    region: "europe-west1",   // tu región
-    cors: true,               // habilita CORS
+    region: "europe-west1",   // ← tu región
+    cors: true,               // CORS abierto
     timeoutSeconds: 15,
-    secrets: ["PLACES_KEY"],  // el secreto que contiene tu API key
+    secrets: ["PLACES_KEY"],  // ← ¡IMPORTANTE! indica qué secreto usar
   },
   async (req, res) => {
     try {
-      // Parámetros de consulta
-      const { lat, lng } = req.query;
-      const radius = parseInt(req.query.radius, 10) || 10000;
-
+      const { lat, lng, radius = 10000 } = req.query;
       if (!lat || !lng) {
-        return res.status(400).json({ error: "Faltan coordenadas (lat,y lng)" });
+        return res.status(400).json({ error: "coords missing (lat,lng)" });
       }
 
-      // Recupera el API key del secreto
-      const apiKey = process.env.PLACES_KEY;
+      const apiKey = process.env.PLACES_KEY;   // ya disponible
       if (!apiKey) {
-        logger.error("PLACES_KEY no definida");
-        return res.status(500).json({ error: "Configuración del servidor incorrecta" });
+        logger.error("PLACES_KEY undefined");
+        return res.status(500).json({ error: "server misconfigured" });
       }
 
-      // Construye la URL de la API de Google Places
       const url =
         "https://maps.googleapis.com/maps/api/place/nearbysearch/json" +
-        `?location=${encodeURIComponent(lat)},${encodeURIComponent(lng)}` +
-        `&radius=${encodeURIComponent(radius)}` +
+        `?location=${lat},${lng}` +
         "&keyword=vinyl+record+store" +
-        `&key=${encodeURIComponent(apiKey)}`;
+        `&radius=${radius}` +
+        `&key=${apiKey}`;
 
-      // Llama a la API externa
       const apiResp = await fetch(url);
-      if (!apiResp.ok) {
-        const errText = await apiResp.text();
-        logger.error("Error en Places API:", apiResp.status, errText);
-        return res.status(apiResp.status).json({ error: errText });
-      }
-
-      // Devuelve el resultado directamente
       const data = await apiResp.json();
-      return res.status(200).json(data);
 
+      res.json(data);
     } catch (err) {
-      logger.error("nearbyVinylStores error:", err);
-      return res.status(500).json({ error: "Error interno", details: err.message });
+      logger.error("nearbyVinylStores error", err);
+      res.status(500).json({ error: "internal", details: err.message });
     }
   }
 );
+// ⬆️ Aquí termina la definición ------------------------------
