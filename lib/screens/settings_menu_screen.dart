@@ -78,12 +78,6 @@ class SettingsMenuScreen extends StatelessWidget {
               ),
               _tile(
                 context,
-                Icons.help_outline,
-                'Ayuda y soporte',
-                () => context.pushNamed('help'),
-              ),
-              _tile(
-                context,
                 Icons.info_outline,
                 'Acerca de',
                 () => context.pushNamed('acerca'),
