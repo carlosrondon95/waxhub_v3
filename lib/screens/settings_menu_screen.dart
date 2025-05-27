@@ -1,3 +1,5 @@
+// lib/screens/settings/settings_menu_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../services/user_service.dart';
@@ -52,6 +54,12 @@ class SettingsMenuScreen extends StatelessWidget {
               ),
               _tile(
                 context,
+                Icons.map_outlined,
+                'Ajustes de mapa',
+                () => context.pushNamed('mapSettings'),
+              ),
+              _tile(
+                context,
                 Icons.notifications_outlined,
                 'Notificaciones',
                 () => context.pushNamed('notificaciones'),
@@ -64,9 +72,15 @@ class SettingsMenuScreen extends StatelessWidget {
               ),
               _tile(
                 context,
-                Icons.map_outlined,
-                'Ajustes de mapa',
-                () => context.pushNamed('mapSettings'),
+                Icons.question_answer_outlined,
+                'Preguntas frecuentes',
+                () => context.pushNamed('faq'),
+              ),
+              _tile(
+                context,
+                Icons.help_outline,
+                'Ayuda y soporte',
+                () => context.pushNamed('help'),
               ),
               _tile(
                 context,
