@@ -14,7 +14,7 @@ class CollectionProvider extends ChangeNotifier {
 
   StreamSubscription<QuerySnapshot>? _subscription;
 
-  /* ─── Estado ───────────────────────────────────────────── */
+  //Estado
   List<VinylRecord> _allRecords = [];
   String _searchQuery = '';
   String _sortBy = 'titulo';
@@ -22,7 +22,7 @@ class CollectionProvider extends ChangeNotifier {
   String _viewMode = 'lista';
   bool _isLoading = false;
 
-  /* ─── Constructor ─────────────────────────────────────── */
+  //Constructor
   CollectionProvider() {
     _auth.authStateChanges().listen((user) {
       _subscription?.cancel();
@@ -36,7 +36,7 @@ class CollectionProvider extends ChangeNotifier {
     });
   }
 
-  /* ─── Suscripción a Firestore ─────────────────────────── */
+  //Firestore
   void _subscribeToRecords(String uid) {
     _isLoading = true;
     notifyListeners();
@@ -66,8 +66,7 @@ class CollectionProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  /* ─── Getters ──────────────────────────────────────────── */
-
+  //Getters
   List<VinylRecord> get allRecords => List.unmodifiable(_allRecords);
 
   List<VinylRecord> get filteredRecords {
@@ -102,8 +101,7 @@ class CollectionProvider extends ChangeNotifier {
   String get viewMode => _viewMode;
   bool get isLoading => _isLoading;
 
-  /* ─── Setters ──────────────────────────────────────────── */
-
+  //Setters
   void setSearchQuery(String q) {
     _searchQuery = q;
     notifyListeners();
@@ -124,8 +122,7 @@ class CollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /* ─── Operaciones de escritura ────────────────────────── */
-
+  //Operaciones CRUD
   Future<void> deleteRecord(String id) async {
     await _firestore.collection('discos').doc(id).delete();
     // El listener actualizará la lista
@@ -136,7 +133,6 @@ class CollectionProvider extends ChangeNotifier {
       'favorito': !current,
       'favoritedAt': !current ? FieldValue.serverTimestamp() : null,
     });
-    // El listener de snapshots propagará el cambio
   }
 
   Future<void> updateRecord(VinylRecord updated) async {

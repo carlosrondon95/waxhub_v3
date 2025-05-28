@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-const _turquoise = Color(0xFF00BCD4); // color de acento
-const _bg = Color(0xFF0D0D0D); // negro vinilo
-const _surface = Color(0xFF1E1E1E); // gris grafito
+const _turquoise = Color(0xFF00BCD4);
+const _bg = Color(0xFF0D0D0D);
+const _surface = Color(0xFF1E1E1E);
 
 /* ─────────────────────────────  TEMA CLARO  ───────────────────────────── */
 

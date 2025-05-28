@@ -1,5 +1,4 @@
-// lib/models/release_result.dart
-import '../services/discogs_service.dart' show httpsUrl;
+import '/services/discogs_service.dart' show httpsUrl;
 
 class ReleaseResult {
   final int id;

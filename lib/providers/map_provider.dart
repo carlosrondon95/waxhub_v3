@@ -144,7 +144,7 @@ class MapProvider extends ChangeNotifier {
     }
   }
 
-  /// Calcula la distancia (m) entre dos coordenadas (haversine)
+  // Calcula la distancia
   double _distanceInMeters(double lat1, double lon1, double lat2, double lon2) {
     const R = 6371000; // radio Tierra en metros
     final dLat = _deg2rad(lat2 - lat1);

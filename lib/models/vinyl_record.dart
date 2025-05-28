@@ -1,4 +1,3 @@
-// lib/models/vinyl_record.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class VinylRecord {
@@ -31,19 +30,19 @@ class VinylRecord {
   });
 
   Map<String, dynamic> toMap() => {
-        'userId': userId,
-        'referencia': referencia,
-        'artista': artista,
-        'titulo': titulo,
-        'genero': genero,
-        'anio': anio,
-        'sello': sello,
-        'lugarCompra': lugarCompra,
-        'descripcion': descripcion,
-        'portadaUrl': portadaUrl,
-        'favorito': favorito,
-        'timestamp': FieldValue.serverTimestamp(),
-      };
+    'userId': userId,
+    'referencia': referencia,
+    'artista': artista,
+    'titulo': titulo,
+    'genero': genero,
+    'anio': anio,
+    'sello': sello,
+    'lugarCompra': lugarCompra,
+    'descripcion': descripcion,
+    'portadaUrl': portadaUrl,
+    'favorito': favorito,
+    'timestamp': FieldValue.serverTimestamp(),
+  };
 
   factory VinylRecord.fromDoc(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;

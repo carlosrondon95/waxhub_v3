@@ -1,5 +1,4 @@
-// lib/models/release_detail.dart
-import '../services/discogs_service.dart' show httpsUrl;
+import '/services/discogs_service.dart' show httpsUrl;
 
 class ReleaseDetail {
   final String title;

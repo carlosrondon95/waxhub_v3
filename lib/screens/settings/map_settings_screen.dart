@@ -11,7 +11,6 @@ class MapSettingsScreen extends StatefulWidget {
 }
 
 class _MapSettingsScreenState extends State<MapSettingsScreen> {
-  // Valor local para manejar suavemente el slider
   late double _sliderValue;
   bool _initialized = false;
 
@@ -66,7 +65,7 @@ class _MapSettingsScreenState extends State<MapSettingsScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Radio de búsqueda (km)
+              // Radio de búsqueda
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Radio de búsqueda'),
@@ -92,7 +91,7 @@ class _MapSettingsScreenState extends State<MapSettingsScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Tipo de mapa (solo Normal / Satélite)
+              // Tipo de mapa
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.map_outlined),

@@ -1,4 +1,3 @@
-// lib/models/artist_result.dart
 class ArtistResult {
   final int id;
   final String name;
