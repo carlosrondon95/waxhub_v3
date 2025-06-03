@@ -45,7 +45,7 @@ class DetalleDiscoScreen extends StatelessWidget {
     String artist,
     String album,
   ) async {
-    final query = Uri.encodeComponent('$artist $album full album');
+    final query = Uri.encodeComponent('$artist $album');
     await _safeLaunch(
       context,
       Uri.parse('https://www.youtube.com/results?search_query=$query'),

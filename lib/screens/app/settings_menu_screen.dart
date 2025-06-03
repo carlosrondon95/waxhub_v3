@@ -46,12 +46,11 @@ class SettingsMenuScreen extends StatelessWidget {
                 'Tema y apariencia',
                 () => context.pushNamed('apariencia'),
               ),
-              _tile(
+              /*_tile(
                 context,
                 Icons.language_outlined,
                 'Idioma',
-                () => context.pushNamed('idioma'),
-              ),
+                () => context.pushNamed('idioma'),*/
               _tile(
                 context,
                 Icons.map_outlined,
