@@ -1,3 +1,5 @@
+// lib/screens/settings/map_settings_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,6 +13,7 @@ class MapSettingsScreen extends StatefulWidget {
 }
 
 class _MapSettingsScreenState extends State<MapSettingsScreen> {
+  // Valor local para manejar suavemente el slider
   late double _sliderValue;
   bool _initialized = false;
 
@@ -27,6 +30,13 @@ class _MapSettingsScreenState extends State<MapSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final prov = context.watch<MapProvider>();
+
+    // Si prov.mapType no es normal ni satellite, forzamos a normal para no romper el Dropdown
+    MapType currentType = prov.mapType;
+    if (currentType != MapType.normal && currentType != MapType.satellite) {
+      currentType = MapType.normal;
+    }
+
     const maxWidth = 450.0;
     final cardColor = Theme.of(context).cardColor;
     final shadowColor = Theme.of(context).shadowColor.withOpacity(0.1);
@@ -65,7 +75,7 @@ class _MapSettingsScreenState extends State<MapSettingsScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Radio de búsqueda
+              // Radio de búsqueda (km)
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Radio de búsqueda'),
@@ -91,13 +101,14 @@ class _MapSettingsScreenState extends State<MapSettingsScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Tipo de mapa
+              // Tipo de mapa (solo Normal / Satélite)
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.map_outlined),
                 title: const Text('Tipo de mapa'),
                 trailing: DropdownButton<MapType>(
-                  value: prov.mapType,
+                  // Usamos currentType, que siempre será normal o satellite
+                  value: currentType,
                   items: const [
                     DropdownMenuItem(
                       value: MapType.normal,
@@ -109,7 +120,9 @@ class _MapSettingsScreenState extends State<MapSettingsScreen> {
                     ),
                   ],
                   onChanged: (MapType? t) {
-                    if (t != null) prov.setMapType(t);
+                    if (t != null) {
+                      prov.setMapType(t);
+                    }
                   },
                 ),
               ),

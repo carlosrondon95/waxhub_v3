@@ -20,7 +20,7 @@ final lightTheme = ThemeData(
     foregroundColor: Colors.black,
     elevation: 1,
   ),
-  cardTheme: const CardTheme(
+  cardTheme: const CardThemeData(
     color: Colors.white,
     elevation: 2,
     margin: EdgeInsets.all(8),
@@ -28,6 +28,7 @@ final lightTheme = ThemeData(
       borderRadius: BorderRadius.all(Radius.circular(20)),
     ),
   ),
+
   listTileTheme: const ListTileThemeData(
     tileColor: Colors.white,
     iconColor: Colors.black54,
@@ -98,7 +99,7 @@ final darkTheme = ThemeData(
     foregroundColor: Colors.white,
     elevation: 1,
   ),
-  cardTheme: const CardTheme(
+  cardTheme: const CardThemeData(
     color: _surface,
     elevation: 2,
     margin: EdgeInsets.all(8),
@@ -106,6 +107,7 @@ final darkTheme = ThemeData(
       borderRadius: BorderRadius.all(Radius.circular(20)),
     ),
   ),
+
   listTileTheme: const ListTileThemeData(
     tileColor: _surface,
     iconColor: Colors.white70,
