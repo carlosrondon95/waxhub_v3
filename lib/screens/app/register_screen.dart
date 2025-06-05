@@ -1,9 +1,8 @@
-// lib/screens/register_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '/providers/auth_provider.dart';
-import '/widgets//fields/input_form_field.dart';
+import '/widgets/fields/input_form_field.dart';
 import '/widgets/fields/password_field.dart';
 
 /// Alerta reutilizable
@@ -84,13 +83,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
+    // Validaciones locales
     if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _nameError = null;
+      _emailError = null;
+    });
+
     final auth = context.read<AuthProvider>();
+
+    // Validaciones en Firestore
+    if (await auth.usernameExists(_nameCtrl.text)) {
+      setState(() => _nameError = 'Ese nombre ya está en uso');
+    }
+    if (await auth.emailExists(_emailCtrl.text)) {
+      setState(() => _emailError = 'Ese correo ya está registrado');
+    }
+    if (_nameError != null || _emailError != null) return;
+
+    // Registro
     final error = await auth.register(
-      _nameCtrl.text.trim(),
-      _emailCtrl.text.trim(),
+      _nameCtrl.text,
+      _emailCtrl.text,
       _passCtrl.text,
     );
+
     if (error != null) {
       await _showAlert(context, error);
     } else {
@@ -99,7 +117,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'Registro exitoso. Revisa tu correo para verificar.',
         success: true,
       );
-      // Nos quedamos en la pantalla; limpiamos campos para evitar duplicados
+      if (!mounted) return;
+
+      // Limpiar formulario y campos
+      _formKey.currentState?.reset();
       _nameCtrl.clear();
       _emailCtrl.clear();
       _passCtrl.clear();
@@ -113,7 +134,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     const maxWidth = 450.0;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Crear cuenta')),
       body: Center(
         child: Container(
