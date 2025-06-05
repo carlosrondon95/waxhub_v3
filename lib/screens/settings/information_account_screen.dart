@@ -1,5 +1,4 @@
 // lib/screens/settings/information_account_screen.dart
-
 import 'dart:typed_data';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -9,6 +8,49 @@ import '/services/user_service.dart';
 import '/widgets/changes/change_name_section.dart';
 import '/widgets/changes/change_email_section.dart';
 import '/widgets/changes/change_password_section.dart';
+
+Future<void> _showAlert(
+  BuildContext context,
+  String message, {
+  bool success = false,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder:
+        (_) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                success ? Icons.check_circle_outline : Icons.error_outline,
+                size: 48,
+                color:
+                    success
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.redAccent,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+  );
+}
 
 class InformationAccountScreen extends StatefulWidget {
   const InformationAccountScreen({Key? key}) : super(key: key);
@@ -94,9 +136,7 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
             ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al subir avatar: $e')));
+      await _showAlert(context, 'Error al subir avatar: $e');
     } finally {
       if (mounted) setState(() => _savingAvatar = false);
     }
@@ -135,7 +175,7 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
           title: const Text('Captcha'),
           content: TextField(
             onChanged: (v) => input = v,
-            decoration: InputDecoration(labelText: '¿Cuánto es \$a + \$b?'),
+            decoration: InputDecoration(labelText: '¿Cuánto es $a + $b?'),
             keyboardType: TextInputType.number,
           ),
           actions: [
@@ -152,9 +192,7 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
       },
     );
     if (answer == null || int.tryParse(answer) != a + b) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Captcha incorrecto')));
+      await _showAlert(context, 'Captcha incorrecto');
       return;
     }
 
@@ -162,14 +200,10 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
       await _profileSvc.deleteAccount();
       if (mounted) {
         Navigator.of(context).popUntil((r) => r.isFirst);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Cuenta eliminada')));
+        await _showAlert(context, 'Cuenta eliminada', success: true);
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: \$e')));
+      await _showAlert(context, 'Error: $e');
     }
   }
 
@@ -238,7 +272,6 @@ class _InformationAccountScreenState extends State<InformationAccountScreen> {
                   )
                 else
                   const SizedBox(height: 20),
-                // Mostrar siempre el nombre de usuario debajo del avatar
                 Text(_name, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 24),
                 ChangeNameSection(

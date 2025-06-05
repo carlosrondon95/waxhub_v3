@@ -1,5 +1,4 @@
 // lib/widgets/nuevo_disco_form.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +8,49 @@ import '/models/artist_result.dart';
 import '/models/release_result.dart';
 import '/providers/vinyl_provider.dart';
 import '/core/image_proxy.dart';
+
+Future<void> _showAlert(
+  BuildContext context,
+  String message, {
+  bool success = false,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder:
+        (_) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                success ? Icons.check_circle_outline : Icons.error_outline,
+                size: 48,
+                color:
+                    success
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.redAccent,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+  );
+}
 
 class NuevoDiscoForm extends StatelessWidget {
   const NuevoDiscoForm({super.key});
@@ -215,7 +257,7 @@ class NuevoDiscoForm extends StatelessWidget {
                             Navigator.of(context, rootNavigator: true).pop();
 
                             if (ok) {
-                              // 4) Éxito (estilo igual al eliminado)
+                              // 4) Éxito
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
@@ -256,12 +298,9 @@ class NuevoDiscoForm extends StatelessWidget {
                               vinyl.clearForm();
                             } else {
                               // 6) Error
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Error al añadir el disco. Intenta de nuevo.',
-                                  ),
-                                ),
+                              await _showAlert(
+                                context,
+                                'Error al añadir el disco. Intenta de nuevo.',
                               );
                             }
                           },

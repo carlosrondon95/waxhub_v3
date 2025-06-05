@@ -1,11 +1,53 @@
-// lib/screens/register_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 
 import '/providers/auth_provider.dart';
-import '/widgets//fields/input_form_field.dart';
+import '/widgets/fields/input_form_field.dart';
 import '/widgets/fields/password_field.dart';
+
+/// Alerta reutilizable
+Future<void> _showAlert(
+  BuildContext context,
+  String message, {
+  bool success = false,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder:
+        (_) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                success ? Icons.check_circle_outline : Icons.error_outline,
+                size: 48,
+                color:
+                    success
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.redAccent,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+  );
+}
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -41,27 +83,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
+    // Validaciones locales
     if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _nameError = null;
+      _emailError = null;
+    });
+
     final auth = context.read<AuthProvider>();
+
+    // Validaciones en Firestore
+    if (await auth.usernameExists(_nameCtrl.text)) {
+      setState(() => _nameError = 'Ese nombre ya está en uso');
+    }
+    if (await auth.emailExists(_emailCtrl.text)) {
+      setState(() => _emailError = 'Ese correo ya está registrado');
+    }
+    if (_nameError != null || _emailError != null) return;
+
+    // Registro
     final error = await auth.register(
-      _nameCtrl.text.trim(),
-      _emailCtrl.text.trim(),
+      _nameCtrl.text,
+      _emailCtrl.text,
       _passCtrl.text,
     );
+
     if (error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
+      await _showAlert(context, error);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'Registro exitoso. Revisa tu correo para verificar.',
-          ),
-          backgroundColor: Colors.green,
-        ),
+      await _showAlert(
+        context,
+        'Registro exitoso. Revisa tu correo para verificar.',
+        success: true,
       );
-      context.goNamed('login');
+      if (!mounted) return;
+
+      // Limpiar formulario y campos
+      _formKey.currentState?.reset();
+      _nameCtrl.clear();
+      _emailCtrl.clear();
+      _passCtrl.clear();
+      _confirmCtrl.clear();
     }
   }
 
@@ -71,7 +134,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     const maxWidth = 450.0;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Crear cuenta')),
       body: Center(
         child: Container(
@@ -162,23 +224,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                               )
                               : const Text('Registrarse'),
-                    ),
-                    const SizedBox(height: 10),
-                    TextButton(
-                      onPressed: () => context.goNamed('login'),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 15,
-                        ),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        '¿Ya tienes cuenta? Inicia sesión',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
                     ),
                   ],
                 ),
