@@ -7,6 +7,50 @@ import '/providers/auth_provider.dart';
 import '/widgets/fields/input_form_field.dart';
 import '/widgets/fields/google_signin_button.dart';
 
+/// Alerta bonita y uniforme
+Future<void> _showAlert(
+  BuildContext context,
+  String message, {
+  bool success = false,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder:
+        (_) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                success ? Icons.check_circle_outline : Icons.error_outline,
+                size: 48,
+                color:
+                    success
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.redAccent,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+  );
+}
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -43,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
             controller: emailDialogCtrl,
             autofocus: true,
             keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Correo electrónico',
               hintText: 'Introduce tu email',
             ),
@@ -63,9 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 final msg =
                     error ??
                     'Enlace de recuperación enviado. Revisa tu correo.';
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(msg)));
+                await _showAlert(context, msg, success: error == null);
               },
               child: const Text('Enviar'),
             ),
@@ -80,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final err = await auth.signIn(_emailCtrl.text.trim(), _passCtrl.text);
     if (!mounted) return;
     if (err != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+      await _showAlert(context, err);
     } else {
       context.goNamed('home');
     }

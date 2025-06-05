@@ -1,9 +1,51 @@
 // lib/screens/settings/edit_avatar_screen.dart
-
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '/services/user_service.dart';
+
+Future<void> _showAlert(
+  BuildContext context,
+  String message, {
+  bool success = false,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder:
+        (_) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                success ? Icons.check_circle_outline : Icons.error_outline,
+                size: 48,
+                color:
+                    success
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.redAccent,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+  );
+}
 
 class EditAvatarScreen extends StatefulWidget {
   const EditAvatarScreen({Key? key}) : super(key: key);
@@ -44,15 +86,11 @@ class _EditAvatarScreenState extends State<EditAvatarScreen> {
 
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Avatar actualizado')));
+      await _showAlert(context, 'Avatar actualizado', success: true);
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error al subir avatar: $e')));
+        await _showAlert(context, 'Error al subir avatar: $e');
       }
     }
   }

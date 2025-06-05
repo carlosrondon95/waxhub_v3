@@ -44,6 +44,9 @@ class _PasswordFieldState extends State<PasswordField> {
     return TextFormField(
       controller: widget.controller,
       obscureText: _obscure,
+      obscuringCharacter: '•',
+      enableSuggestions: false,
+      autocorrect: false,
       validator: widget.validator,
       decoration: InputDecoration(
         prefixIcon: Icon(

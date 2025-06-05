@@ -7,6 +7,49 @@ import '/providers/auth_provider.dart';
 import '/widgets//fields/input_form_field.dart';
 import '/widgets/fields/password_field.dart';
 
+Future<void> _showAlert(
+  BuildContext context,
+  String message, {
+  bool success = false,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder:
+        (_) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                success ? Icons.check_circle_outline : Icons.error_outline,
+                size: 48,
+                color:
+                    success
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.redAccent,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+  );
+}
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
 
@@ -49,17 +92,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _passCtrl.text,
     );
     if (error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
+      await _showAlert(context, error);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'Registro exitoso. Revisa tu correo para verificar.',
-          ),
-          backgroundColor: Colors.green,
-        ),
+      await _showAlert(
+        context,
+        'Registro exitoso. Revisa tu correo para verificar.',
+        success: true,
       );
       context.goNamed('login');
     }

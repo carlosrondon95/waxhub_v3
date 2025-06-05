@@ -1,6 +1,50 @@
+// lib/widgets/changes/change_password_section.dart
 import 'package:flutter/material.dart';
 import '/services/user_service.dart';
 import '/widgets/fields/password_field.dart';
+
+Future<void> _showAlert(
+  BuildContext context,
+  String message, {
+  bool success = false,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder:
+        (_) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                success ? Icons.check_circle_outline : Icons.error_outline,
+                size: 48,
+                color:
+                    success
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.redAccent,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+  );
+}
 
 class ChangePasswordSection extends StatefulWidget {
   final bool isGoogle;
@@ -38,15 +82,14 @@ class _ChangePasswordSectionState extends State<ChangePasswordSection> {
     try {
       await UserService().updatePassword(_currentCtrl.text, _newCtrl.text);
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Contraseña actualizada')));
+      await _showAlert(context, 'Contraseña actualizada', success: true);
       _currentCtrl.clear();
       _newCtrl.clear();
       _confirmCtrl.clear();
     } catch (e) {
       if (!mounted) return;
       setState(() => _error = e.toString());
+      await _showAlert(context, _error ?? 'Error desconocido');
     }
 
     if (mounted) setState(() => _saving = false);
