@@ -91,10 +91,10 @@ class FaqScreen extends StatelessWidget {
           'q': '¿Cómo cambio el tema?',
           'a': 'En Ajustes → Tema y apariencia elige Claro, Oscuro o Sistema.',
         },
-        {
+        /*{
           'q': '¿Puedo cambiar de idioma?',
           'a': 'En Ajustes → Idioma selecciona tu preferencia.',
-        },
+        },*/
       ],
     },
     {
@@ -112,7 +112,7 @@ class FaqScreen extends StatelessWidget {
         },
       ],
     },
-    {
+    /*{
       'title': 'Ayuda y soporte',
       'items': [
         {
@@ -121,7 +121,7 @@ class FaqScreen extends StatelessWidget {
               'Ve a Ajustes → Ayuda y soporte, escribe tu mensaje y toca Enviar.',
         },
       ],
-    },
+    },*/
     {
       'title': 'Cuenta',
       'items': [
