@@ -4,7 +4,7 @@ const _turquoise = Color(0xFF00BCD4);
 const _bg = Color(0xFF0D0D0D);
 const _surface = Color(0xFF1E1E1E);
 
-/* ─────────────────────────────  TEMA CLARO  ───────────────────────────── */
+/* TEMA CLARO */
 
 final lightTheme = ThemeData(
   fontFamily: 'Poppins',
@@ -80,7 +80,7 @@ final lightTheme = ThemeData(
   ),
 );
 
-/* ─────────────────────────────  TEMA OSCURO  ───────────────────────────── */
+/* TEMA OSCURO */
 
 final darkTheme = ThemeData(
   fontFamily: 'Poppins',
