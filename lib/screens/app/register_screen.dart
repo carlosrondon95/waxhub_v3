@@ -1,12 +1,12 @@
 // lib/screens/register_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 
 import '/providers/auth_provider.dart';
 import '/widgets//fields/input_form_field.dart';
 import '/widgets/fields/password_field.dart';
 
+/// Alerta reutilizable
 Future<void> _showAlert(
   BuildContext context,
   String message, {
@@ -99,7 +99,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'Registro exitoso. Revisa tu correo para verificar.',
         success: true,
       );
-      context.goNamed('login');
+      // Nos quedamos en la pantalla; limpiamos campos para evitar duplicados
+      _nameCtrl.clear();
+      _emailCtrl.clear();
+      _passCtrl.clear();
+      _confirmCtrl.clear();
     }
   }
 
@@ -200,23 +204,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                               )
                               : const Text('Registrarse'),
-                    ),
-                    const SizedBox(height: 10),
-                    TextButton(
-                      onPressed: () => context.goNamed('login'),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 15,
-                        ),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        '¿Ya tienes cuenta? Inicia sesión',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
                     ),
                   ],
                 ),

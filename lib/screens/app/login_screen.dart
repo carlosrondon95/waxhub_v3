@@ -7,7 +7,7 @@ import '/providers/auth_provider.dart';
 import '/widgets/fields/input_form_field.dart';
 import '/widgets/fields/google_signin_button.dart';
 
-/// Alerta bonita y uniforme
+/// Alerta reutilizable (errores)
 Future<void> _showAlert(
   BuildContext context,
   String message, {
@@ -119,11 +119,46 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _submit() async {
     final auth = context.read<AuthProvider>();
+
+    // ­—— Diálogo de carga ——
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (_) => const AlertDialog(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 16),
+                Expanded(child: Text('Iniciando sesión...')),
+              ],
+            ),
+          ),
+    );
+
     final err = await auth.signIn(_emailCtrl.text.trim(), _passCtrl.text);
+
+    // Cerrar diálogo de carga
+    Navigator.of(context, rootNavigator: true).pop();
+
     if (!mounted) return;
     if (err != null) {
       await _showAlert(context, err);
     } else {
+      // Snackbar verde de bienvenida
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('¡Bienvenido a WaxHub!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      // Pequeña pausa para que se vea
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return;
       context.goNamed('home');
     }
   }
