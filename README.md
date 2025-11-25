@@ -47,6 +47,7 @@ The app blends a minimalist UI with advanced features such as automatic metadata
 ---
 
 ## 📁 Project Structure
+```text
 lib/
 ├── core/
 │   ├── themes/              # Global theme: colors, typography, styles
@@ -66,34 +67,14 @@ lib/
 │
 ├── firebase_options.dart    # Auto-generated Firebase config
 └── main.dart                # App entry point
-
+```
 ---
 
 ## 🎯 Purpose of the Project
 
 WaxHub is part of the final project for a **Higher National Diploma in Cross-Platform Application Development (CFGS DAM)**, but it is also a personal project created with passion for vinyl culture.
 
-The goal is to deliver a professional, well-structured, scalable, and polished application by **June 2025**.
-
----
-
-## 📌 Current Development Status
-
-- [x] Project architecture & folder structure  
-- [x] Firebase setup  
-- [x] Base screens & navigation  
-- [ ] Discogs API integration  
-- [ ] Google Maps implementation  
-- [ ] Lists, favorites & filters  
-- [ ] Final UI adjustments  
-- [ ] Testing & polishing  
-
----
-
-## 🤝 Contributing
-
-This is a personal project, but suggestions and improvements are welcome.  
-Feel free to open an issue or reach out.
+The goal is to deliver a professional, well-structured, scalable, and polished application.
 
 ---
 
