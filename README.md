@@ -49,24 +49,23 @@ The app blends a minimalist UI with advanced features such as automatic metadata
 ## 📁 Project Structure
 lib/
 ├── core/
-│ ├── themes/ # Global theme: colors, typography, styles
-│ └── utils/ # Generic helpers and utilities
+│   ├── themes/              # Global theme: colors, typography, styles
+│   └── utils/               # Generic helpers and utilities
 │
-├── models/ # Data models (Vinyl, User, List…)
+├── models/                  # Data models (Vinyl, User, List…)
 │
-├── services/ # Discogs, Maps, Firebase integrations
+├── services/                # Discogs, Maps, Firebase integrations
 │
-├── providers/ # Global state & business logic
+├── providers/               # Global state & business logic
 │
-├── routes/ # App navigation
+├── routes/                  # App navigation
 │
-├── screens/ # Main screens (Home, Collection, Map…)
+├── screens/                 # Main screens (Home, Collection, Map…)
 │
-├── widgets/ # Reusable UI components (cards, buttons…)
+├── widgets/                 # Reusable UI components (cards, buttons…)
 │
-├── firebase_options.dart # Auto-generated Firebase config
-└── main.dart # App entry point
-
+├── firebase_options.dart    # Auto-generated Firebase config
+└── main.dart                # App entry point
 
 ---
 
