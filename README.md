@@ -6,6 +6,12 @@ The app blends a minimalist UI with advanced features such as automatic metadata
 
 ---
 
+## 🎥 Demo Video
+
+▶️ **[Watch Demo](https://drive.google.com/file/d/17KulAnAmPQrUlADC_V2btoYp8bflnsLh/view?usp=sharing)**
+
+---
+
 ## 🚀 Key Features
 
 ### 🔍 Automatic Cataloging
