@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/vinyl_record.dart';
+import '../core/constants.dart';
 
 class CollectionProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -12,7 +13,7 @@ class CollectionProvider extends ChangeNotifier {
 
   StreamSubscription<QuerySnapshot>? _subscription;
 
-  /* ─── Estado ───────────────────────────────────────────── */
+  /* ─── Estado ─── */
   List<VinylRecord> _allRecords = [];
   String _searchQuery = '';
   String _sortBy = 'titulo';
@@ -20,9 +21,8 @@ class CollectionProvider extends ChangeNotifier {
   String _viewMode = 'lista';
   bool _isLoading = false;
 
-  /* ─── Constructor ─────────────────────────────────────── */
+  /* ─── Constructor ─── */
   CollectionProvider() {
-    // Cada vez que cambia la sesión, ajusta la suscripción
     _auth.authStateChanges().listen((user) {
       _subscription?.cancel();
       if (user != null) {
@@ -35,13 +35,13 @@ class CollectionProvider extends ChangeNotifier {
     });
   }
 
-  /* ─── Suscripción a Firestore ─────────────────────────── */
+  /* ─── Suscripción a Firestore ─── */
   void _subscribeToRecords(String uid) {
     _isLoading = true;
     notifyListeners();
 
     _subscription = _firestore
-        .collection('discos')
+        .collection(FirestoreCollections.discos)
         .where('userId', isEqualTo: uid)
         .snapshots()
         .listen(
@@ -65,22 +65,21 @@ class CollectionProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  /* ─── Getters (públicos) ───────────────────────────────── */
+  /* ─── Getters ─── */
 
   List<VinylRecord> get allRecords => List.unmodifiable(_allRecords);
 
   List<VinylRecord> get filteredRecords {
     final q = _searchQuery.toLowerCase();
 
-    var list =
-        _allRecords.where((r) {
-          final matchSearch =
-              r.titulo.toLowerCase().contains(q) ||
-              r.artista.toLowerCase().contains(q) ||
-              r.genero.toLowerCase().contains(q);
-          final matchFav = !_showFavorites || r.favorito;
-          return matchSearch && matchFav;
-        }).toList();
+    var list = _allRecords.where((r) {
+      final matchSearch =
+          r.titulo.toLowerCase().contains(q) ||
+          r.artista.toLowerCase().contains(q) ||
+          r.genero.toLowerCase().contains(q);
+      final matchFav = !_showFavorites || r.favorito;
+      return matchSearch && matchFav;
+    }).toList();
 
     list.sort((a, b) {
       switch (_sortBy) {
@@ -102,7 +101,7 @@ class CollectionProvider extends ChangeNotifier {
   String get viewMode => _viewMode;
   bool get isLoading => _isLoading;
 
-  /* ─── Setters (filtros y vista) ───────────────────────── */
+  /* ─── Setters (filtros y vista) ─── */
 
   void setSearchQuery(String q) {
     _searchQuery = q;
@@ -124,20 +123,22 @@ class CollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /* ─── Operaciones de escritura ────────────────────────── */
+  /* ─── Operaciones de escritura ─── */
 
   Future<void> deleteRecord(String id) async {
-    await _firestore.collection('discos').doc(id).delete();
-    // El listener actualizará la lista
+    await _firestore.collection(FirestoreCollections.discos).doc(id).delete();
   }
 
   Future<void> toggleFavorite(String id, bool current) async {
-    await _firestore.collection('discos').doc(id).update({
+    await _firestore.collection(FirestoreCollections.discos).doc(id).update({
       'favorito': !current,
     });
   }
 
   Future<void> updateRecord(VinylRecord updated) async {
-    await _firestore.collection('discos').doc(updated.id).set(updated.toMap());
+    await _firestore
+        .collection(FirestoreCollections.discos)
+        .doc(updated.id)
+        .set(updated.toMap());
   }
 }

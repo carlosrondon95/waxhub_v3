@@ -9,10 +9,10 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- 🔑 Clave ÚNICA del Maps SDK for Android -->
+        <!-- Google Maps SDK – la key se inyecta desde local.properties -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBpmV9gSDHG472GUmxC0e0JbMO4jjPQJGA" />
+            android:value="${MAPS_API_KEY}" />
 
         <!-- (Opcional - soluciona errores de red en targetSdk 34) -->
         <!--

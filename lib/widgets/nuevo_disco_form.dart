@@ -1,15 +1,17 @@
-// lib/widgets/nuevo_disco_form.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../services/discogs_service.dart';
 import '../providers/vinyl_provider.dart';
 import '../core/image_proxy.dart';
 
 class NuevoDiscoForm extends StatelessWidget {
-  const NuevoDiscoForm({super.key});
+  final GlobalKey<FormState> formKey;
+
+  const NuevoDiscoForm({super.key, required this.formKey});
 
   @override
   Widget build(BuildContext context) {
@@ -17,19 +19,17 @@ class NuevoDiscoForm extends StatelessWidget {
     final bp = ResponsiveBreakpoints.of(context);
     final isDesktop = bp.largerThan(TABLET);
 
-    // Limita el ancho máx. y aplica padding homogéneo
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 600),
         child: ListView(
           padding: const EdgeInsets.all(24),
           children: [
-            // ------------- Línea 1: Artista + Título -------------
+            // Artista + Título
             ResponsiveRowColumn(
-              layout:
-                  isDesktop
-                      ? ResponsiveRowColumnType.ROW
-                      : ResponsiveRowColumnType.COLUMN,
+              layout: isDesktop
+                  ? ResponsiveRowColumnType.ROW
+                  : ResponsiveRowColumnType.COLUMN,
               columnSpacing: 12,
               rowSpacing: 12,
               children: [
@@ -45,12 +45,11 @@ class NuevoDiscoForm extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ------------- Línea 2: Género + Año -------------
+            // Género + Año
             ResponsiveRowColumn(
-              layout:
-                  isDesktop
-                      ? ResponsiveRowColumnType.ROW
-                      : ResponsiveRowColumnType.COLUMN,
+              layout: isDesktop
+                  ? ResponsiveRowColumnType.ROW
+                  : ResponsiveRowColumnType.COLUMN,
               columnSpacing: 12,
               rowSpacing: 12,
               children: [
@@ -75,12 +74,11 @@ class NuevoDiscoForm extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ------------- Línea 3: Sello + Compra -------------
+            // Sello + Compra
             ResponsiveRowColumn(
-              layout:
-                  isDesktop
-                      ? ResponsiveRowColumnType.ROW
-                      : ResponsiveRowColumnType.COLUMN,
+              layout: isDesktop
+                  ? ResponsiveRowColumnType.ROW
+                  : ResponsiveRowColumnType.COLUMN,
               columnSpacing: 12,
               rowSpacing: 12,
               children: [
@@ -105,7 +103,7 @@ class NuevoDiscoForm extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ------------- Descripción -------------
+            // Descripción
             TextFormField(
               controller: vinyl.descController,
               decoration: const InputDecoration(labelText: 'Descripción'),
@@ -113,17 +111,18 @@ class NuevoDiscoForm extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // ------------- Portada -------------
+            // Portada
             Column(
               children: [
                 if (vinyl.coverUrl != null && vinyl.coverUrl!.isNotEmpty)
-                  Image.network(
-                    proxiedImage(vinyl.coverUrl),
+                  CachedNetworkImage(
+                    imageUrl: proxiedImage(vinyl.coverUrl),
                     height: 150,
                     fit: BoxFit.cover,
-                    errorBuilder:
-                        (_, __, ___) =>
-                            const Icon(Icons.broken_image, size: 80),
+                    placeholder: (_, __) =>
+                        const Center(child: CircularProgressIndicator()),
+                    errorWidget: (_, __, ___) =>
+                        const Icon(Icons.broken_image, size: 80),
                   )
                 else
                   Container(
@@ -141,25 +140,25 @@ class NuevoDiscoForm extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // ------------- Guardar -------------
+            // Guardar
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed:
-                    vinyl.isLoading
-                        ? null
-                        : () async {
-                          final ok = await vinyl.saveRecord();
-                          if (ok) Navigator.of(context).pop();
-                        },
-                child:
-                    vinyl.isLoading
-                        ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                        : const Text('Guardar disco'),
+                onPressed: vinyl.isLoading
+                    ? null
+                    : () async {
+                        final ok = await vinyl.saveRecord(formKey);
+                        if (ok && context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                child: vinyl.isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Guardar disco'),
               ),
             ),
           ],
@@ -167,8 +166,6 @@ class NuevoDiscoForm extends StatelessWidget {
       ),
     );
   }
-
-  // ------ validadores y campos auxiliares ------
 
   String? _required(String? v) =>
       (v == null || v.isEmpty) ? 'Campo requerido' : null;
@@ -181,21 +178,19 @@ class _ArtistField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TypeAheadField<ArtistResult>(
-      builder:
-          (ctx, ctrl, node) => TextFormField(
-            controller: ctrl,
-            focusNode: node,
-            decoration: const InputDecoration(labelText: 'Artista'),
-            validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
-          ),
+      builder: (ctx, ctrl, node) => TextFormField(
+        controller: ctrl,
+        focusNode: node,
+        decoration: const InputDecoration(labelText: 'Artista'),
+        validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
+      ),
       suggestionsCallback: (q) => q.length < 2 ? [] : vinyl.searchArtists(q),
       itemBuilder: (_, a) => ListTile(title: Text(a.name)),
       onSelected: vinyl.selectArtist,
-      emptyBuilder:
-          (_) => const Padding(
-            padding: EdgeInsets.all(8),
-            child: Text('Sin coincidencias'),
-          ),
+      emptyBuilder: (_) => const Padding(
+        padding: EdgeInsets.all(8),
+        child: Text('Sin coincidencias'),
+      ),
     );
   }
 }
@@ -215,32 +210,30 @@ class _TitleField extends StatelessWidget {
     }
 
     return TypeAheadField<ReleaseResult>(
-      builder:
-          (ctx, ctrl, node) => TextFormField(
-            controller: ctrl,
-            focusNode: node,
-            decoration: const InputDecoration(labelText: 'Título'),
-            validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
-          ),
+      builder: (ctx, ctrl, node) => TextFormField(
+        controller: ctrl,
+        focusNode: node,
+        decoration: const InputDecoration(labelText: 'Título'),
+        validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
+      ),
       suggestionsCallback: (q) => q.isEmpty ? [] : vinyl.searchReleases(q),
-      itemBuilder:
-          (_, r) => ListTile(
-            leading:
-                r.thumb.isNotEmpty
-                    ? Image.network(
-                      proxiedImage(r.thumb),
-                      width: 40,
-                      fit: BoxFit.cover,
-                    )
-                    : null,
-            title: Text(r.title),
-          ),
+      itemBuilder: (_, r) => ListTile(
+        leading: r.thumb.isNotEmpty
+            ? CachedNetworkImage(
+                imageUrl: proxiedImage(r.thumb),
+                width: 40,
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) =>
+                    const Icon(Icons.broken_image, size: 20),
+              )
+            : null,
+        title: Text(r.title),
+      ),
       onSelected: vinyl.selectRelease,
-      emptyBuilder:
-          (_) => const Padding(
-            padding: EdgeInsets.all(8),
-            child: Text('Sin coincidencias'),
-          ),
+      emptyBuilder: (_) => const Padding(
+        padding: EdgeInsets.all(8),
+        child: Text('Sin coincidencias'),
+      ),
     );
   }
 }

@@ -1,6 +1,6 @@
-// lib/widgets/collection_grid.dart
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../models/vinyl_record.dart';
 import '../core/image_proxy.dart';
@@ -37,22 +37,19 @@ class CollectionGrid extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Portada 1:1
               AspectRatio(
                 aspectRatio: 1,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: Image.network(
-                    proxiedImage(r.portadaUrl),
+                  child: CachedNetworkImage(
+                    imageUrl: proxiedImage(r.portadaUrl),
                     fit: BoxFit.cover,
-                    errorBuilder:
-                        (_, __, ___) =>
-                            const Icon(Icons.broken_image, size: 40),
+                    errorWidget: (_, __, ___) =>
+                        const Icon(Icons.broken_image, size: 40),
                   ),
                 ),
               ),
               const SizedBox(height: 4),
-              // Título
               Flexible(
                 child: Text(
                   r.titulo,
@@ -62,19 +59,18 @@ class CollectionGrid extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
-              // Artista
               Flexible(
                 child: Text(
                   r.artista,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(fontWeight: FontWeight.w500),
                 ),
               ),
-              // Año
               Text(
                 r.anio,
                 textAlign: TextAlign.center,

@@ -1,6 +1,6 @@
-// lib/screens/detalle_disco_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../models/vinyl_record.dart';
 import '../providers/collection_provider.dart';
@@ -19,19 +19,15 @@ class DetalleDiscoScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed:
-                () => Navigator.pushNamed(
-                  context,
-                  '/editar_disco',
-                  arguments: record,
-                ),
+            onPressed: () => Navigator.pushNamed(
+              context,
+              '/editar_disco',
+              arguments: record,
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.delete),
-            onPressed: () async {
-              await collection.deleteRecord(record.id);
-              Navigator.pop(context);
-            },
+            onPressed: () => _confirmDelete(context, collection),
           ),
         ],
       ),
@@ -41,11 +37,13 @@ class DetalleDiscoScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Image.network(
-                record.portadaUrl,
+              child: CachedNetworkImage(
+                imageUrl: record.portadaUrl,
                 height: 200,
-                errorBuilder:
-                    (_, __, ___) => const Icon(Icons.broken_image, size: 100),
+                placeholder: (_, __) =>
+                    const Center(child: CircularProgressIndicator()),
+                errorWidget: (_, __, ___) =>
+                    const Icon(Icons.broken_image, size: 100),
               ),
             ),
             const SizedBox(height: 16),
@@ -78,6 +76,33 @@ class DetalleDiscoScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, CollectionProvider collection) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Eliminar disco'),
+        content: const Text(
+          '¿Estás seguro de que quieres eliminar este disco de tu colección?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              await collection.deleteRecord(record.id);
+              if (context.mounted) Navigator.of(context).pop();
+            },
+            child: const Text('Eliminar'),
+          ),
+        ],
       ),
     );
   }

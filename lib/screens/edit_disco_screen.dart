@@ -1,4 +1,3 @@
-// lib/screens/edit_disco_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,13 +14,13 @@ class EditDiscoScreen extends StatefulWidget {
 
 class _EditDiscoScreenState extends State<EditDiscoScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _artistCtr,
-      _titleCtr,
-      _genreCtr,
-      _yearCtr,
-      _labelCtr,
-      _buyCtr,
-      _descCtr;
+  late final TextEditingController _artistCtr;
+  late final TextEditingController _titleCtr;
+  late final TextEditingController _genreCtr;
+  late final TextEditingController _yearCtr;
+  late final TextEditingController _labelCtr;
+  late final TextEditingController _buyCtr;
+  late final TextEditingController _descCtr;
 
   @override
   void initState() {
@@ -51,10 +50,7 @@ class _EditDiscoScreenState extends State<EditDiscoScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     final provider = context.read<CollectionProvider>();
-    final updated = VinylRecord(
-      id: widget.record.id,
-      userId: widget.record.userId,
-      referencia: widget.record.referencia,
+    final updated = widget.record.copyWith(
       artista: _artistCtr.text,
       titulo: _titleCtr.text,
       genero: _genreCtr.text,
@@ -62,11 +58,9 @@ class _EditDiscoScreenState extends State<EditDiscoScreen> {
       sello: _labelCtr.text,
       lugarCompra: _buyCtr.text,
       descripcion: _descCtr.text,
-      portadaUrl: widget.record.portadaUrl,
-      favorito: widget.record.favorito,
     );
     await provider.updateRecord(updated);
-    Navigator.pop(context);
+    if (mounted) Navigator.pop(context);
   }
 
   @override
@@ -112,7 +106,8 @@ class _EditDiscoScreenState extends State<EditDiscoScreen> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _buyCtr,
-                decoration: const InputDecoration(labelText: 'Lugar de compra'),
+                decoration:
+                    const InputDecoration(labelText: 'Lugar de compra'),
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -121,7 +116,10 @@ class _EditDiscoScreenState extends State<EditDiscoScreen> {
                 maxLines: null,
               ),
               const SizedBox(height: 24),
-              ElevatedButton(onPressed: _save, child: const Text('Guardar')),
+              ElevatedButton(
+                onPressed: _save,
+                child: const Text('Guardar'),
+              ),
             ],
           ),
         ),

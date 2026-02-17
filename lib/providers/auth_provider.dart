@@ -1,8 +1,9 @@
-// lib/providers/auth_provider.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../core/constants.dart';
 
 class AuthProvider with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -13,25 +14,23 @@ class AuthProvider with ChangeNotifier {
   User? get currentUser => _auth.currentUser;
   bool get isAuthenticated => currentUser != null;
 
-  /// Comprueba si ya existe un usuario con ese nombre en Firestore
+  /// Comprueba si ya existe un usuario con ese nombre en Firestore.
   Future<bool> usernameExists(String name) async {
-    final snap =
-        await _firestore
-            .collection('usuarios')
-            .where('nombre', isEqualTo: name.trim())
-            .limit(1)
-            .get();
+    final snap = await _firestore
+        .collection(FirestoreCollections.usuarios)
+        .where('nombre', isEqualTo: name.trim())
+        .limit(1)
+        .get();
     return snap.docs.isNotEmpty;
   }
 
-  /// Comprueba si ya existe un usuario con ese email en Firestore
+  /// Comprueba si ya existe un usuario con ese email en Firestore.
   Future<bool> emailExists(String email) async {
-    final snap =
-        await _firestore
-            .collection('usuarios')
-            .where('email', isEqualTo: email.trim())
-            .limit(1)
-            .get();
+    final snap = await _firestore
+        .collection(FirestoreCollections.usuarios)
+        .where('email', isEqualTo: email.trim())
+        .limit(1)
+        .get();
     return snap.docs.isNotEmpty;
   }
 
@@ -70,14 +69,17 @@ class AuthProvider with ChangeNotifier {
       final result = await _auth.signInWithCredential(credential);
       final isNewUser = result.additionalUserInfo?.isNewUser ?? false;
       if (isNewUser && currentUser != null) {
-        await _firestore.collection('usuarios').doc(currentUser!.uid).set({
-          'email': currentUser!.email,
-          'nombre': googleUser.displayName ?? '',
-        });
+        await _firestore
+            .collection(FirestoreCollections.usuarios)
+            .doc(currentUser!.uid)
+            .set({
+              'email': currentUser!.email,
+              'nombre': googleUser.displayName ?? '',
+            });
       }
       return null;
     } catch (e) {
-      return 'Error al iniciar sesión con Google: ${e.toString()}';
+      return 'Error al iniciar sesión con Google: $e';
     } finally {
       isLoading = false;
       notifyListeners();
@@ -125,16 +127,19 @@ class AuthProvider with ChangeNotifier {
         password: password,
       );
       await cred.user!.sendEmailVerification();
-      await _firestore.collection('usuarios').doc(cred.user!.uid).set({
-        'nombre': name.trim(),
-        'email': email.trim(),
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      await _firestore
+          .collection(FirestoreCollections.usuarios)
+          .doc(cred.user!.uid)
+          .set({
+            'nombre': name.trim(),
+            'email': email.trim(),
+            'createdAt': FieldValue.serverTimestamp(),
+          });
       return null;
     } on FirebaseAuthException catch (e) {
       return e.message;
     } catch (e) {
-      return 'Error al registrar usuario: ${e.toString()}';
+      return 'Error al registrar usuario: $e';
     } finally {
       isLoading = false;
       notifyListeners();

@@ -1,6 +1,6 @@
-// lib/widgets/collection_carousel.dart
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../models/vinyl_record.dart';
 import '../core/image_proxy.dart';
@@ -46,21 +46,20 @@ class _CollectionCarouselState extends State<CollectionCarousel> {
           builder: (context, constraints) {
             return Column(
               children: [
-                // Imagen ocupa un porcentaje fijo
                 SizedBox(
                   height: constraints.maxHeight * heightFactor,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Image.network(
-                      proxiedImage(d.portadaUrl),
+                    child: CachedNetworkImage(
+                      imageUrl: proxiedImage(d.portadaUrl),
                       fit: BoxFit.contain,
-                      errorBuilder:
-                          (_, __, ___) =>
-                              const Icon(Icons.broken_image, size: 80),
+                      placeholder: (_, __) =>
+                          const Center(child: CircularProgressIndicator()),
+                      errorWidget: (_, __, ___) =>
+                          const Icon(Icons.broken_image, size: 80),
                     ),
                   ),
                 ),
-                // El resto puede desplazarse si falta espacio
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 16),

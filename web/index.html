@@ -1,34 +1,61 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <base href="$FLUTTER_BASE_HREF">
 
-    <meta charset="UTF-8">
-    <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-    <meta name="description" content="A new Flutter project.">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
 
-    <!-- Google Sign-In -->
-    <meta name="google-signin-client_id"
-          content="847614059163-7dm7t9dtkuq58rapamic8fv512n6p74l.apps.googleusercontent.com">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
 
-    <!-- iOS meta tags & icons -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="waxhub_v3">
-    <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="waxhub_v3">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="favicon.png" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png" />
 
-    <title>waxhub_v3</title>
-    <link rel="manifest" href="manifest.json">
-  </head>
+  <title>waxhub_v3</title>
+  <link rel="manifest" href="manifest.json">
 
-  <body>
-    <!-- 🔹 Google Maps JavaScript SDK (obligatorio en Web) -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpmV9gSDHG472GUmxC0e0JbMO4jjPQJGA&libraries=places"></script>
+  <!-- Configuración segura (env.js está en gitignore) -->
+  <script src="env.js"></script>
 
-    <!-- Flutter bootstrap (carga main.dart.js) -->
-    <script src="flutter_bootstrap.js" async></script>
+  <!-- Inyección dinámica de claves (Maps + Sign-In) -->
+  <script>
+    (function () {
+      if (window.env) {
+        // 1. Google Maps
+        if (window.env.MAPS_API_KEY) {
+          var script = document.createElement('script');
+          script.src = "https://maps.googleapis.com/maps/api/js?key=" +
+            window.env.MAPS_API_KEY + "&libraries=places";
+          script.async = true;
+          script.defer = true;
+          document.head.appendChild(script);
+        } else {
+          console.error("WaxHub: MAPS_API_KEY no encontrada en web/env.js");
+        }
+
+        // 2. Google Sign-In Client ID
+        if (window.env.GOOGLE_CLIENT_ID) {
+          var meta = document.createElement('meta');
+          meta.name = "google-signin-client_id";
+          meta.content = window.env.GOOGLE_CLIENT_ID;
+          document.head.appendChild(meta);
+        } else {
+          console.error("WaxHub: GOOGLE_CLIENT_ID no encontrado en web/env.js");
+        }
+      } else {
+        console.error("WaxHub: web/env.js no cargado");
+      }
+    })();
+  </script>
+
+  <!-- Flutter bootstrap (carga main.dart.js) -->
+  <script src="flutter_bootstrap.js" async></script>
   </body>
+
 </html>

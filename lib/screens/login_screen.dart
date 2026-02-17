@@ -15,8 +15,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _recoveryEmailController = TextEditingController();
 
-  bool _showRecoveryDialog = false;
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -59,10 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 TextButton(
-                  onPressed:
-                      auth.isLoading
-                          ? null
-                          : () => setState(() => _showRecoveryDialog = true),
+                  onPressed: auth.isLoading ? null : _showRecoveryDialog,
                   child: const Text('He olvidado mi contraseña'),
                 ),
               ],
@@ -75,8 +70,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
         ],
       ),
-      floatingActionButton:
-          _showRecoveryDialog ? _buildRecoveryDialog(context) : null,
     );
   }
 
@@ -86,10 +79,11 @@ class _LoginScreenState extends State<LoginScreen> {
       _emailController.text.trim(),
       _passwordController.text.trim(),
     );
+    if (!mounted) return;
     if (error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error)),
+      );
     } else {
       Navigator.pushNamedAndRemoveUntil(context, '/home', (r) => false);
     }
@@ -98,57 +92,60 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleSignInWithGoogle() async {
     final auth = context.read<AuthProvider>();
     final error = await auth.signInWithGoogle();
+    if (!mounted) return;
     if (error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error)),
+      );
     } else {
       Navigator.pushNamedAndRemoveUntil(context, '/home', (r) => false);
     }
   }
 
-  Widget _buildRecoveryDialog(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Recuperar contraseña'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Ingresa tu correo para recibir un enlace de restablecimiento.',
+  void _showRecoveryDialog() {
+    _recoveryEmailController.clear();
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Recuperar contraseña'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Ingresa tu correo para recibir un enlace de restablecimiento.',
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _recoveryEmailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration:
+                  const InputDecoration(labelText: 'Correo electrónico'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancelar'),
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _recoveryEmailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'Correo electrónico'),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              final auth = context.read<AuthProvider>();
+              final error = await auth.sendPasswordReset(
+                _recoveryEmailController.text.trim(),
+              );
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(error ?? 'Enlace enviado.'),
+                ),
+              );
+            },
+            child: const Text('Enviar'),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => setState(() => _showRecoveryDialog = false),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            setState(() => _showRecoveryDialog = false);
-            final auth = context.read<AuthProvider>();
-            final error = await auth.sendPasswordReset(
-              _recoveryEmailController.text.trim(),
-            );
-            if (error != null) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(error)));
-            } else {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Enlace enviado.')));
-            }
-          },
-          child: const Text('Enviar'),
-        ),
-      ],
     );
   }
 }

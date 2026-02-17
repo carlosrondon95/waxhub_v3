@@ -1,8 +1,7 @@
-// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   void _goTo(BuildContext context, String route) =>
       Navigator.pushNamed(context, route);
@@ -15,24 +14,10 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0, bottom: 4.0),
-            child: GestureDetector(
-              onTap: () => _goTo(context, '/opciones_usuario'),
-              child: CircleAvatar(
-                backgroundColor: colors.secondaryContainer,
-                radius: 20,
-                child: Icon(Icons.person, size: 24, color: colors.primary),
-              ),
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            // ← aquí
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
             child: Column(
               children: [
@@ -71,14 +56,8 @@ class HomeScreen extends StatelessWidget {
                         onTap: () => _goTo(context, '/mapa_tiendas'),
                       ),
                     ),
-                    Expanded(
-                      child: _IconLabel(
-                        icon: Icons.group,
-                        label: 'Comunidad',
-                        size: 42,
-                        onTap: () => _goTo(context, '/comunidad'),
-                      ),
-                    ),
+                    // Espacio reservado para futuras funcionalidades
+                    const Expanded(child: SizedBox()),
                   ],
                 ),
               ],
@@ -95,13 +74,13 @@ class _IconLabel extends StatelessWidget {
   final String label;
   final double size;
   final VoidCallback onTap;
+
   const _IconLabel({
-    Key? key,
     required this.icon,
     required this.label,
     this.size = 40,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -35,14 +35,11 @@ dependencies:
   flutter_google_maps_webservices: ^1.1.1
   location: ^8.0.0
 
-  # Networking
-  dio: ^5.0.0
+  # Variables de entorno
+  flutter_dotenv: ^5.2.1
 
   # Carga eficiente de imágenes
   cached_network_image: ^3.2.3
-
-  # Navegación avanzada
-  go_router: ^15.1.2
 
   # Cupertino Icons
   cupertino_icons: ^1.0.8
@@ -56,6 +53,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - .env
     - assets/images/
     - assets/icons/
     - assets/fonts/

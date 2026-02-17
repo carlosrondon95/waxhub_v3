@@ -1,4 +1,3 @@
-// lib/routes/app_router.dart
 import 'package:flutter/material.dart';
 
 import '../routes/fade_route.dart';
@@ -11,7 +10,6 @@ import '../screens/collection_screen.dart';
 import '../screens/detalle_disco_screen.dart';
 import '../screens/edit_disco_screen.dart';
 import '../screens/map_screen.dart';
-//import '../screens/comunidad_screen.dart';
 import '../models/vinyl_record.dart';
 
 class AppRouter {
@@ -40,9 +38,6 @@ class AppRouter {
       case '/mapa_tiendas':
         page = const MapScreen();
         break;
-      /*case '/comunidad':                         
-        page = const ComunidadScreen();
-        break;*/
       case '/detalle_disco':
         final record = settings.arguments as VinylRecord;
         page = DetalleDiscoScreen(record: record);

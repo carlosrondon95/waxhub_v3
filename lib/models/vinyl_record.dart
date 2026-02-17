@@ -1,4 +1,3 @@
-// lib/models/vinyl_record.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class VinylRecord {
@@ -15,7 +14,7 @@ class VinylRecord {
   final String portadaUrl;
   final bool favorito;
 
-  VinylRecord({
+  const VinylRecord({
     required this.id,
     required this.userId,
     required this.referencia,
@@ -45,6 +44,36 @@ class VinylRecord {
     'timestamp': FieldValue.serverTimestamp(),
   };
 
+  VinylRecord copyWith({
+    String? id,
+    String? userId,
+    String? referencia,
+    String? artista,
+    String? titulo,
+    String? genero,
+    String? anio,
+    String? sello,
+    String? lugarCompra,
+    String? descripcion,
+    String? portadaUrl,
+    bool? favorito,
+  }) {
+    return VinylRecord(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      referencia: referencia ?? this.referencia,
+      artista: artista ?? this.artista,
+      titulo: titulo ?? this.titulo,
+      genero: genero ?? this.genero,
+      anio: anio ?? this.anio,
+      sello: sello ?? this.sello,
+      lugarCompra: lugarCompra ?? this.lugarCompra,
+      descripcion: descripcion ?? this.descripcion,
+      portadaUrl: portadaUrl ?? this.portadaUrl,
+      favorito: favorito ?? this.favorito,
+    );
+  }
+
   factory VinylRecord.fromDoc(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return VinylRecord(
@@ -62,4 +91,14 @@ class VinylRecord {
       favorito: data['favorito'] as bool? ?? false,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VinylRecord &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

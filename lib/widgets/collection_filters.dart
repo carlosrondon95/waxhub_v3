@@ -1,4 +1,3 @@
-// lib/widgets/collection_filters.dart
 import 'package:flutter/material.dart';
 
 class CollectionFilters extends StatelessWidget {
@@ -12,7 +11,7 @@ class CollectionFilters extends StatelessWidget {
   final ValueChanged<String> onViewModeChanged;
 
   const CollectionFilters({
-    Key? key,
+    super.key,
     required this.searchQuery,
     required this.onSearchChanged,
     required this.sortBy,
@@ -21,7 +20,7 @@ class CollectionFilters extends StatelessWidget {
     required this.onShowFavoritesChanged,
     required this.viewMode,
     required this.onViewModeChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +29,6 @@ class CollectionFilters extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // — Buscador en su propia fila —feo
           TextField(
             decoration: const InputDecoration(
               labelText: 'Buscar...',
@@ -40,7 +38,6 @@ class CollectionFilters extends StatelessWidget {
             onChanged: onSearchChanged,
           ),
           const SizedBox(height: 12),
-          // — Controles (Ordenar, Vista, Favoritos) debajo —
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -80,7 +77,7 @@ class CollectionFilters extends StatelessWidget {
             ),
           ),
         ],
-      ), //tonto
+      ),
     );
   }
 }

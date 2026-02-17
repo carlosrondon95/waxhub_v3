@@ -1,4 +1,4 @@
-// lib/screens/register_screen.dart
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,8 +22,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _nameError;
   String? _emailError;
 
+  Timer? _nameDebounce;
+  Timer? _emailDebounce;
+
   @override
   void dispose() {
+    _nameDebounce?.cancel();
+    _emailDebounce?.cancel();
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -59,7 +64,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Nombre de usuario con validación en tiempo real
+                  // Nombre de usuario con debounce
                   TextFormField(
                     controller: _nameController,
                     decoration: InputDecoration(
@@ -67,24 +72,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       errorText: _nameError,
                     ),
                     validator: (_) => _nameError,
-                    onChanged: (v) async {
+                    onChanged: (v) {
+                      _nameDebounce?.cancel();
                       if (v.trim().isEmpty) {
                         setState(() => _nameError = 'Ingresa tu nombre');
-                      } else {
-                        final exists = await context
-                            .read<AuthProvider>()
-                            .usernameExists(v);
-                        setState(
-                          () =>
-                              _nameError =
-                                  exists ? 'Nombre ya registrado' : null,
-                        );
+                        return;
                       }
+                      _nameDebounce = Timer(
+                        const Duration(milliseconds: 500),
+                        () async {
+                          final exists = await context
+                              .read<AuthProvider>()
+                              .usernameExists(v);
+                          if (!mounted) return;
+                          setState(
+                            () => _nameError =
+                                exists ? 'Nombre ya registrado' : null,
+                          );
+                        },
+                      );
                     },
                   ),
                   const SizedBox(height: 16),
 
-                  // Correo electrónico con validación en tiempo real
+                  // Correo electrónico con debounce
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -93,19 +104,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       errorText: _emailError,
                     ),
                     validator: (_) => _emailError,
-                    onChanged: (v) async {
+                    onChanged: (v) {
+                      _emailDebounce?.cancel();
                       if (!v.contains('@')) {
                         setState(() => _emailError = 'Correo inválido');
-                      } else {
-                        final exists = await context
-                            .read<AuthProvider>()
-                            .emailExists(v);
-                        setState(
-                          () =>
-                              _emailError =
-                                  exists ? 'Correo ya registrado' : null,
-                        );
+                        return;
                       }
+                      _emailDebounce = Timer(
+                        const Duration(milliseconds: 500),
+                        () async {
+                          final exists = await context
+                              .read<AuthProvider>()
+                              .emailExists(v);
+                          if (!mounted) return;
+                          setState(
+                            () => _emailError =
+                                exists ? 'Correo ya registrado' : null,
+                          );
+                        },
+                      );
                     },
                   ),
                   const SizedBox(height: 16),
@@ -121,11 +138,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   PasswordField(
                     controller: _confirmPasswordController,
                     label: 'Confirmar contraseña',
-                    validator:
-                        (v) =>
-                            v != _passwordController.text
-                                ? 'Las contraseñas no coinciden'
-                                : null,
+                    validator: (v) => v != _passwordController.text
+                        ? 'Las contraseñas no coinciden'
+                        : null,
                   ),
                   const SizedBox(height: 24),
 
@@ -137,14 +152,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 _emailError != null)
                             ? null
                             : _handleRegister,
-                    child:
-                        auth.isLoading
-                            ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                            : const Text('Registrarse'),
+                    child: auth.isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Registrarse'),
                   ),
                 ],
               ),
@@ -168,10 +182,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _emailController.text.trim(),
       _passwordController.text,
     );
+    if (!mounted) return;
     if (error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error)),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
