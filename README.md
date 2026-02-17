@@ -1,58 +1,68 @@
 # 🎧 WaxHub — Elevate Your Vinyl Collection
 
-**WaxHub** is a cross-platform application built with **Flutter** that helps vinyl collectors, DJs, and music enthusiasts manage their record collections in a clean, elegant, and intuitive way.
+**Cross-platform application** designed for the complete management of vinyl
+collections, helping DJs and music enthusiasts organize their records in a
+clean, elegant, and intuitive way.
 
-The app blends a minimalist UI with advanced features such as automatic metadata import, smart list creation, and an interactive map of nearby record stores.
-
----
-
-## 🎥 Demo Video
-
-▶️ **[Watch Demo](https://drive.google.com/file/d/17KulAnAmPQrUlADC_V2btoYp8bflnsLh/view?usp=sharing)**
+The app blends a minimalist UI with advanced features such as automatic metadata
+import, smart list creation, and an interactive map of nearby record stores.
 
 ---
 
 ## 🚀 Key Features
 
 ### 🔍 Automatic Cataloging
-- Add records to your collection through search.
-- WaxHub automatically retrieves artwork, year, label, tracklist, genres, and more using the **Discogs API**.
 
-### 🎛️ Custom Lists
-- Create thematic lists: favorites, ambient, techno, jazz, to-buy list, etc.
-- Easily filter, reorder, and tag your records.
+- **Smart Import:** Automatically retrieves artwork, year, label, tracklist, and
+  genres using the **Discogs API**.
+- **Effortless Organization:** Add records to your collection through a seamless
+  search experience.
+
+### 🎛️ Custom Lists & Management
+
+- **Thematic Lists:** Create favorites, ambient, techno, jazz, or "to-buy"
+  lists.
+- **Advanced Filtering:** Easily filter, reorder, and tag your records.
 
 ### 🏪 Interactive Record Store Map
-- Discover nearby record stores with the **Google Maps API**.
-- Check location, details, distance, and navigation.
 
-### ☁️ Cloud Synchronization
-- Real-time syncing using **Firebase Firestore**.
-- Secure authentication with **Firebase Auth**.
+- **Discovery:** Find nearby record stores using the **Google Maps API**.
+- **Details:** View location, store details, distance, and get navigation
+  directions.
 
-### 🎨 Clean & Accessible UI
-- Professional, minimalist, and accessible design.
-- Light color palette with turquoise as the primary color.
-- **Poppins** as the main typography.
-- Consistent and polished UI across all platforms.
+### ☁️ Cloud & Security
+
+- **Real-time Sync:** Powered by **Firebase Firestore**.
+- **Secure Access:** robust authentication via **Firebase Auth**.
+
+### 🎨 Premium UI
+
+- **Design:** Professional, minimalist interface with a turquoise-accented light
+  palette.
+- **Typography:** Uses **Poppins** for a modern, clean look.
 
 ---
 
-## 🏗️ Tech Stack
+## 🛠️ Tech Stack
 
-| Area | Technology |
-|------|------------|
-| Frontend | Flutter (Dart) |
-| Backend | Firebase Firestore |
-| Authentication | Firebase Auth |
-| External APIs | Discogs API, Google Maps API |
-| State Management | Riverpod / Provider |
-| Design System | Material 3 + custom theme |
-| Maps | Google Maps for Flutter |
+- **Frontend:** Flutter (Dart) – Material 3 Design.
+- **Backend:** Firebase Firestore (NoSQL Database).
+- **Authentication:** Firebase Auth.
+- **External APIs:** Discogs API (Metadata), Google Maps SDK (Location).
+- **State Management:** Provider.
+- **Maps:** Google Maps for Flutter.
+
+---
+
+## 🎥 Demo Video
+
+▶️
+**[Watch Demo](https://drive.google.com/file/d/17KulAnAmPQrUlADC_V2btoYp8bflnsLh/view?usp=sharing)**
 
 ---
 
 ## 📁 Project Structure
+
 ```text
 lib/
 ├── core/
@@ -74,13 +84,17 @@ lib/
 ├── firebase_options.dart    # Auto-generated Firebase config
 └── main.dart                # App entry point
 ```
+
 ---
 
-## 🎯 Purpose of the Project
+## 🎯 Purpose
 
-WaxHub is part of the final project for a **Higher National Diploma in Cross-Platform Application Development (CFGS DAM)**, but it is also a personal project created with passion for vinyl culture.
+WaxHub is developed as the final project for a **Higher National Diploma in
+Cross-Platform Application Development (CFGS DAM)**, combining academic rigor
+with a genuine passion for vinyl culture.
 
-The goal is to deliver a professional, well-structured, scalable, and polished application.
+The goal is to deliver a professional, scalable, and polished application that
+solves real problems for collectors.
 
 ---
 
