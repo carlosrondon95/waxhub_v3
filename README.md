@@ -1,6 +1,9 @@
 # 🎧 WaxHub — Elevate Your Vinyl Collection
 
-### Flutter • Firebase • Dart • Provider • Google Maps
+![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=white)
+![Google Maps](https://img.shields.io/badge/Google_Maps-4285F4?style=for-the-badge&logo=google-maps&logoColor=white)
 
 **Cross-platform application** designed for the complete management of vinyl
 collections, helping DJs and music enthusiasts organize their records in a
